@@ -1,0 +1,53 @@
+// Resource file for include for project binaries
+//
+// $Id: version.rc 613 2010-03-09 23:59:36Z Roger $
+
+#include "winver.h"
+
+// Common values for the product suite
+#define MAJOR_VERSION 2
+#include "buildVersion.h"
+
+
+#ifndef MINOR_VERSION
+#error MINOR_VERSION must be defined.
+#endif
+
+#define STR(X) #X
+#define TO_STR(X) STR(X)
+
+#define VERSION MAJOR_VERSION,1,MINOR_VERSION,BUILD_VERSION
+#define VERSION_STRING TO_STR(MAJOR_VERSION) ".1." TO_STR(MINOR_VERSION) "." TO_STR(BUILD_VERSION)
+
+VS_VERSION_INFO VERSIONINFO
+   FILEVERSION VERSION
+   PRODUCTVERSION VERSION
+   FILEFLAGSMASK 0x3fL
+   FILEFLAGS 0x0L
+   FILEOS VOS_NT_WINDOWS32
+#if defined(APPLICATION)
+   FILETYPE VFT_APP
+#elif defined(LIBRARY)
+   FILETYPE VFT_DLL
+#else
+   #error APPLICATION or LIBRARY must be defined.
+#endif
+   FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+   BLOCK "StringFileInfo"
+   BEGIN
+      BLOCK "080904B0"
+      BEGIN
+         VALUE "CompanyName", "OR/2 Limited"
+         VALUE "FileDescription", DESCRIPTION
+         VALUE "FileVersion", VERSION_STRING
+         VALUE "LegalCopyright", "Copyright (C) OR/2 Limited 2010"
+         VALUE "ProductName", "Debugging Tools"
+      END
+   END
+   BLOCK "VarFileInfo"
+   BEGIN
+      // UK English, Unicode
+      VALUE "Translation", 0x809, 1200
+   END
+END
