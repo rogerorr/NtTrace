@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<link type="text/css" rel="stylesheet" href="../or2.css">
+<link rel="shortcut icon" href="NtTrace.ico">
+
+<meta name="Author" content="Roger Orr">
+<meta name="Description" content="Similar Tools">
+
+<title>Similar Tools to NtTrace</title>
+</head>
+
+<body>
+
+There are other tools for Windows that provide a similar sort of functionality to NtTrace.
+<br>
+Here is a short list of some such, with some personal views of their advantages and disadvantages.
+<p>
+Note that <a href="http://www.cygwin.com/">Cygwin</a> provides Unix-like strace functionality, but <i>only</i> for Cygwin binaries.
+
+<h3>Strace for NT from BindView</h3>
+
+<h4> Bindview was purchased by Symantec, I don't know where strace went. </h4>
+
+<ul>
+<li>- Installs a device driver, so must be an administrator
+<li>- Must reboot to uninstall
+<li>+ Comes with source
+</ul>
+
+<a href="http://www.bindview.com/Services/RAZOR/Utilities/Windows/strace_readme.cfm">
+http://www.bindview.com/Services/RAZOR/Utilities/Windows/strace_readme.cfm</a>
+
+<h3>StraceNT from IntellectualHeaven</h3>
+
+<ul>
+<li>Traces Win32 calls rather than the native API.  This may be better or worse :-)
+<li>- No unpacking of arguments
+<li>+ Source code (under a BSD-like license)
+<li>+ Both command line and GUI interface
+</ul>
+
+<a href="http://www.intellectualheaven.com/default.asp?BH=projects&H=strace.htm">
+http://www.intellectualheaven.com/default.asp?BH=projects&H=strace.htm</a>
+
+<h3>Api Monitor from rohitab </h3>
+
+<ul>
+<li>- No source code
+<li>+ Allows additional Dlls to be traced
+</ul>
+
+<a href="http://www.rohitab.com/"> http://www.rohitab.com/</a>
+
+<h3>Apimon from Microsoft</h3>
+
+<ul>
+<li>Traces Win32 calls rather than the native API.  This may be better or worse :-)
+<li>- No source code
+<li>- No unpacking of arguments
+<li>- Sometimes unreliable - problems with apidll.dll missing/uninstalled
+</ul>
+
+ApiMon is supplied as one of the Windows Support Tools, various versions of which exist.
+<br>
+For example: 
+<a href="http://www.microsoft.com/downloads/details.aspx?FamilyID=49AE8576-9BB9-4126-9761-BA8011FABF38&displaylang=en">
+Windows XP Service Pack 2 Support Tools</a>
+
+<h3> KaKeeware Application Monitor </h3>
+
+KaKeeware Application Monitor is a very small API monitor that allows the user to monitor the APIs called by the given application.
+KAM supports 2378 different APIs as of Jan 2007. 
+
+<ul>
+<li>- This program is FREEWARE only for non-commercial use.
+<li>- No source code.
+</ul>
+
+<p>
+<a href="http://www.kakeeware.com/i_kam.php">http://www.kakeeware.com/i_kam.php</a>
+
+<h3> ApiMonitor </h3>
+
+Display Win32 API calls made by applications.
+
+<ul>
+<li>- <b>Not</b> free software.
+<li>- No source code.
+</ul>
+
+<p>
+<a href="http://www.apimonitor.com/">http://www.apimonitor.com/</a>
+
+<h3> Api Spy for Windows </h3>
+
+<h4> Link was broken, Feb 2012 </h4>
+
+It allows you to examine any known API function`s calls that are resolved during the program load time and are given by APIS32.
+
+<ul>
+<li>- <b>Not</b> free software.
+<li>- No source code.
+</ul>
+
+<p>
+<a href="http://www.matcode.com/apis32.htm">http://www.matcode.com/apis32.htm</a>
+
+<p>
+<hr>
+
+<font size="-1">
+Last update: $Date: 2012-03-18 00:52:43 +0000 (Sun, 18 Mar 2012) $
+</font>
+
+</body>
+</html>

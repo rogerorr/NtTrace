@@ -2,6 +2,12 @@
 Thumbs.db
 ehthumbs.db
 
+# Output files and directories
+build/
+NtTrace.exe
+NtTrace.res
+*.pdb
+
 # Folder config file
 Desktop.ini
 
