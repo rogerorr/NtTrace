@@ -51,16 +51,6 @@ static char const szRCSID[] = "$Id: SymbolEngine.cpp 1573 2015-09-10 22:36:20Z R
 
 #include "GetModuleBase.h"
 
-// If we use imagehlp.lib then
-// (A) we must copy the imagehlp.dll to the location of the exe on NT 4.0
-// (B) because dbghelp.dll is loaded dynamically it will always be loaded from WntNt\System32
-//     on Windows 2000 and so you can't use the later versions from "Debugging Tools for Windows".
-//
-// If we use dbgHelp.lib we tend to always get the one in WINNT\SYSTEM32
-// So I use a 'copy': dbgCopy.lib
-
-#pragma comment( lib, "dbgCopy.lib" )
-
 #pragma comment( lib, "psapi" )
 
 // helper function

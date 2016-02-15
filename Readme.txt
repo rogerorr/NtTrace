@@ -13,8 +13,6 @@ NtTrace.rc	- resource file
 src		- source files
 include		- include files
 version.rc	- version resource
-dbgCopy.dll	- copied and renamed version of DbgHelp.dll from Microsoft "Debugging Tools for windows"
-dbgCopy.lib	- library mapping DbgHelp calls to dbgCopy instead
 
 Build instructions
 ------------------
@@ -41,21 +39,19 @@ The 64bit version of NtTrace builds in the amd64 environment.
 This can be selected using, for example:
 "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" amd64
 
-Note: it requires the dbgcopy.lib/.dll from the 64bit ZIP file.
-
-Note on DbgCopy.dll/lib
------------------------
+Note on DbgHelp.dll
+-------------------
 
 Windows ships with DbgHelp.dll in the system32 directory.
 However, newer versions of this DLL are packaged with "Debugging Tools for Windows"
 (See http://www.microsoft.com/whdc/DevTools/Debugging/default.mspx)
 
 The problem with this mechanism is that the version installed with the OS tends to
-take precendence over newer version that may be downloaded.
+take precendence over a newer version that may be downloaded.
 
-My solution is to create a library, dbgCopy.lib, that maps the entry points from DbgHelp.dll
-to dbgCopy.dll.  The file dbgcopy.dll is simply a renamed copy of the latest DbgHelp.dll but
-it can now be placed anywhere on the PATH without conflicting with the OS provided DbgHelp.dll
+If you find you require a newer version than the one installed in the system directory you
+can simply copy of the latest DbgHelp.dll to the same directory that NtTrace.exe is in.
+(You will also need to copy SymSrv.dll and SrcSrv.dll)
 
 Running NtTrace
 ---------------

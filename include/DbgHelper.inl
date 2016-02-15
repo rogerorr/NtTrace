@@ -20,16 +20,14 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.demon.co.uk.
 
-    $Revision: 1405 $
+    $Revision: 1601 $
 */
 
-// $Id: DbgHelper.inl 1405 2013-11-12 23:57:17Z Roger $
+// $Id: DbgHelper.inl 1601 2016-02-14 23:18:15Z Roger $
 
 #include <iostream>
 
 #ifdef DBGHELP_6_1_APIS
-
-#define DBGCOPY_DLL "dbgCopy" // Use a copy of dbgHelp.dll to avoid DLL hell
 
 /** Helper for streaming SymTagEnum values */
 inline
@@ -183,8 +181,17 @@ BOOL DbgHelper::GetSymFromAddr64( DWORD dwAddr, PDWORD64 pdwDisplacement, PIMAGE
 
 // Version 6.1 APIs
 
-#define DYN_LOAD( SYMBOL ) static SYMBOL *pfn##SYMBOL = \
-(SYMBOL*) ::GetProcAddress( ::GetModuleHandle( DBGCOPY_DLL ), #SYMBOL );
+inline FARPROC DbgHelper::GetProc(char const * name)
+{
+   MEMORY_BASIC_INFORMATION mbi;
+   if (VirtualQuery(&::SymInitialize, &mbi, sizeof(mbi) ))
+   {
+      return ::GetProcAddress((HMODULE)mbi.AllocationBase, name);
+   }
+   return 0;
+}
+
+#define DYN_LOAD( SYMBOL ) static SYMBOL *pfn##SYMBOL = (SYMBOL*) GetProc(#SYMBOL);
 
 /** Get symbol for specific address */
 inline
@@ -408,7 +415,7 @@ MiniDumpWriteDump(
    return bRet;
 }
 
-#undef DYM_LOAD
+#undef DYN_LOAD
 
 /** Test whether EnumSymbols API is available */
 inline

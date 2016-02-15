@@ -40,16 +40,7 @@
 #include <DbgHelp.h>
 #pragma warning(pop)
 
-// If we use imagehlp.lib then
-// (A) we must copy the imagehlp.dll to the location of the exe on NT 4.0
-// (B) because dbghelp.dll is loaded dynamically it will always be loaded from WntNt\System32
-//     on Windows 2000 and so you can't use the later versions from "Debugging Tools for Windows".
-//
-// If we use dbgHelp.lib we tend to get the one in WINNT\SYSTEM32
-// So I use a 'copy': dbgCopy.lib which links to dbgCopy.dll, which in turn
-// is just a copy and rename of the latest dbgHelp.dll
-
-#pragma comment( lib, "dbgCopy.lib" )
+#pragma comment( lib, "dbgHelp.lib" )
 
 #include <iosfwd>
 
@@ -146,6 +137,11 @@ private:
    DbgHelper& operator=( DbgHelper const & );
 
    HANDLE m_hProcess; // Current process being debugged
+
+#ifdef DBGHELP_6_1_APIS
+   // Helper function for resolving addresses dynamically
+   static FARPROC GetProc(char const * name);
+#endif // DBGHELP_6_1_APIS
 };
 
 /** Helper struct to zero initialise POD classes */
