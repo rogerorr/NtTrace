@@ -1,16 +1,18 @@
 # NtTrace readme file
 
+See also http://rogerorr.github.io/NtTrace/
+
 # Contents
 
-Readme.txt	- This file
-NtTrace.cfg	- Configuration file for NtTrace
-NtTrace.exe	- Built EXE, if you don't want to build it yourself
-NtTrace.ico	- icon file
-NtTrace.mak	- make file for Microsoft Visual Studio command prompt
-NtTrace.rc	- resource file
-src		- source files
-include		- include files
-version.rc	- version resource
+   * Readme.md	- This file
+   * NtTrace.cfg	- Configuration file for NtTrace
+   * NtTrace.exe	- Built EXE, if you don't want to build it yourself
+   * NtTrace.ico	- icon file
+   * NtTrace.mak	- make file for Microsoft Visual Studio command prompt
+   * NtTrace.rc	- resource file
+   * src		- source files
+   * include		- include files
+   * version.rc	- version resource
 
 # Build instructions
 
