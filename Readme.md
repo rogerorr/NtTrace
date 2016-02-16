@@ -4,15 +4,16 @@ See also http://rogerorr.github.io/NtTrace/
 
 # Contents
 
-   * Readme.md	- This file
-   * NtTrace.cfg	- Configuration file for NtTrace
-   * NtTrace.exe	- Built EXE, if you don't want to build it yourself
+   * Readme.md	- this file
+   * NtTrace.cfg	- default configuration file for NtTrace
    * NtTrace.ico	- icon file
    * NtTrace.mak	- make file for Microsoft Visual Studio command prompt
    * NtTrace.rc	- resource file
    * src		- source files
    * include		- include files
    * version.rc	- version resource
+   * Gdi32Trace.cfg - configuration file for GDI native calls
+   * User32Trace.cfg - configuration file for USER32 native calls
 
 # Build instructions
 
@@ -96,7 +97,7 @@ The complete list was arrived at by a combination of detective work on the funct
 
 Each function is assigned to a category, and filtering can be done by function name (partial match) and function category.
 
-By default NtTrace traces on return from the system call, but the -pre option can be used to trace before the call as well.
+By default NtTrace traces on return from the system call, but the `-pre` option can be used to trace before the call as well.
 This can be useful if, for example, the same structure is used for a request and a response buffer.
 
 --
