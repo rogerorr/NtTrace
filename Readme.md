@@ -35,7 +35,7 @@ path has the platform SDK include directory *before* the VC6 ones.
 The 64bit version of NtTrace builds in the amd64 environment.
 
 This can be selected using, for example:
-"C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" amd64
+"C:\\Program Files\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat" amd64
 
 ## Note on DbgHelp.dll
 
@@ -68,7 +68,7 @@ Run `NtTrace -h` for a complete list of options.
 
 ## How it works
 
-1. Technology
+### Technology
 
 NtTrace works by using the Windows debug interface to place breakpoints in NtDll around the native Windows calls into the kernel.
 Each time a breakpoint is hit NtTrace reads the arguments pased to/values returned by the associated call.
@@ -87,7 +87,7 @@ It also deals with multi-threaded applications (and the -tid option will help id
 However note that, since the Windows debug interface is event based, if multiple threads all make calls simultaneously
 then the tracing will be serialised.
 
-2. Configuration
+### Configuration
 
 The configuration for the native calls is held in NtTrace.cfg and this file is parsed when the program starts up.
 Note that different versions of Windows support different sets of calls.
@@ -101,4 +101,4 @@ By default NtTrace traces on return from the system call, but the `-pre` option 
 This can be useful if, for example, the same structure is used for a request and a response buffer.
 
 --
-$Id: Readme.md 1606 2016-02-16 21:08:07Z Roger $
+$Id: Readme.md 1607 2016-02-16 21:23:13Z Roger $
