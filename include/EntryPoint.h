@@ -7,7 +7,7 @@
 
     @author Roger Orr <rogero@howzatt.demon.co.uk>
 
-    Copyright &copy; 2002,2007.
+    Copyright &copy; 2002,2015.
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.demon.co.uk.
 
-    $Revision: 1590 $
+    $Revision: 1609 $
 */
 
-// $Id: EntryPoint.h 1590 2015-12-29 20:28:24Z Roger $
+// $Id: EntryPoint.h 1609 2016-02-16 21:31:39Z Roger $
 
 #include <windows.h>
 

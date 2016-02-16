@@ -6,7 +6,7 @@ DESCRIPTION
     Class to define NT native enumerations for use by ShowData
 
 COPYRIGHT
-    Copyright (C) 2011 by Roger Orr <rogero@howzatt.demon.co.uk>
+    Copyright (C) 2011, 2013 by Roger Orr <rogero@howzatt.demon.co.uk>
 
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,7 +22,7 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.demon.co.uk.
 */
 
-static char const szRCSID[] = "$Id: Enumerations.cpp 1405 2013-11-12 23:57:17Z Roger $";
+static char const szRCSID[] = "$Id: Enumerations.cpp 1610 2016-02-16 21:34:41Z Roger $";
 
 #include "Enumerations.h"
 

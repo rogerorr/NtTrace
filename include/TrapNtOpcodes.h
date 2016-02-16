@@ -7,7 +7,7 @@
 
     @author Roger Orr <rogero@howzatt.demon.co.uk>
 
-    Copyright &copy; 2002,2003.
+    Copyright &copy; 2002, 2013.
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.demon.co.uk.
 
-    $Revision: 1405 $
+    $Revision: 1609 $
 */
 
-// $Id: TrapNtOpcodes.h 1405 2013-11-12 23:57:17Z Roger $
+// $Id: TrapNtOpcodes.h 1609 2016-02-16 21:31:39Z Roger $
 
 // Define the op codes used for NtTrace
 static unsigned char const XOR = 0x33;         ///< xor reg1,reg2

@@ -7,7 +7,7 @@
 
     @author Roger Orr <rogero@howzatt.demon.co.uk>
 
-    Copyright &copy; 2011.
+    Copyright &copy; 2011, 2014.
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.demon.co.uk.
 
-    $Revision: 1460 $
+    $Revision: 1609 $
 */
 
-// $Id: Enumerations.h 1460 2014-10-09 22:31:44Z Roger $
+// $Id: Enumerations.h 1609 2016-02-16 21:31:39Z Roger $
 
 namespace Enumerations
 {

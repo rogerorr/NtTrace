@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.demon.co.uk.
 
-    $Revision: 1591 $
+    $Revision: 1603 $
 */
 
-// $Id: DbgHelper.h 1591 2015-12-29 20:31:53Z Roger $
+// $Id: DbgHelper.h 1603 2016-02-15 22:24:56Z Roger $
 
 #include <windows.h>
 

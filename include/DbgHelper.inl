@@ -20,10 +20,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.demon.co.uk.
 
-    $Revision: 1601 $
+    $Revision: 1603 $
 */
 
-// $Id: DbgHelper.inl 1601 2016-02-14 23:18:15Z Roger $
+// $Id: DbgHelper.inl 1603 2016-02-15 22:24:56Z Roger $
 
 #include <iostream>
 

@@ -6,7 +6,7 @@ DESCRIPTION
     Class to handle showing data from another process
 
 COPYRIGHT
-    Copyright (C) 2002,2003 by Roger Orr <rogero@howzatt.demon.co.uk>
+    Copyright (C) 2002, 2015 by Roger Orr <rogero@howzatt.demon.co.uk>
 
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,7 +22,7 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.demon.co.uk.
 */
 
-static char const szRCSID[] = "$Id: ShowData.cpp 1567 2015-09-10 22:14:43Z Roger $";
+static char const szRCSID[] = "$Id: ShowData.cpp 1610 2016-02-16 21:34:41Z Roger $";
 
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
 

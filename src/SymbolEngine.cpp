@@ -22,7 +22,7 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.demon.co.uk.
 */
 
-static char const szRCSID[] = "$Id: SymbolEngine.cpp 1573 2015-09-10 22:36:20Z Roger $";
+static char const szRCSID[] = "$Id: SymbolEngine.cpp 1603 2016-02-15 22:24:56Z Roger $";
 
 #ifdef _MSC_VER
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' chars

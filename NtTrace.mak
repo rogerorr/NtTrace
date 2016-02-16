@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 1593 2015-12-29 20:35:05Z Roger $
+# $Id: NtTrace.mak 1609 2016-02-16 21:31:39Z Roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2005 and above,
@@ -6,7 +6,7 @@
 #
 
 # COPYRIGHT
-#     Copyright (C) 2007,2009 by Roger Orr <rogero@howzatt.demon.co.uk>
+#     Copyright (C) 2007,2015 by Roger Orr <rogero@howzatt.demon.co.uk>
 # 
 #     This software is distributed in the hope that it will be useful, but
 #     without WITHOUT ANY WARRANTY; without even the implied warranty of
