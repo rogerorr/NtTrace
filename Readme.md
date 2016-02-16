@@ -1,8 +1,6 @@
-NtTrace readme file
-===================
+# NtTrace readme file
 
-Contents
---------
+# Contents
 
 Readme.txt	- This file
 NtTrace.cfg	- Configuration file for NtTrace
@@ -14,16 +12,14 @@ src		- source files
 include		- include files
 version.rc	- version resource
 
-Build instructions
-------------------
+# Build instructions
 
 For Visual Studio versions since VC6:
 - start a "Visual Studio command prompt",
 - cd to this directory
-- run 'nmake /f NtTrace.mak'
+- run `nmake /f NtTrace.mak`
 
-Visual Studio 6
----------------
+## Visual Studio 6
 
 The platform SDK shipped with Visual Studio 6 did not include the Psapi and DbgHelp headers
 and libraries used by the program.
@@ -31,16 +27,14 @@ and libraries used by the program.
 You need to download and install a newer version of the platform SDK, and ensure the include
 path has the platform SDK include directory *before* the VC6 ones.
 
-64bit builds
-------------
+## 64bit builds
 
 The 64bit version of NtTrace builds in the amd64 environment.
 
 This can be selected using, for example:
 "C:\Program Files\Microsoft Visual Studio 10.0\VC\vcvarsall.bat" amd64
 
-Note on DbgHelp.dll
--------------------
+## Note on DbgHelp.dll
 
 Windows ships with DbgHelp.dll in the system32 directory.
 However, newer versions of this DLL are packaged with "Debugging Tools for Windows"
@@ -50,11 +44,10 @@ The problem with this mechanism is that the version installed with the OS tends 
 take precendence over a newer version that may be downloaded.
 
 If you find you require a newer version than the one installed in the system directory you
-can simply copy of the latest DbgHelp.dll to the same directory that NtTrace.exe is in.
-(You will also need to copy SymSrv.dll and SrcSrv.dll)
+can simply copy of the latest `DbgHelp.dll` to the same directory that `NtTrace.exe` is in.
+(You will also need to copy `SymSrv.dll` and `SrcSrv.dll`)
 
-Running NtTrace
----------------
+# Running NtTrace
 
 NtTrace is designed to run from the command line.
 
@@ -68,10 +61,9 @@ For example:
 or
 	NtTrace -a notepad
 
-Run NtTrace -h for a complete list of options.
+Run `NtTrace -h` for a complete list of options.
 
-How it works
-------------
+## How it works
 
 1. Technology
 
@@ -106,4 +98,4 @@ By default NtTrace traces on return from the system call, but the -pre option ca
 This can be useful if, for example, the same structure is used for a request and a response buffer.
 
 --
-$Id: Readme.txt 929 2011-11-05 18:20:24Z Roger $
+$Id: Readme.md 1606 2016-02-16 21:08:07Z Roger $
