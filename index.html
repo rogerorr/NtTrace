@@ -77,10 +77,16 @@ LPC, Memory, Object, Other, Process, Registry,<br>
 Security, Synchronization, Time, Transaction and WOW64.
 
 <hr>
-Download NtTrace from GitHub and build an x86 or amd64 binary.
+Download NtTrace from <a href="https://github.com/rogerorr/NtTrace">GitHub<a/> and build an x86 or amd64 binary.
 <p>
 <b>Build instructions for Microsoft Visual Studio</b><p>
 At a Visual Studio command prompt type <code>'nmake -f NtTrace.mak'</code>
+<p>
+Build the appropriate binary (32-bit or 64-bit) for your target program.
+<ul>
+<li>Windows does not support 32-bit binaries debugging 64-bit ones.
+<li>While you can use a 64-bit NtTrace on 32-bit programs the output form the 32-bit NtTrace is liklely to be clearer.
+</ul>
 <p>
 Notes for Visual Studio 6
 <p>
