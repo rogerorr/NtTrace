@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.demon.co.uk.
 
-    $Revision: 1603 $
+    $Revision: 1657 $
 */
 
-// $Id: DbgHelper.h 1603 2016-02-15 22:24:56Z Roger $
+// $Id: DbgHelper.h 1657 2016-11-18 20:45:19Z Roger $
 
 #include <windows.h>
 
@@ -152,7 +152,7 @@ struct DbgInit : public T
    DbgInit()
    {
       ::memset( static_cast<void*>(this), 0, sizeof( T ) );
-      SizeOfStruct = sizeof( T );
+      this->SizeOfStruct = sizeof( T );
    }
 };
 

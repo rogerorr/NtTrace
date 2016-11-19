@@ -35,7 +35,7 @@ path has the platform SDK include directory *before* the VC6 ones.
 The 64bit version of NtTrace builds in the amd64 environment.
 
 This can be selected using, for example:
-"C:\\Program Files\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat" amd64
+`"C:\\Program Files\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat" amd64`
 
 ## Note on DbgHelp.dll
 
@@ -56,13 +56,14 @@ NtTrace is designed to run from the command line.
 
 It can be used to execute a program, with arguments if needed.
 For example:
-	NtTrace -filter File cmd
+<br>
+`NtTrace -filter File cmd`
 
 or to attach to an existing process by PID or, using the -a option, by name.
 For example:
-	NtTrace 1234
+`NtTrace 1234`
 or
-	NtTrace -a notepad
+`NtTrace -a notepad`
 
 Run `NtTrace -h` for a complete list of options.
 
@@ -101,4 +102,4 @@ By default NtTrace traces on return from the system call, but the `-pre` option 
 This can be useful if, for example, the same structure is used for a request and a response buffer.
 
 --
-$Id: Readme.md 1607 2016-02-16 21:23:13Z Roger $
+$Id: Readme.md 1615 2016-03-19 12:49:38Z Roger $

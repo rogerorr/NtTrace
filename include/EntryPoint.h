@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.demon.co.uk.
 
-    $Revision: 1609 $
+    $Revision: 1681 $
 */
 
-// $Id: EntryPoint.h 1609 2016-02-16 21:31:39Z Roger $
+// $Id: EntryPoint.h 1681 2016-11-19 17:33:55Z Roger $
 
 #include <windows.h>
 
@@ -76,7 +76,7 @@ typedef enum
 
 struct Argument
 {
-    Argument() : argType( argULONG_PTR ), argTypeName( "ULONG" ), name( "Unknown" ), attributes( argNONE ) {}
+    Argument() : argType( argULONG_PTR ), argTypeName( "ULONG" ), name( "Unknown" ), attributes( argNONE ), dummy(false) {}
     Argument( ArgType argType, std::string const &argTypeName, std::string const &name, ArgAttributes attributes )
         : argType( argType ), argTypeName( argTypeName ), name( name ), attributes( attributes ), dummy(false)
     {}
