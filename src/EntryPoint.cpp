@@ -22,7 +22,7 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.demon.co.uk.
 */
 
-static char const szRCSID[] = "$Id: EntryPoint.cpp 1610 2016-02-16 21:34:41Z Roger $";
+static char const szRCSID[] = "$Id: EntryPoint.cpp 1704 2017-06-10 23:27:35Z Roger $";
 
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
 
@@ -117,7 +117,7 @@ static unsigned char const signature4[] =
 static unsigned char const signature5[] =
 {MOVdwordEax, 5, FS, 1, CallReg, 6, 0, 0}; // 12 bytes
 
-// Check for Windows 10 NtQueryInformationProcess
+// Check for Windows 10 NtQueryInformationProcess (and trap the Wow64SystemServiceCall)
 // ntdll!NtQueryInformationProcess:
 // b8 19 00 00 00        mov     eax,19h
 // e8 04 00 00 00        call    ntdll!NtQueryInformationProcess+0xe
@@ -134,6 +134,23 @@ static unsigned char const signature5[] =
 static unsigned char const signature6[] =
 {MOVdwordEax, 5, 0xe8, 5 + 4, 0x5a, 1, 0x80, 4, 0x75, 2, FS, 1, CallReg, 6, 0xc2, 3, 0xba, 5, 0xff, 2, 0, 0}; // 38 bytes
 
+// Check for Windows 10 Creator NtQueryInformationProcess (and trap the Wow64SystemServiceCall)
+// ntdll!NtQueryInformationProcess:
+// b8 19 00 00 00        mov     eax,19h
+// e8 00 00 00 00        call    ntdll!NtQueryInformationProcess+0xa
+// 5a                    pop     edx
+// 80 7a 14 4b           cmp     byte ptr [edx+14h],4Bh
+// 75 0e                 jne     ntdll!NtQueryInformationProcess+0x1f
+// 64 ff 15 c0 00 00 00  call    dword ptr fs:[0C0h]
+// c2 14 00              ret     14h
+// 00 00 9a 77           <ntdll>
+// ba 40 61 a2 77        mov     edx,offset ntdll!Wow64SystemServiceCall
+// ff d2                 call    edx
+// c2 14 00              ret     14h
+
+static unsigned char const signature6b[] =
+{MOVdwordEax, 5, 0xe8, 5, 0x5a, 1, 0x80, 4, 0x75, 2, FS, 1, CallReg, 6, 0xc2, 3 + 4, 0xba, 5, 0xff, 2, 0, 0}; // 38 bytes
+
 static unsigned char const *signatures[] = {
 signature1,
 signature2,
@@ -141,6 +158,7 @@ signature3,
 signature4,
 signature5,
 signature6,
+signature6b,
 };
 
 static unsigned int const MAX_PREAMBLE(38);
@@ -1136,7 +1154,9 @@ bool EntryPoint::readEntryPoints( std::istream & cfgFile, EntryPointSet & entryP
                     attributes |= argRESERVED;
                 else
                     break;
-                if (typeName[0] == '_')
+                if (typeName[0] == '_' && typeName[1] == '_')
+                    attributes |= argDOUBLE_UNDERSCORE;
+                else if (typeName[0] == '_')
                     attributes |= argUNDERSCORE;
             } while ( is );
             if ( bEnded && ( typeName.length() == 0 || (argNum == 0 && typeName == "VOID")))
@@ -1201,7 +1221,7 @@ void EntryPoint::writeExport( std::ostream & os ) const
            continue;
         }
         os << "    ";
-        if ( argument.attributes & argUNDERSCORE )
+        if ( argument.attributes & argDOUBLE_UNDERSCORE )
         {
             std::string const opt(argument.attributes & argOPTIONAL ? "_opt" : "");
             if ( argument.attributes & argRESERVED )
@@ -1216,7 +1236,23 @@ void EntryPoint::writeExport( std::ostream & os ) const
                 os << "const ";
             os << argument.argTypeName << " " << argument.name;
         }
+        else if ( argument.attributes & argUNDERSCORE )
+        {
+            std::string const opt(argument.attributes & argOPTIONAL ? "opt_" : "");
+            if ( argument.attributes & argRESERVED )
+                os << "_Reserved_ ";
+            if ( ( argument.attributes & (argIN|argOUT) ) == (argIN|argOUT) )
+                os << "_Inout_" << opt << ' ';
+            else if ( argument.attributes & argIN )
+                os << "_In_" << opt << ' ';
+            else if ( argument.attributes & argOUT )
+                os << "_Out_" << opt << ' ';
+            if ( argument.attributes & argCONST )
+                os << "const ";
+            os << argument.argTypeName << " " << argument.name;
+        }
         else
+
         {
             if ( argument.attributes & argIN )
                 os << "IN ";

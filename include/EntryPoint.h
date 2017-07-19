@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.demon.co.uk.
 
-    $Revision: 1681 $
+    $Revision: 1694 $
 */
 
-// $Id: EntryPoint.h 1681 2016-11-19 17:33:55Z Roger $
+// $Id: EntryPoint.h 1694 2017-06-03 22:28:29Z Roger $
 
 #include <windows.h>
 
@@ -70,8 +70,9 @@ typedef enum
     argOUT = 2,
     argOPTIONAL = 4,
     argCONST = 8,
-    argUNDERSCORE = 16, // use __in, __out rather than IN, OUT
-    argRESERVED = 32,
+    argRESERVED = 16,
+    argUNDERSCORE = 32, // use _In_, _Out_ rather than IN, OUT
+    argDOUBLE_UNDERSCORE = 64, // use __in, __out rather than IN, OUT
 } ArgAttributes;
 
 struct Argument
