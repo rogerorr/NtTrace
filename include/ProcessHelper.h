@@ -22,10 +22,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.demon.co.uk.
 
-    $Revision: 1405 $
+    $Revision: 1700 $
 */
 
-// $Id: ProcessHelper.h 1405 2013-11-12 23:57:17Z Roger $
+// $Id: ProcessHelper.h 1700 2017-06-04 21:26:23Z Roger $
 
 
 #pragma warning( disable: 4786 )
@@ -223,7 +223,17 @@ std::vector< DWORD > FindProcesses( const char *pattern = 0 ///< pattern to matc
     DWORD const cProcesses = cbNeeded / sizeof(DWORD);
 
     std::string lowerPattern( pattern == 0 ? "" : pattern );
-    std::transform( lowerPattern.begin(), lowerPattern.end(), lowerPattern.begin(), tolower );
+#if _MSC_VER > 1200
+    // avoid C4244 warning from tolower
+    struct lcase
+    {
+      char operator()(char ch) { return static_cast<char>(tolower(ch)); }
+    } lcase;
+#else
+    #define lcase tolower
+#endif // _MSC_VER
+
+    std::transform( lowerPattern.begin(), lowerPattern.end(), lowerPattern.begin(), lcase );
 
     for ( unsigned int iProcess = 0; iProcess < cProcesses; iProcess++ )
     {
@@ -246,7 +256,7 @@ std::vector< DWORD > FindProcesses( const char *pattern = 0 ///< pattern to matc
                )
             {
                 std::string lower( szModName );
-                std::transform( lower.begin(), lower.end(), lower.begin(), tolower );
+                std::transform( lower.begin(), lower.end(), lower.begin(), lcase );
                 if ( ( lowerPattern.length() == 0 ) || ( lower.find( lowerPattern ) != std::string::npos ) )
                 {
                     // Return the process identifier.

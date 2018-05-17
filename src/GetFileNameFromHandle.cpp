@@ -40,7 +40,7 @@ IMPLEMENTATION NOTES
       
 */
 
-static char const szRCSID[] = "$Id: GetFileNameFromHandle.cpp 1405 2013-11-12 23:57:17Z Roger $";
+static char const szRCSID[] = "$Id: GetFileNameFromHandle.cpp 1682 2016-11-19 18:11:44Z Roger $";
 
 #include <windows.h>
 
@@ -107,7 +107,7 @@ std::string GetFileNameFromHandle(HANDLE hFile)
   DWORD dwFileSizeHi = 0;
   DWORD dwFileSizeLo = GetFileSize(hFile, &dwFileSizeHi); 
 
-  if( dwFileSizeLo == 0 && dwFileSizeHi == 0 )
+  if (dwFileSizeLo == INVALID_FILE_SIZE && GetLastError() != NO_ERROR)
   {
      SetLastError(ERROR_FILE_INVALID);
      return result;
