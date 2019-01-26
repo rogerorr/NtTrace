@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.demon.co.uk.
 
-    $Revision: 1609 $
+    $Revision: 1766 $
 */
 
-// $Id: TrapNtOpcodes.h 1609 2016-02-16 21:31:39Z Roger $
+// $Id: TrapNtOpcodes.h 1766 2019-01-20 20:52:53Z Roger $
 
 // Define the op codes used for NtTrace
 static unsigned char const XOR = 0x33;         ///< xor reg1,reg2
@@ -35,7 +35,8 @@ static unsigned char const NOP = 0x90;         ///< nop
 static unsigned char const MOVdwordEax = 0xB8; ///< mov eax,dword
 static unsigned char const MOVdwordEcx = 0xB9; ///< mov ecx,dword
 static unsigned char const MOVdwordEdx = 0xBA; ///< mov edx,dword
-static unsigned char const CallReg = 0xff;     ///< call edx
+static unsigned char const Call = 0xff;        ///< call prefix
+static unsigned char const Indirect = 0x25;    ///< indirect call modifier
 static unsigned char const RETn = 0xC2;        ///< ret n
 static unsigned char const RET = 0xC3;         ///< ret
 static unsigned char const BRKPT = 0xCC;       ///< breakpoint

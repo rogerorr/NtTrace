@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.demon.co.uk.
 
-    $Revision: 1694 $
+    $Revision: 1775 $
 */
 
-// $Id: EntryPoint.h 1694 2017-06-03 22:28:29Z Roger $
+// $Id: EntryPoint.h 1775 2019-01-22 22:06:08Z Roger $
 
 #include <windows.h>
 
@@ -125,6 +125,10 @@ public:
 
     std::string const & getName() const { return name; }
 
+    std::string const & getExported() const { return exported; }
+
+    void setExported(std::string const &value) { exported = value; }
+
     std::string const & getCategory() const { return category; }
 
     bool isDisabled() const { return disabled; }
@@ -149,7 +153,7 @@ public:
     void writeExport( std::ostream & os ) const;
 
     /** Set a trap for this entry point in the target process */
-    NtCall setNtTrap(HANDLE hProcess, HMODULE hTargetDll, bool bPreTrace, DWORD dllOffset);
+    NtCall setNtTrap(HANDLE hProcess, HMODULE hTargetDll, bool bPreTrace, DWORD dllOffset, bool verbose);
 
     /** Clear the trap for this entry in the target process */
     bool clearNtTrap(HANDLE hProcess, NtCall const & ntcall) const;
@@ -171,6 +175,7 @@ public:
     static void stackTrace(std::ostream & os, HANDLE hProcess, HANDLE hThread);
 private:
     std::string name; // name of entry point
+    std::string exported; // (optional) exported name for entry point
     std::string category; // category of entry point
     bool disabled; // this entry point is disabled
     std::vector< Argument > arguments; // vector of arguments

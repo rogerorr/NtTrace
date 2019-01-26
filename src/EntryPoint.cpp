@@ -22,7 +22,7 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.demon.co.uk.
 */
 
-static char const szRCSID[] = "$Id: EntryPoint.cpp 1704 2017-06-10 23:27:35Z Roger $";
+static char const szRCSID[] = "$Id: EntryPoint.cpp 1775 2019-01-22 22:06:08Z Roger $";
 
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
 
@@ -87,7 +87,7 @@ static unsigned char const signature1[] =
 //  C2 0C 00             ret         0Ch
 
 static unsigned char const signature2[] =
-{ MOVdwordEax, 5, MOVdwordEdx, 5, CallReg, 2, 0, 0}; // 12 bytes
+{ MOVdwordEax, 5, MOVdwordEdx, 5, Call, 2, 0, 0}; // 12 bytes
 
 // Check for basic W2K8/64 32-bit signature...
 //  B8 1E 00 00 00       mov         eax,1Eh
@@ -97,7 +97,7 @@ static unsigned char const signature2[] =
 //  C2 0C 00             ret         0Ch
 
 static unsigned char const signature3[] =
-{MOVdwordEax, 5, MOVdwordEcx, 5, LEA, 4, FS, 1, CallReg, 6, 0, 0}; // 21 bytes
+{MOVdwordEax, 5, MOVdwordEcx, 5, LEA, 4, FS, 1, Call, 6, 0, 0}; // 21 bytes
 
 // Check for type-2 W2K8/64 32-bit signature...
 //  B8 1E 00 00 00       mov         eax,1Eh
@@ -107,7 +107,7 @@ static unsigned char const signature3[] =
 //  C2 0C 00             ret         0Ch
 
 static unsigned char const signature4[] =
-{MOVdwordEax, 5, XOR, 2, LEA, 4, FS, 1, CallReg, 6, 0, 0}; // 18 bytes
+{MOVdwordEax, 5, XOR, 2, LEA, 4, FS, 1, Call, 6, 0, 0}; // 18 bytes
 
 // Check for Windows 8.1 32bit signature
 // b8 0e 00 03 00         mov     eax,0x3000e
@@ -115,7 +115,7 @@ static unsigned char const signature4[] =
 // c2 04 00               ret     0x4
 
 static unsigned char const signature5[] =
-{MOVdwordEax, 5, FS, 1, CallReg, 6, 0, 0}; // 12 bytes
+{MOVdwordEax, 5, FS, 1, Call, 6, 0, 0}; // 12 bytes
 
 // Check for Windows 10 NtQueryInformationProcess (and trap the Wow64SystemServiceCall)
 // ntdll!NtQueryInformationProcess:
@@ -132,7 +132,7 @@ static unsigned char const signature5[] =
 // c2 14 00              ret     14h
 
 static unsigned char const signature6[] =
-{MOVdwordEax, 5, 0xe8, 5 + 4, 0x5a, 1, 0x80, 4, 0x75, 2, FS, 1, CallReg, 6, 0xc2, 3, 0xba, 5, 0xff, 2, 0, 0}; // 38 bytes
+{MOVdwordEax, 5, 0xe8, 5 + 4, 0x5a, 1, 0x80, 4, 0x75, 2, FS, 1, Call, 6, 0xc2, 3, 0xba, 5, Call, 2, 0, 0}; // 38 bytes
 
 // Check for Windows 10 Creator NtQueryInformationProcess (and trap the Wow64SystemServiceCall)
 // ntdll!NtQueryInformationProcess:
@@ -149,7 +149,7 @@ static unsigned char const signature6[] =
 // c2 14 00              ret     14h
 
 static unsigned char const signature6b[] =
-{MOVdwordEax, 5, 0xe8, 5, 0x5a, 1, 0x80, 4, 0x75, 2, FS, 1, CallReg, 6, 0xc2, 3 + 4, 0xba, 5, 0xff, 2, 0, 0}; // 38 bytes
+{MOVdwordEax, 5, 0xe8, 5, 0x5a, 1, 0x80, 4, 0x75, 2, FS, 1, Call, 6, 0xc2, 3 + 4, 0xba, 5, Call, 2, 0, 0}; // 38 bytes
 
 static unsigned char const *signatures[] = {
 signature1,
@@ -467,7 +467,7 @@ NtCall EntryPoint::insertBrkpt( HANDLE hProcess, unsigned char *address, unsigne
 
 //////////////////////////////////////////////////////////////////////////
 // Attempt to set a trap for the entry point in the target DLL.
-NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll, bool bPreTrace, DWORD dllOffset)
+NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll, bool bPreTrace, DWORD dllOffset, bool verbose)
 {
 #ifdef _M_X64
     // We need the pretrace on X64 to save the volatile registers
@@ -487,78 +487,103 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll, bool bPreTrace
             DWORD errorCode = GetLastError();
             if ( errorCode == ERROR_PROC_NOT_FOUND )
             {
-                // Entry points are allowed to be absent!
+               if (!exported.empty() && (pProc = GetProcAddress( hTargetDll, exported.c_str())) != 0)
+               {
+                  // Found entry point using the exported name
+               }
+               else
+               {
+                  // Entry points are allowed to be absent!
+                  if (verbose)
+                  {
+                     std::cout << "Unable to locate " << name << "\n";
+                  }
+                  return NtCall();
+               }
+                
             }
             else
             {
                 std::cerr << "Cannot resolve " << name << ": " << displayError(errorCode) << std::endl;
+                return NtCall();
             }
-            return NtCall();
         }
         address = reinterpret_cast<unsigned char *>( pProc );
     }
 
     unsigned int preamble = 0;
     unsigned char instruction[MAX_PREAMBLE];
-    if (ReadProcessMemory(hProcess, address, instruction, sizeof( instruction ), 0))
+    if (!ReadProcessMemory(hProcess, address, instruction, sizeof( instruction ), 0))
     {
-        unsigned char * setssn = 0;
-        for (unsigned int idx = 0; idx != sizeof(signatures)/sizeof(signatures[0]); idx++)
-        {
-           unsigned int offset = 0;
-           setssn = 0;
-           unsigned char const *pCheck = signatures[idx];
-           for (; *pCheck != 0; pCheck += 2)
-           {
-              if (instruction[offset] == BRKPT)
-              {
-                 // already pre-trace trapping!
-                 preamble = offset;
-                 break;
-              }
-              if (instruction[offset] != pCheck[0])
-                 break;
-              if (instruction[offset] == MOVdwordEax)
-              {
-                 setssn = address + offset;
-              }
-              offset += pCheck[1];
-           }
-           if (pCheck[0] == 0)
-           {
-              // Check for possible esp adjustment
-              if (instruction[offset] == AddEsp)
-              {
-                 offset += 3;
-              }
-              preamble = offset;
-              break;
-           }
-       }
-       if ( instruction[preamble] == BRKPT )
-       {
-           std::cerr << "Already trapping: " << name << std::endl;
-       }
-       else if (preamble == 0)
-       {
-           std::cerr << "Cannot trap " << name << " - wrong signature" << std::endl;
-       }
-       else if (setssn == 0)
-       {
-           std::cerr << "Cannot trap " << name << " - cannot find system service number" << std::endl;
-       }
-       else
-       {
-           memcpy(&ssn, instruction + (setssn - address) + 1, sizeof(ssn));
-           return insertBrkpt(hProcess, address, preamble, bPreTrace ? setssn : 0);
-       }
-    }
-    else
-    {
-        std::cerr << "Cannot trap " << name << " - unable to read memory: " << displayError() << std::endl;
+        std::cerr << "Cannot trap " << name << " - unable to read memory at " << (void*)address << ": " << displayError() << std::endl;
+        return NtCall();
     }
 
-    return NtCall();
+    // Check for indirect jump (eg Windows 10 NtUserXxx moved from user32.dll to win32u.dll)
+    // Note that at this point when loading the DLL the target address has not yet been resolved
+    // so we cannot (easily) follow the jump to its target
+    if (instruction[0] == Call && instruction[1] == Indirect)
+    {
+       std::cerr << "Cannot trap " << name << " (maybe implemented in another DLL)" << std::endl;
+       return NtCall();
+    }
+
+    unsigned char * setssn = 0;
+    for (unsigned int idx = 0; idx != sizeof(signatures)/sizeof(signatures[0]); idx++)
+    {
+       unsigned int offset = 0;
+       setssn = 0;
+       unsigned char const *pCheck = signatures[idx];
+       for (; *pCheck != 0; pCheck += 2)
+       {
+          if (instruction[offset] == BRKPT)
+          {
+             // already pre-trace trapping!
+             preamble = offset;
+             break;
+          }
+          if (instruction[offset] != pCheck[0])
+             break;
+          if (instruction[offset] == MOVdwordEax)
+          {
+             setssn = address + offset;
+          }
+          offset += pCheck[1];
+       }
+       if (pCheck[0] == 0)
+       {
+          // Check for possible esp adjustment
+          if (instruction[offset] == AddEsp)
+          {
+             offset += 3;
+          }
+          preamble = offset;
+          break;
+       }
+    }
+
+    if ( instruction[preamble] == BRKPT )
+    {
+        std::cerr << "Already trapping: " << name << std::endl;
+        return NtCall();
+    }
+    else if (preamble == 0)
+    {
+        std::cerr << "Cannot trap " << name << " - wrong signature" << std::endl;
+        return NtCall();
+    }
+    else if (setssn == 0)
+    {
+        std::cerr << "Cannot trap " << name << " - cannot find system service number" << std::endl;
+        return NtCall();
+    }
+
+    memcpy(&ssn, instruction + (setssn - address) + 1, sizeof(ssn));
+    if (verbose)
+    {
+       std::cout << "Instrumenting " << name << " at: " << (void*)address << ", ssn: 0x" << std::hex << ssn << std::dec << "\n";
+    }
+    return insertBrkpt(hProcess, address, preamble, bPreTrace ? setssn : 0);
 }
 
 
@@ -661,6 +686,7 @@ void EntryPoint::setArgument( int argNum, std::string const & argType,
       { argENUM, "DEBUGOBJECTINFOCLASS" },
       { argENUM, "DEBUG_CONTROL_CODE" },
       { argENUM, "DEVICE_POWER_STATE" },
+      { argENUM, "DIRECTORY_NOTIFY_INFORMATION_CLASS" },
       { argENUM, "ENLISTMENT_INFORMATION_CLASS" },
       { argENUM, "EVENT_INFORMATION_CLASS" },
       { argENUM, "EVENT_TYPE" },
@@ -675,6 +701,7 @@ void EntryPoint::setArgument( int argNum, std::string const & argType,
       { argENUM, "KPROFILE_SOURCE" },
       { argENUM, "KTMOBJECT_TYPE" },
       { argENUM, "MEMORY_INFORMATION_CLASS" },
+      { argENUM, "MEMORY_PARTITION_INFORMATION_CLASS" },
       { argENUM, "MUTANT_INFORMATION_CLASS" },
       { argENUM, "OBJECT_INFORMATION_CLASS" },
       { argENUM, "PORT_INFORMATION_CLASS" },
@@ -1051,7 +1078,24 @@ bool EntryPoint::readEntryPoints( std::istream & cfgFile, EntryPointSet & entryP
               std::string const argument = lbuf.substr(3, len - 4);
               if (argument.find('.') != std::string::npos)
               {
-                 target = argument;
+                 // set target as the first DLL that we can load
+                 // to support NtUser moving from user32 -> win32u
+                 if (target.empty() && ::LoadLibrary(argument.c_str()))
+                 {
+                    target = argument;
+                 }
+              }
+              else if (argument.find('=') == 0)
+              {
+                 // Exported name for current function
+                 if (currEntryPoint)
+                 {
+                    currEntryPoint->setExported(argument.substr(1));
+                 }
+                 else
+                 {
+                    std::cerr << "unexpected export line '" << lbuf << "'" << std::endl;
+                 }
               }
               else
               {
@@ -1191,6 +1235,7 @@ bool EntryPoint::readEntryPoints( std::istream & cfgFile, EntryPointSet & entryP
             {
 		// Done with this function
                 argNum = -1;
+				currEntryPoint = 0;
             }
         }
     }
@@ -1213,6 +1258,12 @@ void EntryPoint::writeExport( std::ostream & os ) const
         os << retTypeName;
     }
     os << "\nNTAPI\n" << name << "(\n";
+    // Write the export alias if there is one
+    if (!exported.empty())
+    {
+        os << "//[=" << exported << "]\n";
+    }
+
     for ( size_t i = 0, end = arguments.size(); i != end; i++ )
     {
         Argument const & argument = arguments[i];

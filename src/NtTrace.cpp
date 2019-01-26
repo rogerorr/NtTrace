@@ -27,7 +27,7 @@ EXAMPLE
     NtTrace 1234
 */
 
-static char const szRCSID[] = "$Id: NtTrace.cpp 1610 2016-02-16 21:34:41Z Roger $";
+static char const szRCSID[] = "$Id: NtTrace.cpp 1775 2019-01-22 22:06:08Z Roger $";
 
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
 #pragma warning( disable: 4800 ) // forcing value to bool 'true' or 'false' (performance warning)
@@ -252,6 +252,8 @@ namespace
 // Local data
 
 static bool bErrorsOnly( false );
+static bool bVerbose( false );
+
 static std::set<NTSTATUS> errorCodes;
 static bool bNames( false );
 static bool bPreTrace( false );
@@ -725,7 +727,7 @@ void TrapNtDebugger::SetDllBreakpoints( HANDLE hProcess )
        if ( bRequired )
        {
           EntryPoint &ep = const_cast<EntryPoint &>(*it); // set iterator returns const object :-(
-          NtCall nt = ep.setNtTrap( hProcess, TargetDll, bPreTrace, offsets[ep.getName()] );
+          NtCall nt = ep.setNtTrap( hProcess, TargetDll, bPreTrace, offsets[ep.getName()], bVerbose );
           if ( nt.entryPoint != 0 )
           {
               NtCalls[ ep.getAddress() ] = nt;
@@ -895,6 +897,7 @@ int main( int argc, char **argv )
     Options options( szRCSID );
     options.set( "a", &attach, "attach to existing process <cmd> rather than starting a fresh <cmd>" );
     options.set( "e", &bErrorsOnly, "Only log errors" );
+    options.set( "v", &bVerbose, "More verbose logging" );
     options.set( "config", &configFile, "Specify config file" );
     options.set( "errors", &codeFilter, "Comma delimited list of error codes to filter on" );
     options.set( "export", &exportFile, "Export symbols once loaded [for testing]" );

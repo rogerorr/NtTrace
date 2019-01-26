@@ -22,7 +22,7 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.demon.co.uk.
 */
 
-static char const szRCSID[] = "$Id: Enumerations.cpp 1610 2016-02-16 21:34:41Z Roger $";
+static char const szRCSID[] = "$Id: Enumerations.cpp 1758 2019-01-15 22:59:10Z Roger $";
 
 #include "Enumerations.h"
 
@@ -156,6 +156,18 @@ EnumMap DEVICE_POWER_STATE_MAP[] = {
   DEF(PowerDeviceD1),
   DEF(PowerDeviceD2),
   DEF(PowerDeviceD3),
+  {0, 0}
+};
+
+typedef enum _DIRECTORY_NOTIFY_INFORMATION_CLASS {
+  DirectoryNotifyInformation,
+  DirectoryNotifyExtendedInformation,
+} DIRECTORY_NOTIFY_INFORMATION_CLASS;
+
+EnumMap DIRECTORY_NOTIFY_INFORMATION_CLASS_MAP[] = 
+{
+  DEF(DirectoryNotifyInformation),
+  DEF(DirectoryNotifyExtendedInformation),
   {0, 0}
 };
 
@@ -613,11 +625,49 @@ EnumMap LPC_TYPE_MAP[] =
 
 typedef enum _MEMORY_INFORMATION_CLASS {
   MemoryBasicInformation,
+  MemoryWorkingSetInformation,
+  MemoryMappedFilenameInformation,
+  MemoryRegionInformation,
+  MemoryWorkingSetExInformation,
+  MemorySharedCommitInformation,
+  MemoryImageInformation,
+  MemoryRegionInformationEx,
+  MemoryPrivilegedBasicInformation,
+  MemoryEnclaveImageInformation,
+  MemoryBasicInformationCapped,
 } MEMORY_INFORMATION_CLASS;
 
 EnumMap MEMORY_INFORMATION_CLASS_MAP[] = 
 {
   DEF(MemoryBasicInformation),
+  DEF(MemoryWorkingSetInformation),
+  DEF(MemoryMappedFilenameInformation),
+  DEF(MemoryRegionInformation),
+  DEF(MemoryWorkingSetExInformation),
+  DEF(MemorySharedCommitInformation),
+  DEF(MemoryImageInformation),
+  DEF(MemoryRegionInformationEx),
+  DEF(MemoryPrivilegedBasicInformation),
+  DEF(MemoryEnclaveImageInformation),
+  DEF(MemoryBasicInformationCapped),
+  {0, 0}
+};
+
+typedef enum _MEMORY_PARTITION_INFORMATION_CLASS {
+  SystemMemoryPartitionInformation,
+  SystemMemoryPartitionMoveMemory,
+  SystemMemoryPartitionAddPagefile,
+  SystemMemoryPartitionCombineMemory,
+  SystemMemoryPartitionInitialAddMemory,
+} MEMORY_PARTITION_INFORMATION_CLASS;
+
+EnumMap MEMORY_PARTITION_INFORMATION_CLASS_MAP[] = 
+{
+  DEF(SystemMemoryPartitionInformation),
+  DEF(SystemMemoryPartitionMoveMemory),
+  DEF(SystemMemoryPartitionAddPagefile),
+  DEF(SystemMemoryPartitionCombineMemory),
+  DEF(SystemMemoryPartitionInitialAddMemory),
   {0, 0}
 };
 
@@ -1527,6 +1577,7 @@ struct AllEnum allEnums[] =
    DEF(DEBUGOBJECTINFOCLASS),
    DEF(DEBUG_CONTROL_CODE),
    DEF(DEVICE_POWER_STATE),
+   DEF(DIRECTORY_NOTIFY_INFORMATION_CLASS),
    DEF(ENLISTMENT_INFORMATION_CLASS),
    DEF(EVENT_INFORMATION_CLASS),
    DEF(EVENT_TYPE),
@@ -1542,6 +1593,7 @@ struct AllEnum allEnums[] =
    DEF(KTMOBJECT_TYPE),
    DEF(LPC_TYPE),
    DEF(MEMORY_INFORMATION_CLASS),
+   DEF(MEMORY_PARTITION_INFORMATION_CLASS),
    DEF(MUTANT_INFORMATION_CLASS),
    DEF(NOTIFICATION_MASK),
    DEF(OBJECT_INFORMATION_CLASS),
