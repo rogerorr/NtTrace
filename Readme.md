@@ -17,38 +17,13 @@ See also http://rogerorr.github.io/NtTrace/
 
 # Build instructions
 
-For Visual Studio versions since VC6:
-- start a "Visual Studio command prompt",
-- cd to this directory
+You will need either or both of the 32-bit and 64-bit version of NtTrace, whichever matches your target application(s)
+From a windows command prompt:
+- cd to this top-level directory
+- Set up the target VC environment
+-- Eg "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
+-- or "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
 - run `nmake /f NtTrace.mak`
-
-## Visual Studio 6
-
-The platform SDK shipped with Visual Studio 6 did not include the Psapi and DbgHelp headers
-and libraries used by the program.
-
-You need to download and install a newer version of the platform SDK, and ensure the include
-path has the platform SDK include directory *before* the VC6 ones.
-
-## 64bit builds
-
-The 64bit version of NtTrace builds in the amd64 environment.
-
-This can be selected using, for example:
-`"C:\\Program Files\\Microsoft Visual Studio 10.0\\VC\\vcvarsall.bat" amd64`
-
-## Note on DbgHelp.dll
-
-Windows ships with DbgHelp.dll in the system32 directory.
-However, newer versions of this DLL are packaged with "Debugging Tools for Windows"
-(See http://www.microsoft.com/whdc/DevTools/Debugging/default.mspx)
-
-The problem with this mechanism is that the version installed with the OS tends to
-take precendence over a newer version that may be downloaded.
-
-If you find you require a newer version than the one installed in the system directory you
-can simply copy of the latest `DbgHelp.dll` to the same directory that `NtTrace.exe` is in.
-(You will also need to copy `SymSrv.dll` and `SrcSrv.dll`)
 
 # Running NtTrace
 
@@ -66,6 +41,31 @@ or
 `NtTrace -a notepad`
 
 Run `NtTrace -h` for a complete list of options.
+
+## Gdi and User calls
+
+By default NtTrace targets the Windows Native API exposed through NtDll.dll
+
+Configuration files are also supplied for many of the entry points that support the
+Windows graphics interface: 
+
+Gdi32Trace.cfg for the Graphics Device Interface
+
+User32Trace.cfg for the User Interface
+
+You can select one of these, rather than the default NtTrace.cfg by using the `-config` command line argument.
+
+## Note on DbgHelp.dll
+
+Windows ships with DbgHelp.dll in the system32 directory.
+However, newer versions of this DLL are sometimes available from Microsoft in their SDKs.
+
+The version of the DLL installed with the OS tends to
+take precedence over a newer version that may be downloaded.
+
+If you find you require a newer version than the one installed in the system directory you
+can simply copy of the latest `DbgHelp.dll` to the same directory that `NtTrace.exe` is in.
+(You will also need to copy `SymSrv.dll` and `SrcSrv.dll`)
 
 ## How it works
 
@@ -102,4 +102,4 @@ By default NtTrace traces on return from the system call, but the `-pre` option 
 This can be useful if, for example, the same structure is used for a request and a response buffer.
 
 --
-$Id: Readme.md 1615 2016-03-19 12:49:38Z Roger $
+$Id: Readme.md 1782 2019-01-26 14:37:31Z Roger $
