@@ -53,6 +53,7 @@ Options:<br>
 <table border=0>
 <tr><td>  -a    </td><td> attach to existing process &lt;cmd&gt; rather than starting a fresh &lt;cmd&gt; </td></tr>
 <tr><td>  -e    </td><td> Only log errors </td></tr>
+<tr><td>  -v        More verbose logging</td></tr>
 <tr><td>  -config   </td><td> Specify config file </td></tr>
 <tr><td>  -errors   </td><td> Comma delimited list of error codes to filter on </td></tr>
 <tr><td>  -export   </td><td> Export symbols once loaded [for testing] </td></tr>
@@ -88,16 +89,18 @@ Build the appropriate binary (32-bit or 64-bit) for your target program.
 <li>While you can use a 64-bit NtTrace on 32-bit programs the output form the 32-bit NtTrace is liklely to be clearer.
 </ul>
 <p>
-Notes for Visual Studio 6
-<p>
-<ul>
-<li>You need to ensure the Platform SDK is installed to pick up psapi.h/lib and DbgHelp.h/lib.
-<li>Newer compilers are available...
-</ul>
-<p>
 (See Readme.txt for full details)
 <p>
 
+<hr>
+Version 1818 - 18-Mar-2019<br>
+Recent changes:
+<ul>
+<li>Added the most recent Windows 10 APIs, and categorized some of them
+<li>Update some enumerations, for example Power Information, with newer values
+<li>Support for user32 and gdi32 on more recent versions of Windows that use win32u.dll
+<li>Add -v option to NtTrace to display address and SSN
+</ul>
 <hr>
 Version 1439 - 16-Oct-2014<br>
 Recent changes:
