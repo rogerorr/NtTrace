@@ -73,20 +73,22 @@ can simply copy of the latest `DbgHelp.dll` to the same directory that `NtTrace.
 
 NtTrace works by using the Windows debug interface to place breakpoints in NtDll around the native Windows calls into the kernel.
 Each time a breakpoint is hit NtTrace reads the arguments pased to/values returned by the associated call.
-Note: it does not attempt to trap the native graphics calls that are made to Win32k.sys
 
 It works on user level and only affects the specific process (and its children). No attempt is made to go into the kernel.
 This was a deliberate design decision as it means the tool can be used without requiring adminstrative rights
 or permission to install device drivers.
 However this also means the tool will not catch:
  * kernel calls made by device drivers on behalf of an application
- * any direct use of the int 2e or syscall mechanism
+ * any direct use of the int 2e, syscall, or sysenter mechanism
 
 NtTrace also traces into child processes of the initial process started, the -pid option will add the process Id to each output line.
 
 It also deals with multi-threaded applications (and the -tid option will help identify which thread is making each call).
 However note that, since the Windows debug interface is event based, if multiple threads all make calls simultaneously
 then the tracing will be serialised.
+
+By default the calls in NtDll are traced; the configuration files for Gdi32 and User32 select a different target DLL.
+NtTrace does not currently support simultaneously tracing different types of system calls.
 
 ### Configuration
 
@@ -102,4 +104,4 @@ By default NtTrace traces on return from the system call, but the `-pre` option 
 This can be useful if, for example, the same structure is used for a request and a response buffer.
 
 --
-$Id: Readme.md 1782 2019-01-26 14:37:31Z Roger $
+$Id: Readme.md 1817 2019-03-18 22:48:56Z Roger $

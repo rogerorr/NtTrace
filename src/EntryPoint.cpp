@@ -6,7 +6,7 @@ DESCRIPTION
     Handle a single entry point for NtTrace
 
 COPYRIGHT
-    Copyright (C) 2002, 2015 by Roger Orr <rogero@howzatt.demon.co.uk>
+    Copyright (C) 2002, 2019 by Roger Orr <rogero@howzatt.demon.co.uk>
 
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,7 +22,7 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.demon.co.uk.
 */
 
-static char const szRCSID[] = "$Id: EntryPoint.cpp 1775 2019-01-22 22:06:08Z Roger $";
+static char const szRCSID[] = "$Id: EntryPoint.cpp 1816 2019-03-18 22:43:29Z Roger $";
 
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
 
@@ -684,7 +684,6 @@ void EntryPoint::setArgument( int argNum, std::string const & argType,
       { argENUM, "ATOM_INFORMATION_CLASS" },
       { argENUM, "AUDIT_EVENT_TYPE" },
       { argENUM, "DEBUGOBJECTINFOCLASS" },
-      { argENUM, "DEBUG_CONTROL_CODE" },
       { argENUM, "DEVICE_POWER_STATE" },
       { argENUM, "DIRECTORY_NOTIFY_INFORMATION_CLASS" },
       { argENUM, "ENLISTMENT_INFORMATION_CLASS" },
@@ -713,6 +712,7 @@ void EntryPoint::setArgument( int argNum, std::string const & argType,
       { argENUM, "SECTION_INHERIT" },
       { argENUM, "SHUTDOWN_ACTION" },
       { argENUM, "SEMAPHORE_INFORMATION_CLASS" },
+      { argENUM, "SYSDBG_COMMAND" },
       { argENUM, "SYSTEM_POWER_STATE" },
       { argENUM, "SYSTEM_INFORMATION_CLASS" },
       { argENUM, "THREADINFOCLASS" },
@@ -916,7 +916,7 @@ void EntryPoint::trace( std::ostream & os, HANDLE hProcess, HANDLE hThread, CONT
 
   switch (retType)
   {
-    case retNTSTATUS: success = (returnCode == ERROR_SUCCESS); break;
+    case retNTSTATUS: success = NT_SUCCESS(returnCode); break;
     case retULONG: success = ((ULONG)returnCode != 0); break;
     case retULONG_PTR: success = (returnCode != 0); break;
     default: break;
@@ -1233,9 +1233,9 @@ bool EntryPoint::readEntryPoints( std::istream & cfgFile, EntryPointSet & entryP
             }
             if ( bEnded )
             {
-		// Done with this function
+                // Done with this function
                 argNum = -1;
-				currEntryPoint = 0;
+                currEntryPoint = 0;
             }
         }
     }
@@ -1246,7 +1246,7 @@ bool EntryPoint::readEntryPoints( std::istream & cfgFile, EntryPointSet & entryP
 // Print self to a stream, as a function prototype
 void EntryPoint::writeExport( std::ostream & os ) const
 {
-    if ( targetAddress == 0 )
+    if ( targetAddress == 0 && !disabled )
        os << "//inactive\n";
     os << "//[" << (disabled ? "-" : "") << category << "]\n";
     if (retType == retNTSTATUS)

@@ -6,7 +6,7 @@ DESCRIPTION
     Process to provide tracing for NT 'native' API
 
 COPYRIGHT
-    Copyright (C) 2002, 2015 by Roger Orr <rogero@howzatt.demon.co.uk>
+    Copyright (C) 2002, 2019 by Roger Orr <rogero@howzatt.demon.co.uk>
 
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@ EXAMPLE
     NtTrace 1234
 */
 
-static char const szRCSID[] = "$Id: NtTrace.cpp 1775 2019-01-22 22:06:08Z Roger $";
+static char const szRCSID[] = "$Id: NtTrace.cpp 1816 2019-03-18 22:43:29Z Roger $";
 
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
 #pragma warning( disable: 4800 ) // forcing value to bool 'true' or 'false' (performance warning)
