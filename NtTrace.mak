@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 1609 2016-02-16 21:31:39Z Roger $
+# $Id: NtTrace.mak 1881 2020-04-09 20:55:12Z Roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2005 and above,
@@ -6,7 +6,7 @@
 #
 
 # COPYRIGHT
-#     Copyright (C) 2007,2015 by Roger Orr <rogero@howzatt.demon.co.uk>
+#     Copyright (C) 2007,2015 by Roger Orr <rogero@howzatt.co.uk>
 # 
 #     This software is distributed in the hope that it will be useful, but
 #     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -19,7 +19,7 @@
 #     by this notice.
 # 
 #     Comments and suggestions are always welcome.
-#     Please report bugs to rogero@howzatt.demon.co.uk.
+#     Please report bugs to rogero@howzatt.co.uk.
 
 all : build NtTrace.exe
 

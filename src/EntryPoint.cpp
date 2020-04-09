@@ -6,7 +6,7 @@ DESCRIPTION
     Handle a single entry point for NtTrace
 
 COPYRIGHT
-    Copyright (C) 2002, 2019 by Roger Orr <rogero@howzatt.demon.co.uk>
+    Copyright (C) 2002, 2019 by Roger Orr <rogero@howzatt.co.uk>
 
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -19,10 +19,10 @@ COPYRIGHT
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 */
 
-static char const szRCSID[] = "$Id: EntryPoint.cpp 1816 2019-03-18 22:43:29Z Roger $";
+static char const szRCSID[] = "$Id: EntryPoint.cpp 1881 2020-04-09 20:55:12Z Roger $";
 
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
 

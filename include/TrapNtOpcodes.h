@@ -5,7 +5,7 @@
 
     List of opcodes used by NtTrace to trap calls in NTDLL.
 
-    @author Roger Orr <rogero@howzatt.demon.co.uk>
+    @author Roger Orr <rogero@howzatt.co.uk>
 
     Copyright &copy; 2002, 2013.
     This software is distributed in the hope that it will be useful, but
@@ -19,12 +19,12 @@
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1766 $
+    $Revision: 1881 $
 */
 
-// $Id: TrapNtOpcodes.h 1766 2019-01-20 20:52:53Z Roger $
+// $Id: TrapNtOpcodes.h 1881 2020-04-09 20:55:12Z Roger $
 
 // Define the op codes used for NtTrace
 static unsigned char const XOR = 0x33;         ///< xor reg1,reg2

@@ -5,7 +5,7 @@
 @file
     Manage a single entry point for NtTrace.
 
-    @author Roger Orr <rogero@howzatt.demon.co.uk>
+    @author Roger Orr <rogero@howzatt.co.uk>
 
     Copyright &copy; 2002,2015.
     This software is distributed in the hope that it will be useful, but
@@ -19,12 +19,12 @@
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1775 $
+    $Revision: 1881 $
 */
 
-// $Id: EntryPoint.h 1775 2019-01-22 22:06:08Z Roger $
+// $Id: EntryPoint.h 1881 2020-04-09 20:55:12Z Roger $
 
 #include <windows.h>
 

@@ -10,7 +10,7 @@ NOTES
     sed -n "s/.*enum /udt /p" Enumerations.cpp | symexplorer ole32.dll
 
 COPYRIGHT
-    Copyright (C) 2011, 2019 by Roger Orr <rogero@howzatt.demon.co.uk>
+    Copyright (C) 2011, 2019 by Roger Orr <rogero@howzatt.co.uk>
 
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,10 +23,10 @@ COPYRIGHT
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 */
 
-static char const szRCSID[] = "$Id: Enumerations.cpp 1816 2019-03-18 22:43:29Z Roger $";
+static char const szRCSID[] = "$Id: Enumerations.cpp 1881 2020-04-09 20:55:12Z Roger $";
 
 #include "Enumerations.h"
 
