@@ -5,7 +5,7 @@
 
     Header for NtDll Structures - defines some data structures used by the native API.
 
-    @author Roger Orr <rogero@howzatt.demon.co.uk>
+    @author Roger Orr <rogero@howzatt.co.uk>
 
     Copyright &copy; 2004.
     This software is distributed in the hope that it will be useful, but
@@ -19,12 +19,12 @@
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1405 $
+    $Revision: 1881 $
 */
 
-// $Id: NtDllStruct.h 1405 2013-11-12 23:57:17Z Roger $
+// $Id: NtDllStruct.h 1881 2020-04-09 20:55:12Z Roger $
 
 // For MSVC 5.00/6.00 basetsd.h (changes with platform SDK)
 #ifndef _W64

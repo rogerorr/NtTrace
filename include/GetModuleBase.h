@@ -5,7 +5,7 @@
 
     Function to provide an implementation of SymGetModuleBase.
 
-    @author Roger Orr <rogero@howzatt.demon.co.uk>
+    @author Roger Orr <rogero@howzatt.co.uk>
 
     Copyright &copy; 2003.
     This software is distributed in the hope that it will be useful, but
@@ -19,12 +19,12 @@
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1405 $
+    $Revision: 1881 $
 */
 
-// $Id: GetModuleBase.h 1405 2013-11-12 23:57:17Z Roger $
+// $Id: GetModuleBase.h 1881 2020-04-09 20:55:12Z Roger $
 
 #ifndef _WINDOWS_
 #include <windows.h>

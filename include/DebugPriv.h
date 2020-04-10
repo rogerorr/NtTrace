@@ -8,7 +8,7 @@
     Granting debug privileges enables being able to access other processes
     to read/write memory and debug them.
 
-    @author Roger Orr <rogero@howzatt.demon.co.uk>
+    @author Roger Orr <rogero@howzatt.co.uk>
 
     Copyright &copy; 2003.
     This software is distributed in the hope that it will be useful, but
@@ -22,12 +22,12 @@
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1405 $
+    $Revision: 1881 $
 */
 
-// $Id: DebugPriv.h 1405 2013-11-12 23:57:17Z Roger $
+// $Id: DebugPriv.h 1881 2020-04-09 20:55:12Z Roger $
 
 #include "AdjustPriv.h"
 

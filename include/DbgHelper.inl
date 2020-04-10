@@ -4,7 +4,7 @@
 /*
     Provide helper functions for DbgHelp DLL.
 
-    @author Roger Orr <rogero@howzatt.demon.co.uk>
+    @author Roger Orr <rogero@howzatt.co.uk>
 
     Copyright &copy; 2003.
     This software is distributed in the hope that it will be useful, but
@@ -18,12 +18,12 @@
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1603 $
+    $Revision: 1881 $
 */
 
-// $Id: DbgHelper.inl 1603 2016-02-15 22:24:56Z Roger $
+// $Id: DbgHelper.inl 1881 2020-04-09 20:55:12Z Roger $
 
 #include <iostream>
 

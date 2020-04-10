@@ -5,7 +5,7 @@
 @file
     Helper for wrapping calls to the Microsoft DbgHelp.dll.
 
-    @author Roger Orr <rogero@howzatt.demon.co.uk>
+    @author Roger Orr <rogero@howzatt.co.uk>
 
     Copyright &copy; 2003.
     This software is distributed in the hope that it will be useful, but
@@ -19,12 +19,12 @@
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1657 $
+    $Revision: 1881 $
 */
 
-// $Id: DbgHelper.h 1657 2016-11-18 20:45:19Z Roger $
+// $Id: DbgHelper.h 1881 2020-04-09 20:55:12Z Roger $
 
 #include <windows.h>
 

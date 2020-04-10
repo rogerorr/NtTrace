@@ -6,7 +6,7 @@ DESCRIPTION
     Additional symbol engine functionality
 
 COPYRIGHT
-    Copyright (C) 2003 by Roger Orr <rogero@howzatt.demon.co.uk>
+    Copyright (C) 2003 by Roger Orr <rogero@howzatt.co.uk>
 
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -19,10 +19,10 @@ COPYRIGHT
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 */
 
-static char const szRCSID[] = "$Id: SymbolEngine.cpp 1603 2016-02-15 22:24:56Z Roger $";
+static char const szRCSID[] = "$Id: SymbolEngine.cpp 1881 2020-04-09 20:55:12Z Roger $";
 
 #ifdef _MSC_VER
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' chars

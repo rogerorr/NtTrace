@@ -9,7 +9,7 @@
     displayError( std::cerr, GetLastError() );
     </PRE>
 
-    @author Roger Orr <rogero@howzatt.demon.co.uk>
+    @author Roger Orr <rogero@howzatt.co.uk>
 
     Copyright &copy; 2004.
     This software is distributed in the hope that it will be useful, but
@@ -23,12 +23,12 @@
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1405 $
+    $Revision: 1881 $
 */
 
-// $Id: displayError.h 1405 2013-11-12 23:57:17Z Roger $
+// $Id: displayError.h 1881 2020-04-09 20:55:12Z Roger $
 
 #include <iosfwd>
 #include <windows.h>

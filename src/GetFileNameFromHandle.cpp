@@ -9,7 +9,7 @@ COPYRIGHT
     Original code © 2010 Microsoft Corporation. All rights reserved.
     From http://msdn.microsoft.com/en-us/library/aa366789%28v=vs.85%29.aspx 
 
-    Changes copyright (C) 2011 by Roger Orr <rogero@howzatt.demon.co.uk>
+    Changes copyright (C) 2011 by Roger Orr <rogero@howzatt.co.uk>
 
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,7 +22,7 @@ COPYRIGHT
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 
 IMPLEMENTATION NOTES
     There are various forms of 'raw' file names:
@@ -40,7 +40,7 @@ IMPLEMENTATION NOTES
       
 */
 
-static char const szRCSID[] = "$Id: GetFileNameFromHandle.cpp 1682 2016-11-19 18:11:44Z Roger $";
+static char const szRCSID[] = "$Id: GetFileNameFromHandle.cpp 1881 2020-04-09 20:55:12Z Roger $";
 
 #include <windows.h>
 

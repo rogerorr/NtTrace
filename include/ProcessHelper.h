@@ -5,7 +5,7 @@
 @file
     Helper functions for process management.
 
-    @author Roger Orr <rogero@howzatt.demon.co.uk>
+    @author Roger Orr <rogero@howzatt.co.uk>
 
     Copyright &copy; 2003
 
@@ -20,12 +20,12 @@
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1700 $
+    $Revision: 1881 $
 */
 
-// $Id: ProcessHelper.h 1700 2017-06-04 21:26:23Z Roger $
+// $Id: ProcessHelper.h 1881 2020-04-09 20:55:12Z Roger $
 
 
 #pragma warning( disable: 4786 )

@@ -5,7 +5,7 @@
 @file
     Implementation of command line option handling.
 
-    @author Roger Orr <rogero@howzatt.demon.co.uk>
+    @author Roger Orr <rogero@howzatt.co.uk>
 
     Copyright &copy; 2003.
     This software is distributed in the hope that it will be useful, but
@@ -19,12 +19,12 @@
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1569 $
+    $Revision: 1881 $
 */
 
-// $Id: Options.inl 1569 2015-09-10 22:25:51Z Roger $
+// $Id: Options.inl 1881 2020-04-09 20:55:12Z Roger $
 
 #include <vector>
 #include <iostream>

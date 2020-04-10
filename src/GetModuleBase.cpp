@@ -6,7 +6,7 @@ DESCRIPTION
     Helper for stack walking.
 
 COPYRIGHT
-    Copyright (C) 2003 by Roger Orr <rogero@howzatt.demon.co.uk>
+    Copyright (C) 2003 by Roger Orr <rogero@howzatt.co.uk>
 
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -19,7 +19,7 @@ COPYRIGHT
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 */
 
 #include "GetModuleBase.h"
@@ -35,7 +35,7 @@ COPYRIGHT
 
 #pragma comment( lib, "psapi" )
 
-static char const szRCSID[] = "$Id: GetModuleBase.cpp 1592 2015-12-29 20:33:46Z Roger $";
+static char const szRCSID[] = "$Id: GetModuleBase.cpp 1881 2020-04-09 20:55:12Z Roger $";
 
 namespace
 {

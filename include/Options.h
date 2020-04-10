@@ -5,7 +5,7 @@
 @file
     Provide command line option handling.
 
-    @author Roger Orr <rogero@howzatt.demon.co.uk>
+    @author Roger Orr <rogero@howzatt.co.uk>
 
     Copyright &copy; 2003.
     This software is distributed in the hope that it will be useful, but
@@ -19,12 +19,12 @@
     by this notice.
 
     Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.demon.co.uk.
+    Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1428 $
+    $Revision: 1881 $
 */
 
-// $Id: Options.h 1428 2014-10-04 21:55:56Z Roger $
+// $Id: Options.h 1881 2020-04-09 20:55:12Z Roger $
 
 #include <string>
 #include <vector>
