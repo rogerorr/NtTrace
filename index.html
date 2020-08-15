@@ -86,12 +86,20 @@ At a Visual Studio command prompt type <code>'nmake -f NtTrace.mak'</code>
 Build the appropriate binary (32-bit or 64-bit) for your target program.
 <ul>
 <li>Windows does not support 32-bit binaries debugging 64-bit ones.
-<li>While you can use a 64-bit NtTrace on 32-bit programs the output form the 32-bit NtTrace is liklely to be clearer.
+<li>While you can use a 64-bit NtTrace on 32-bit programs the output from the 32-bit NtTrace is likely to be clearer.
 </ul>
 <p>
 (See Readme.txt for full details)
 <p>
 
+<hr>
+Version 1914 - 15-Aug-2020<br>
+Recent changes:
+<ul>
+<li>Tracked new APIS in Windows 10 (up to build 2004)
+<li>Fix crash in exception logging (issue #3)
+<li>Changed email address
+<ul>
 <hr>
 Version 1818 - 18-Mar-2019<br>
 Recent changes:
@@ -167,16 +175,6 @@ If you have any queries or comments about NtTrace, please email
 <noscript>
   rogero 'at' howzatt.co.uk.
 </noscript>
-<p align="left"/>
-<font size="-1">
-<script type="text/javascript">
-var id = "$Id: index.html 78 2014-10-16 22:54:13Z Roger $";
-var date = "$Date: 2014-10-16 23:54:13 +0100 (Thu, 16 Oct 2014) $";
-var author = "$Author: Roger $";
-
-document.write("Last updated " + date.substring( 7, date.length - 2 ) + " by " + author.substring( 9, author.length - 2 ) )
-</script>
-</font>
 
 </body>
 </html>
