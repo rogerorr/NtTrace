@@ -22,7 +22,7 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.co.uk.
 */
 
-static char const szRCSID[] = "$Id: ShowData.cpp 1881 2020-04-09 20:55:12Z Roger $";
+static char const szRCSID[] = "$Id: ShowData.cpp 1915 2020-08-15 14:23:23Z Roger $";
 
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
 
@@ -30,6 +30,7 @@ static char const szRCSID[] = "$Id: ShowData.cpp 1881 2020-04-09 20:55:12Z Roger
 #include "Enumerations.h"
 
 #include <windows.h>
+#include <DbgHelp.h>
 
 #include <iomanip>
 #include <map>
@@ -525,7 +526,7 @@ void showFileAttributes( std::ostream & os, ULONG argVal )
 }
 
 //////////////////////////////////////////////////////////////////////////
-// note: file times are not returned by the commonest Api, NtQueryInformationFile ... 
+// note: file times are not returned by the commonest Api, NtQueryInformationFile ...
 void showPFileBasicInfo( std::ostream & os, HANDLE hProcess, PFILE_BASIC_INFORMATION pFileBasicInfo )
 {
     showPointer(os, hProcess, (ULONG_PTR)pFileBasicInfo);
@@ -621,11 +622,19 @@ void showThrowType( std::ostream & os, HANDLE hProcess, ULONG_PTR throwInfo, ULO
     memset( type_info + sizeof( PVOID ), 0, sizeof( PVOID ) );
 
     const std::type_info *pType_info = (const std::type_info *)type_info;
-    const char* pName = pType_info->name();
-    os << " type: " << pName;
+    const char *decorated_name = pType_info->raw_name();
 
-    // bit of a fudge: msvc allocates type_info name on first use and therefore we must destroy it.
-    free( const_cast<char*>( pName ) );
+    char buffer[ 1024 ] = "";
+    if ((decorated_name[0] == '.') &&
+         UnDecorateSymbolName( decorated_name + 1, buffer, sizeof( buffer ),
+           UNDNAME_32_BIT_DECODE | UNDNAME_NO_ARGUMENTS ) )
+    {
+      os << " type: " << buffer;
+    }
+    else
+    {
+      os << " raw type: " << decorated_name;
+    }
 }
 
 
