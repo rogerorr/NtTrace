@@ -27,7 +27,7 @@ EXAMPLE
     NtTrace 1234
 */
 
-static char const szRCSID[] = "$Id: NtTrace.cpp 1881 2020-04-09 20:55:12Z Roger $";
+static char const szRCSID[] = "$Id: NtTrace.cpp 1918 2020-08-16 10:32:14Z roger $";
 
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
 #pragma warning( disable: 4800 ) // forcing value to bool 'true' or 'false' (performance warning)
@@ -89,14 +89,14 @@ public:
     TrapNtDebugger( std::ostream & os ) : os( os ), bNoExcept( false ), bActive(true) {}
 
     // callbacks on events
-    virtual void OnException( HANDLE hProcess, HANDLE hThread, DWORD pid, DWORD tid, EXCEPTION_DEBUG_INFO const & DebugEvent, DWORD * pContinueExecution );
-    virtual void OnCreateThread( DWORD dwThreadId, CREATE_THREAD_DEBUG_INFO const & CreateThread );
-    virtual void OnCreateProcess( DWORD dwProcessId, DWORD dwThreadId, CREATE_PROCESS_DEBUG_INFO const & CreateProcessInfo );
-    virtual void OnExitThread( DWORD dwThreadId, EXIT_THREAD_DEBUG_INFO const & ExitThread );
-    virtual void OnExitProcess( DWORD dwProcessId, EXIT_PROCESS_DEBUG_INFO const & ExitProcess );
-    virtual void OnLoadDll( HANDLE hProcess, LOAD_DLL_DEBUG_INFO const & LoadDll );
-    virtual void OnUnloadDll( UNLOAD_DLL_DEBUG_INFO const & UnloadDll );
-    virtual void OnOutputDebugString( HANDLE hProcess, OUTPUT_DEBUG_STRING_INFO const & DebugString );
+    virtual void OnException( DWORD processId, DWORD threadId, HANDLE hProcess, HANDLE hThread, EXCEPTION_DEBUG_INFO const & DebugEvent, DWORD * pContinueExecution );
+    virtual void OnCreateThread( DWORD processId, DWORD threadId, CREATE_THREAD_DEBUG_INFO const & CreateThread );
+    virtual void OnCreateProcess( DWORD processId, DWORD threadId, CREATE_PROCESS_DEBUG_INFO const & CreateProcessInfo );
+    virtual void OnExitThread( DWORD processId, DWORD threadId, EXIT_THREAD_DEBUG_INFO const & ExitThread );
+    virtual void OnExitProcess( DWORD processId, DWORD threadId, EXIT_PROCESS_DEBUG_INFO const & ExitProcess );
+    virtual void OnLoadDll( DWORD processId, DWORD threadId, HANDLE hProcess, LOAD_DLL_DEBUG_INFO const & LoadDll );
+    virtual void OnUnloadDll( DWORD processId, DWORD threadId, UNLOAD_DLL_DEBUG_INFO const & UnloadDll );
+    virtual void OnOutputDebugString( DWORD processId, DWORD threadId, HANDLE hProcess, OUTPUT_DEBUG_STRING_INFO const & DebugString );
     virtual bool Active() { return bActive; }
 
     /**
@@ -167,12 +167,12 @@ private:
     bool inverseFilter; // If true, exclude when filtered
     std::vector< std::string > filters; // If not empty, filter for 'active' entry points
 
-    void OnBreakpoint(HANDLE hProcess, HANDLE hThread, DWORD pid, DWORD tid, LPVOID exceptionAddress);
+    void OnBreakpoint(DWORD processId, DWORD threadId, HANDLE hProcess, HANDLE hThread, LPVOID exceptionAddress);
 
     void SetDllBreakpoints( HANDLE hProcess );
     void showUnused( std::set<std::string> const & unused, std::string const & name );
     void showModuleNameEx( HANDLE hProcess, PVOID lpModuleBase, HANDLE hFile ) const;
-    void header( DWORD pid, DWORD tid );
+    void header( DWORD processId, DWORD threadId );
     bool detachAll();
     bool detach(DWORD processId, HANDLE hProcess);
 };
@@ -370,7 +370,7 @@ void TrapNtDebugger::populateOffsets()
 
 //////////////////////////////////////////////////////////////////////////
 // Print common header to trace lines
-void TrapNtDebugger::header( DWORD pid, DWORD tid )
+void TrapNtDebugger::header( DWORD processId, DWORD threadId )
 {
    if ( bTimestamp || bDelta)
    {
@@ -384,9 +384,9 @@ void TrapNtDebugger::header( DWORD pid, DWORD tid )
    if ( bPid || bTid )
    {
       os << "[";
-      if ( bPid )         os << std::setw(4) << pid;
+      if ( bPid )         os << std::setw(4) << processId;
       if ( bPid && bTid ) os << '/';
-      if ( bTid )         os << std::setw(4) << tid;
+      if ( bTid )         os << std::setw(4) << threadId;
 
       os << "] ";
    }
@@ -396,7 +396,7 @@ void TrapNtDebugger::header( DWORD pid, DWORD tid )
 //////////////////////////////////////////////////////////////////////////
 // The heart of NtTrace: if this is one of our added breakpoint exceptions
 // then trace the arguments and return code for the entry point.
-void TrapNtDebugger::OnBreakpoint( HANDLE hProcess, HANDLE hThread, DWORD pid, DWORD tid, PVOID exceptionAddress)
+void TrapNtDebugger::OnBreakpoint( DWORD processId, DWORD threadId, HANDLE hProcess, HANDLE hThread, PVOID exceptionAddress)
 {
   CONTEXT Context;
   Context.ContextFlags = CONTEXT_FULL;
@@ -412,7 +412,7 @@ void TrapNtDebugger::OnBreakpoint( HANDLE hProcess, HANDLE hThread, DWORD pid, D
       it->second.entryPoint->doPreSave(hProcess, hThread, Context);
       if (bPreTrace)
       {
-        header( pid, tid );
+        header( processId, threadId );
 
         it->second.entryPoint->trace( os, hProcess, hThread, Context, bNames, bStackTrace, true );
       }
@@ -421,6 +421,7 @@ void TrapNtDebugger::OnBreakpoint( HANDLE hProcess, HANDLE hThread, DWORD pid, D
     it = NtCalls.find(exceptionAddress);
     if ( it == NtCalls.end() )
     {
+      header(processId, threadId);
       os << "Breakpoint at " << exceptionAddress << std::endl;
     }
     else
@@ -436,7 +437,7 @@ void TrapNtDebugger::OnBreakpoint( HANDLE hProcess, HANDLE hThread, DWORD pid, D
       }
       else if ( errorCodes.empty() || ( errorCodes.count( rc ) > 0 ) )
       {
-        header( pid, tid );
+        header( processId, threadId );
 
         it->second.entryPoint->trace( os, hProcess, hThread, Context, bNames, bStackTrace, false );
       }
@@ -477,12 +478,12 @@ void TrapNtDebugger::OnBreakpoint( HANDLE hProcess, HANDLE hThread, DWORD pid, D
 }
  
 //////////////////////////////////////////////////////////////////////////
-void TrapNtDebugger::OnException( HANDLE hProcess, HANDLE hThread, DWORD pid, DWORD tid, EXCEPTION_DEBUG_INFO const & Exception, DWORD * pContinueFlag )
+void TrapNtDebugger::OnException( DWORD processId, DWORD threadId, HANDLE hProcess, HANDLE hThread, EXCEPTION_DEBUG_INFO const & Exception, DWORD * pContinueFlag )
 {
     if ( Exception.ExceptionRecord.ExceptionCode == STATUS_BREAKPOINT )
     {
         *pContinueFlag = DBG_CONTINUE;
-        OnBreakpoint(hProcess, hThread, pid, tid, Exception.ExceptionRecord.ExceptionAddress);
+        OnBreakpoint(processId, threadId, hProcess, hThread, Exception.ExceptionRecord.ExceptionAddress);
     }
     else if ( bNoExcept )
     {
@@ -491,6 +492,7 @@ void TrapNtDebugger::OnException( HANDLE hProcess, HANDLE hThread, DWORD pid, DW
 #ifdef _M_X64
     else if (Exception.ExceptionRecord.ExceptionCode == STATUS_WX86_BREAKPOINT)
     {
+        header( processId, threadId );
         os << "WOW64 initialised" << std::endl;
         *pContinueFlag = DBG_CONTINUE;
     }
@@ -498,7 +500,7 @@ void TrapNtDebugger::OnException( HANDLE hProcess, HANDLE hThread, DWORD pid, DW
     else if ( Exception.ExceptionRecord.ExceptionCode == EXCEPTION_ACCESS_VIOLATION )
     {
         // Only defined contents is for an access violation...
-        header( pid, tid );
+        header( processId, threadId );
         os << "Access violation at " << Exception.ExceptionRecord.ExceptionAddress << ": "
            << ( Exception.ExceptionRecord.ExceptionInformation[0] ? "Write to " : "Read from " ) 
            << (PVOID)Exception.ExceptionRecord.ExceptionInformation[1]
@@ -507,7 +509,7 @@ void TrapNtDebugger::OnException( HANDLE hProcess, HANDLE hThread, DWORD pid, DW
     }
     else if ( Exception.ExceptionRecord.ExceptionCode == MSVC_EXCEPTION )
     {
-        header( pid, tid );
+        header( processId, threadId );
         os << "C++ exception at " << Exception.ExceptionRecord.ExceptionAddress;
         if ( ( Exception.dwFirstChance ) &&
              ( Exception.ExceptionRecord.NumberParameters == 3 || Exception.ExceptionRecord.NumberParameters == 4 ) &&
@@ -529,28 +531,32 @@ void TrapNtDebugger::OnException( HANDLE hProcess, HANDLE hThread, DWORD pid, DW
     else if (Exception.ExceptionRecord.ExceptionCode == CLR_EXCEPTION || 
              Exception.ExceptionRecord.ExceptionCode == CLR_EXCEPTION_V4)
     {
+        header( processId, threadId );
         os << "CLR exception, HR: " << (PVOID)(UINT_PTR)(HRESULT)Exception.ExceptionRecord.ExceptionInformation[0] << std::endl;
     }
     else if (Exception.ExceptionRecord.ExceptionCode == MSVC_NOTIFICATION)
     {
         if (Exception.ExceptionRecord.ExceptionInformation[0] == 0x1000)
         {
-            os << now() << ": SetThreadName \"";
+            header( processId, threadId );
+            os << "SetThreadName \"";
             showString( os, hProcess, (PVOID)Exception.ExceptionRecord.ExceptionInformation[1], FALSE, MAX_PATH );
             os << '"' << std::endl;
         }
         else
         {
-            os << now() << ": MSVC Notification: " << (PVOID)Exception.ExceptionRecord.ExceptionInformation[0] << std::endl;
+            header( processId, threadId );
+            os << "MSVC Notification: " << (PVOID)Exception.ExceptionRecord.ExceptionInformation[0] << std::endl;
         }
     }
     else if (Exception.ExceptionRecord.ExceptionCode == CLR_NOTIFICATION)
     {
-        os << now() << ": CLR Notification: " << (PVOID)Exception.ExceptionRecord.ExceptionInformation[0] << std::endl;
+        header( processId, threadId );
+        os << "CLR Notification: " << (PVOID)Exception.ExceptionRecord.ExceptionInformation[0] << std::endl;
     }
     else
     {
-        header( pid, tid );
+        header( processId, threadId );
         os << "Exception: " << std::hex << Exception.ExceptionRecord.ExceptionCode << std::dec
            << " at " << Exception.ExceptionRecord.ExceptionAddress
            << " (" << ( Exception.dwFirstChance ? "first" : "last" ) << " chance)" << std::endl;
@@ -559,17 +565,19 @@ void TrapNtDebugger::OnException( HANDLE hProcess, HANDLE hThread, DWORD pid, DW
 }
  
 //////////////////////////////////////////////////////////////////////////
-void TrapNtDebugger::OnCreateThread( DWORD dwThreadId, CREATE_THREAD_DEBUG_INFO const & CreateThread )
+void TrapNtDebugger::OnCreateThread( DWORD processId, DWORD threadId, CREATE_THREAD_DEBUG_INFO const & CreateThread )
 {
-    os << "Created thread: " << dwThreadId << " at " << 
+    header(processId, threadId);
+    os << "Created thread: " << threadId << " at " << 
         CreateThread.lpStartAddress << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////////
-void TrapNtDebugger::OnCreateProcess( DWORD dwProcessId, DWORD /*dwThreadId*/, CREATE_PROCESS_DEBUG_INFO const & CreateProcessInfo )
+void TrapNtDebugger::OnCreateProcess( DWORD processId, DWORD threadId, CREATE_PROCESS_DEBUG_INFO const & CreateProcessInfo )
 {
-    os << "Process " << dwProcessId << " starting at " << CreateProcessInfo.lpStartAddress << std::endl;
-    processes[dwProcessId] = CreateProcessInfo.hProcess;
+    header( processId, threadId );
+    os << "Process " << processId << " starting at " << CreateProcessInfo.lpStartAddress << std::endl;
+    processes[processId] = CreateProcessInfo.hProcess;
 
     if ( ! CreateProcessInfo.lpImageName || ! showName( os, CreateProcessInfo.hProcess,
                          CreateProcessInfo.lpImageName, CreateProcessInfo.fUnicode  ) )
@@ -580,21 +588,24 @@ void TrapNtDebugger::OnCreateProcess( DWORD dwProcessId, DWORD /*dwThreadId*/, C
 }
 
 //////////////////////////////////////////////////////////////////////////
-void TrapNtDebugger::OnExitThread( DWORD dwThreadId, EXIT_THREAD_DEBUG_INFO const & ExitThread )
+void TrapNtDebugger::OnExitThread( DWORD processId, DWORD threadId, EXIT_THREAD_DEBUG_INFO const & ExitThread )
 {
-    os << "Thread " << dwThreadId << " exit code: " << ExitThread.dwExitCode << std::endl;
+    header(processId, threadId);
+    os << "Thread " << threadId << " exit code: " << ExitThread.dwExitCode << std::endl;
 }
  
 //////////////////////////////////////////////////////////////////////////
-void TrapNtDebugger::OnExitProcess( DWORD dwProcessId, EXIT_PROCESS_DEBUG_INFO const & ExitProcess )
+void TrapNtDebugger::OnExitProcess( DWORD processId, DWORD threadId, EXIT_PROCESS_DEBUG_INFO const & ExitProcess )
 {
-    os << "Process " << dwProcessId << " exit code: " << ExitProcess.dwExitCode << std::endl;
-    processes.erase(dwProcessId);
+    header(processId, threadId);
+    os << "Process " << processId << " exit code: " << ExitProcess.dwExitCode << std::endl;
+    processes.erase(processId);
 }
  
 //////////////////////////////////////////////////////////////////////////
-void TrapNtDebugger::OnLoadDll( HANDLE hProcess, LOAD_DLL_DEBUG_INFO const & LoadDll )
+void TrapNtDebugger::OnLoadDll( DWORD processId, DWORD threadId, HANDLE hProcess, LOAD_DLL_DEBUG_INFO const & LoadDll )
 {
+    header(processId, threadId);
     os << "Loaded DLL at " << LoadDll.lpBaseOfDll << " ";
     if ( LoadDll.lpBaseOfDll == 0 )
     {
@@ -617,14 +628,20 @@ void TrapNtDebugger::OnLoadDll( HANDLE hProcess, LOAD_DLL_DEBUG_INFO const & Loa
 }
  
 //////////////////////////////////////////////////////////////////////////
-void TrapNtDebugger::OnUnloadDll( UNLOAD_DLL_DEBUG_INFO const & UnloadDll )
+void TrapNtDebugger::OnUnloadDll( DWORD processId, DWORD threadId, UNLOAD_DLL_DEBUG_INFO const & UnloadDll )
 {
+    header(processId, threadId);
     os << "Unload of DLL at " << UnloadDll.lpBaseOfDll << std::endl; 
 }
 
 //////////////////////////////////////////////////////////////////////////
-void TrapNtDebugger::OnOutputDebugString( HANDLE hProcess, OUTPUT_DEBUG_STRING_INFO const & DebugString )
+void TrapNtDebugger::OnOutputDebugString( DWORD processId, DWORD threadId, HANDLE hProcess, OUTPUT_DEBUG_STRING_INFO const & DebugString )
 {
+    if (bNewline)
+    {
+        // If we're not adding newlines then the header is simply confusing
+        header(processId, threadId);
+    }
     bool const newline = showString( os, hProcess, 
         DebugString.lpDebugStringData,
         DebugString.fUnicode,

@@ -30,7 +30,7 @@ COPYRIGHT
 
 #include "displayError.h"
 
-static char const szRCSID[] = "$Id: DebugDriver.cpp 1881 2020-04-09 20:55:12Z Roger $";
+static char const szRCSID[] = "$Id: DebugDriver.cpp 1917 2020-08-15 23:13:45Z roger $";
 
 //////////////////////////////////////////////////////////////////////////
 // Main debugger loop
@@ -64,7 +64,7 @@ void or2::DebugDriver::Loop( Debugger & debugger )
                     continueFlag = DBG_EXCEPTION_NOT_HANDLED;
                 }
 
-                debugger.OnException( pe.hProcess, hThread, DebugEvent.dwProcessId, DebugEvent.dwThreadId, DebugEvent.u.Exception, &continueFlag );
+                debugger.OnException( DebugEvent.dwProcessId, DebugEvent.dwThreadId, pe.hProcess, hThread, DebugEvent.u.Exception, &continueFlag );
             }
             break;
 
@@ -73,7 +73,7 @@ void or2::DebugDriver::Loop( Debugger & debugger )
                 ProcessEntry & processEntry = processMap[ DebugEvent.dwProcessId ]; 
                 processEntry.threadMap[ DebugEvent.dwThreadId ] = DebugEvent.u.CreateThread.hThread;
 
-                debugger.OnCreateThread( DebugEvent.dwThreadId, DebugEvent.u.CreateThread );
+                debugger.OnCreateThread( DebugEvent.dwProcessId, DebugEvent.dwThreadId, DebugEvent.u.CreateThread );
             }
             break;
 
@@ -100,7 +100,7 @@ void or2::DebugDriver::Loop( Debugger & debugger )
             {
                 ThreadMap & threadMap = processMap[ DebugEvent.dwProcessId ].threadMap;
 
-                debugger.OnExitThread( DebugEvent.dwThreadId, DebugEvent.u.ExitThread );
+                debugger.OnExitThread( DebugEvent.dwProcessId, DebugEvent.dwThreadId, DebugEvent.u.ExitThread );
 
                 threadMap.erase( DebugEvent.dwThreadId );
 
@@ -109,7 +109,7 @@ void or2::DebugDriver::Loop( Debugger & debugger )
  
         case EXIT_PROCESS_DEBUG_EVENT:
             {
-                debugger.OnExitProcess( DebugEvent.dwProcessId, DebugEvent.u.ExitProcess );
+                debugger.OnExitProcess( DebugEvent.dwProcessId, DebugEvent.dwThreadId, DebugEvent.u.ExitProcess );
 
                 processMap.erase( DebugEvent.dwProcessId );
                 if ( processMap.empty() )
@@ -124,7 +124,7 @@ void or2::DebugDriver::Loop( Debugger & debugger )
             {
                 HANDLE hProcess = processMap[ DebugEvent.dwProcessId ].hProcess;
 
-                debugger.OnLoadDll( hProcess, DebugEvent.u.LoadDll );
+                debugger.OnLoadDll( DebugEvent.dwProcessId, DebugEvent.dwThreadId, hProcess, DebugEvent.u.LoadDll );
 
                 // Close unwanted handle (following John Robbins)
                 if ( ( DebugEvent.u.LoadDll.hFile != 0 ) &&
@@ -136,14 +136,14 @@ void or2::DebugDriver::Loop( Debugger & debugger )
             break;
  
         case UNLOAD_DLL_DEBUG_EVENT:
-            debugger.OnUnloadDll( DebugEvent.u.UnloadDll );
+            debugger.OnUnloadDll( DebugEvent.dwProcessId, DebugEvent.dwThreadId, DebugEvent.u.UnloadDll );
             break;
  
         case OUTPUT_DEBUG_STRING_EVENT:
             {
                 HANDLE hProcess = processMap[ DebugEvent.dwProcessId ].hProcess;
 
-                debugger.OnOutputDebugString( hProcess, DebugEvent.u.DebugString );
+                debugger.OnOutputDebugString( DebugEvent.dwProcessId, DebugEvent.dwThreadId, hProcess, DebugEvent.u.DebugString );
             }
             break;
 

@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 1881 2020-04-09 20:55:12Z Roger $
+# $Id: NtTrace.mak 1927 2020-10-24 19:22:38Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2005 and above,
@@ -21,31 +21,37 @@
 #     Comments and suggestions are always welcome.
 #     Please report bugs to rogero@howzatt.co.uk.
 
-all : build NtTrace.exe
+!if ("$(PLATFORM)" == "X64" || "$(PLATFORM)" == "x64")
+BUILD=build64
+!else
+BUILD=build32
+!endif
 
-build :
-	mkdir build
+all : $(BUILD) NtTrace.exe
+
+$(BUILD) :
+	mkdir $(BUILD)
 
 clean :
 	@-del NtTrace.exe NtTrace.exe.manifest NtTrace.res *.pdb
-	@-rd /q /s build
+	@-rd /q /s $(BUILD)
 
 CCFLAGS = /nologo /MD /W3 /WX /Zi /Iinclude /D_CRT_SECURE_NO_WARNINGS
 LINKFLAGS = /link /opt:ref,icf
 
-{src}.cpp{build}.obj::
-	cl $(CCFLAGS) /Fobuild\ /c /EHsc /I. $<
+{src}.cpp{$(BUILD)}.obj::
+	cl $(CCFLAGS) /Fo$(BUILD)\ /c /EHsc /I. $<
 
 .rc.res:
 	rc -r /Iinclude $(*B)
 
-NtTrace.exe : build\$(*B).obj $(*B).res 
+NtTrace.exe : $(BUILD)\$(*B).obj $(*B).res 
 	cl $(CCFLAGS) /Fe$@ $** $(LINKFLAGS)
 	if exist $(@).manifest mt.exe -nologo -manifest $(@).manifest -outputresource:$@
 
 # Dependencies
 
-build\NtTrace.obj : "include\DebugPriv.h" \
+$(BUILD)\NtTrace.obj : "include\DebugPriv.h" \
 	"include\AdjustPriv.h" \
 	"include\displayError.h" \
 	"include\displayError.inl" \
@@ -62,15 +68,15 @@ build\NtTrace.obj : "include\DebugPriv.h" \
 
 NtTrace.res: $(*B).rc "version.rc"
 
-NtTrace.exe : build\DebugDriver.obj build\EntryPoint.obj build\Enumerations.obj build\ShowData.obj \
-	build\GetFileNameFromHandle.obj build\GetModuleBase.obj build\SymbolEngine.obj
+NtTrace.exe : $(BUILD)\DebugDriver.obj $(BUILD)\EntryPoint.obj $(BUILD)\Enumerations.obj $(BUILD)\ShowData.obj \
+	$(BUILD)\GetFileNameFromHandle.obj $(BUILD)\GetModuleBase.obj $(BUILD)\SymbolEngine.obj
 
-build\DebugDriver.obj : \
+$(BUILD)\DebugDriver.obj : \
 	"include\displayError.h" \
 	"include\displayError.inl" \
 	"include\DebugDriver.h"
 
-build\EntryPoint.obj : \
+$(BUILD)\EntryPoint.obj : \
 	"include\displayError.h" \
 	"include\displayError.inl" \
 	"include\DbgHelper.h" \
@@ -79,16 +85,16 @@ build\EntryPoint.obj : \
 	"include\TrapNtOpcodes.h" \
 	"include\ShowData.h"
 
-build\ShowData.obj: \
+$(BUILD)\ShowData.obj: \
 	"include\Enumerations.h" \
 	"include\NtDllStruct.h" \
 	"include\MsvcExceptions.h" \
 	"include\ReadPartialMemory.h" \
 	"include\ShowData.h"
 
-build\GetModuleBase.obj: include\GetModuleBase.h
+$(BUILD)\GetModuleBase.obj: include\GetModuleBase.h
 
-build\SymbolEngine.obj: \
+$(BUILD)\SymbolEngine.obj: \
 	"include/SymbolEngine.h" \
 	"include/DbgHelper.h" \
 	"include/DbgHelper.inl" \

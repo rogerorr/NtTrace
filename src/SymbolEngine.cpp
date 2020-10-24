@@ -22,7 +22,7 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.co.uk.
 */
 
-static char const szRCSID[] = "$Id: SymbolEngine.cpp 1881 2020-04-09 20:55:12Z Roger $";
+static char const szRCSID[] = "$Id: SymbolEngine.cpp 1915 2020-08-15 14:23:23Z Roger $";
 
 #ifdef _MSC_VER
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' chars
@@ -675,13 +675,19 @@ void SymbolEngine::showMsvcThrow( std::ostream &os, PVOID throwInfo, PVOID base 
     }
 
     const std::type_info *pType_info = (const std::type_info *)raw_type_info;
+    const char *decorated_name = pType_info->raw_name();
 
     char buffer[ 1024 ] = ""; 
-    if ( UnDecorateSymbolName( pType_info->raw_name() + 1, buffer, sizeof( buffer ),
-         UNDNAME_32_BIT_DECODE | UNDNAME_NO_ARGUMENTS ) )
+    if ((decorated_name[0] == '.') &&
+         UnDecorateSymbolName( decorated_name + 1, buffer, sizeof( buffer ),
+           UNDNAME_32_BIT_DECODE | UNDNAME_NO_ARGUMENTS ) )
     { 
         os << " (" << buffer << ")"; 
-    } 
+    }
+    else
+    {
+        os << " (" << decorated_name << ")";
+    }
 }
 
 // Helper for ReadProcessMemory

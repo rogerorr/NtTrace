@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 1917 $
 */
 
-// $Id: DebugDriver.h 1881 2020-04-09 20:55:12Z Roger $
+// $Id: DebugDriver.h 1917 2020-08-15 23:13:45Z roger $
 
 #ifndef _WINDOWS_
 #include <windows.h>
@@ -46,28 +46,28 @@ class Debugger
 public:
     // callbacks on events
     /** Exception occurred */
-    virtual void OnException( HANDLE hProcess, HANDLE hThread, DWORD pid, DWORD tid, EXCEPTION_DEBUG_INFO const & DebugEvent, DWORD * pContinueExecution ) = 0;
+    virtual void OnException( DWORD processId, DWORD threadId, HANDLE hProcess, HANDLE hThread, EXCEPTION_DEBUG_INFO const & DebugEvent, DWORD * pContinueExecution ) = 0;
 
     /** Callback on thread creation */
-    virtual void OnCreateThread( DWORD dwThreadId, CREATE_THREAD_DEBUG_INFO const & CreateThread ) = 0;
+    virtual void OnCreateThread( DWORD processId, DWORD threadId, CREATE_THREAD_DEBUG_INFO const & CreateThread ) = 0;
 
     /** Callback on process creation */
-    virtual void OnCreateProcess( DWORD dwProcessId, DWORD dwThreadId, CREATE_PROCESS_DEBUG_INFO const & CreateProcessInfo ) = 0;
+    virtual void OnCreateProcess( DWORD processId, DWORD threadId, CREATE_PROCESS_DEBUG_INFO const & CreateProcessInfo ) = 0;
 
     /** Callback on thread exit */
-    virtual void OnExitThread( DWORD dwThreadId, EXIT_THREAD_DEBUG_INFO const & ExitThread ) = 0;
+    virtual void OnExitThread( DWORD processId, DWORD threadId, EXIT_THREAD_DEBUG_INFO const & ExitThread ) = 0;
 
     /** Callback on process exit */
-    virtual void OnExitProcess( DWORD dwProcessId, EXIT_PROCESS_DEBUG_INFO const & ExitProcess ) = 0;
+    virtual void OnExitProcess( DWORD processId, DWORD threadId, EXIT_PROCESS_DEBUG_INFO const & ExitProcess ) = 0;
 
     /** Callback on loading DLL */
-    virtual void OnLoadDll( HANDLE hProcess, LOAD_DLL_DEBUG_INFO const & LoadDll ) = 0;
+    virtual void OnLoadDll( DWORD processId, DWORD threadId, HANDLE hProcess, LOAD_DLL_DEBUG_INFO const & LoadDll ) = 0;
 
     /** Callback on unloading DLL */
-    virtual void OnUnloadDll( UNLOAD_DLL_DEBUG_INFO const & UnloadDll ) = 0;
+    virtual void OnUnloadDll( DWORD processId, DWORD threadId, UNLOAD_DLL_DEBUG_INFO const & UnloadDll ) = 0;
 
     /** Callback on outputting a debug string */
-    virtual void OnOutputDebugString( HANDLE hProcess, OUTPUT_DEBUG_STRING_INFO const & DebugString ) = 0;
+    virtual void OnOutputDebugString( DWORD processId, DWORD threadId, HANDLE hProcess, OUTPUT_DEBUG_STRING_INFO const & DebugString ) = 0;
 
     /** Is the debugger still active? */
     virtual bool Active() { return true; }
@@ -88,19 +88,19 @@ class DebuggerAdapter : public Debugger
 public:
     // callbacks on events
     /** Exception occurred */
-    virtual void OnException( HANDLE hProcess, HANDLE hThread, DWORD pid, DWORD tid, EXCEPTION_DEBUG_INFO const & DebugEvent, DWORD * pContinueExecution ) {}
+    virtual void OnException( HANDLE hProcess, HANDLE hThread, DWORD processId, DWORD threadId, EXCEPTION_DEBUG_INFO const & DebugEvent, DWORD * pContinueExecution ) {}
 
     /** Callback on thread creation */
-    virtual void OnCreateThread( DWORD dwThreadId, CREATE_THREAD_DEBUG_INFO const & CreateThread ) {}
+    virtual void OnCreateThread( DWORD threadId, CREATE_THREAD_DEBUG_INFO const & CreateThread ) {}
 
     /** Callback on process creation */
-    virtual void OnCreateProcess( DWORD dwProcessId, DWORD dwThreadId, CREATE_PROCESS_DEBUG_INFO const & CreateProcessInfo ) {}
+    virtual void OnCreateProcess( DWORD processId, DWORD threadId, CREATE_PROCESS_DEBUG_INFO const & CreateProcessInfo ) {}
 
     /** Callback on thread exit */
-    virtual void OnExitThread( DWORD dwThreadId, EXIT_THREAD_DEBUG_INFO const & ExitThread ) {}
+    virtual void OnExitThread( DWORD threadId, EXIT_THREAD_DEBUG_INFO const & ExitThread ) {}
 
     /** Callback on process exit */
-    virtual void OnExitProcess( DWORD dwProcessId, EXIT_PROCESS_DEBUG_INFO const & ExitProcess ) {}
+    virtual void OnExitProcess( DWORD processId, EXIT_PROCESS_DEBUG_INFO const & ExitProcess ) {}
 
     /** Callback on loading DLL */
     virtual void OnLoadDll( HANDLE hProcess, LOAD_DLL_DEBUG_INFO const & LoadDll ) {}
