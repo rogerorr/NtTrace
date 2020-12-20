@@ -22,7 +22,7 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.co.uk.
 */
 
-static char const szRCSID[] = "$Id: ShowData.cpp 1915 2020-08-15 14:23:23Z Roger $";
+static char const szRCSID[] = "$Id: ShowData.cpp 1924 2020-09-29 13:22:00Z Roger $";
 
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
 

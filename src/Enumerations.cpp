@@ -26,7 +26,7 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.co.uk.
 */
 
-static char const szRCSID[] = "$Id: Enumerations.cpp 1881 2020-04-09 20:55:12Z Roger $";
+static char const szRCSID[] = "$Id: Enumerations.cpp 1937 2020-11-21 16:42:35Z roger $";
 
 #include "Enumerations.h"
 
@@ -66,6 +66,7 @@ typedef enum _ALPC_PORT_INFORMATION_CLASS {
   AlpcRegisterCallbackInformation = 9,
   AlpcCompletionListRundownInformation = 10,
   AlpcWaitForPortReferences = 11,
+  AlpcServerSessionInformation = 12,
 } ALPC_PORT_INFORMATION_CLASS;
 
 EnumMap ALPC_PORT_INFORMATION_CLASS_MAP[] = 
@@ -82,6 +83,7 @@ EnumMap ALPC_PORT_INFORMATION_CLASS_MAP[] =
   DEF(AlpcRegisterCallbackInformation),
   DEF(AlpcCompletionListRundownInformation),
   DEF(AlpcWaitForPortReferences),
+  DEF(AlpcServerSessionInformation),
   {0, 0}
 };
 
@@ -755,6 +757,7 @@ typedef enum _MEMORY_INFORMATION_CLASS {
   MemoryPrivilegedBasicInformation = 8,
   MemoryEnclaveImageInformation = 9,
   MemoryBasicInformationCapped = 10,
+  MemoryPhysicalContiguityInformation = 11,
 } MEMORY_INFORMATION_CLASS;
 
 EnumMap MEMORY_INFORMATION_CLASS_MAP[] = 
@@ -770,6 +773,7 @@ EnumMap MEMORY_INFORMATION_CLASS_MAP[] =
   DEF(MemoryPrivilegedBasicInformation),
   DEF(MemoryEnclaveImageInformation),
   DEF(MemoryBasicInformationCapped),
+  DEF(MemoryPhysicalContiguityInformation),
   {0, 0}
 };
 
@@ -780,7 +784,10 @@ typedef enum _PARTITION_INFORMATION_CLASS {
   SystemMemoryPartitionCombineMemory = 3,
   SystemMemoryPartitionInitialAddMemory = 4,
   SystemMemoryPartitionGetMemoryEvents = 5,
-  SystemMemoryPartitionMax = 6,
+  SystemMemoryPartitionSetAttributes = 6,
+  SystemMemoryPartitionNodeInformation = 7,
+  SystemMemoryPartitionCreateLargePages = 8,
+  SystemMemoryPartitionMax = 9,
 } MEMORY_PARTITION_INFORMATION_CLASS;
 
 EnumMap MEMORY_PARTITION_INFORMATION_CLASS_MAP[] = 
@@ -791,6 +798,9 @@ EnumMap MEMORY_PARTITION_INFORMATION_CLASS_MAP[] =
   DEF(SystemMemoryPartitionCombineMemory),
   DEF(SystemMemoryPartitionInitialAddMemory),
   DEF(SystemMemoryPartitionGetMemoryEvents),
+  DEF(SystemMemoryPartitionSetAttributes),
+  DEF(SystemMemoryPartitionNodeInformation),
+  DEF(SystemMemoryPartitionCreateLargePages),
   DEF(SystemMemoryPartitionMax),
   {0, 0}
 };
@@ -1012,7 +1022,8 @@ enum POWER_INFORMATION_LEVEL {
   EnergyTrackerCreate = 92,
   EnergyTrackerQuery = 93,
   UpdateBlackBoxRecorder = 94,
-  PowerInformationLevelMaximum = 95,
+  SessionAllowExternalDmaDevices = 95,
+  PowerInformationLevelMaximum = 96,
 };
 
 EnumMap POWER_INFORMATION_LEVEL_MAP[] =
@@ -1112,6 +1123,7 @@ EnumMap POWER_INFORMATION_LEVEL_MAP[] =
   DEF(EnergyTrackerCreate),
   DEF(EnergyTrackerQuery),
   DEF(UpdateBlackBoxRecorder),
+  DEF(SessionAllowExternalDmaDevices),
   {0, 0}
 };
 
@@ -1217,7 +1229,11 @@ typedef enum _PROCESSINFOCLASS {
   ProcessCombineSecurityDomainsInformation = 95,
   ProcessEnableLogging = 96,
   ProcessLeapSecondInformation = 97,
-  MaxProcessInfoClass = 98,
+  ProcessFiberShadowStackAllocation = 98,
+  ProcessFreeFiberShadowStackAllocation = 99,
+  ProcessAltSystemCallInformation = 100,
+  ProcessDynamicEHContinuationTargets = 101,
+  MaxProcessInfoClass = 102,
 } PROCESSINFOCLASS;
 
 EnumMap PROCESSINFOCLASS_MAP[] = 
@@ -1322,6 +1338,11 @@ EnumMap PROCESSINFOCLASS_MAP[] =
   DEF(ProcessCombineSecurityDomainsInformation),
   DEF(ProcessEnableLogging),
   DEF(ProcessLeapSecondInformation),
+  DEF(ProcessFiberShadowStackAllocation),
+  DEF(ProcessFreeFiberShadowStackAllocation),
+  DEF(ProcessAltSystemCallInformation),
+  DEF(ProcessDynamicEHContinuationTargets),
+
   {0, 0}
 };
 
@@ -1345,6 +1366,7 @@ typedef enum _SECTION_INFORMATION_CLASS {
   SectionRelocationInformation = 2,
   SectionOriginalBaseInformation = 3,
   SectionInternalImageInformation = 4,
+  MaxSectionInfoClass = 5,
 } SECTION_INFORMATION_CLASS;
 
 EnumMap SECTION_INFORMATION_CLASS_MAP[] = 
@@ -1413,6 +1435,7 @@ typedef enum _SHUTDOWN_ACTION {
   ShutdownNoReboot = 0,
   ShutdownReboot = 1,
   ShutdownPowerOff = 2,
+  ShutdownRebootForRecovery = 3,
 } SHUTDOWN_ACTION;
 
 EnumMap SHUTDOWN_ACTION_MAP[] = 
@@ -1420,6 +1443,7 @@ EnumMap SHUTDOWN_ACTION_MAP[] =
   DEF(ShutdownNoReboot),
   DEF(ShutdownReboot),
   DEF(ShutdownPowerOff),
+  DEF(ShutdownRebootForRecovery),
   {0, 0}
 };
 
@@ -1463,6 +1487,7 @@ typedef enum _SYSDBG_COMMAND {
   SysDbgGetUmAttachPid = 35,
   SysDbgClearUmAttachPid = 36,
   SysDbgGetLiveKernelDump = 37,
+  SysDbgKdPullRemoteFile = 38,
 } SYSDBG_COMMAND;
 
 EnumMap SYSDBG_COMMAND_MAP[] =
@@ -1505,6 +1530,7 @@ EnumMap SYSDBG_COMMAND_MAP[] =
   DEF(SysDbgGetUmAttachPid),
   DEF(SysDbgClearUmAttachPid),
   DEF(SysDbgGetLiveKernelDump),
+  DEF(SysDbgKdPullRemoteFile),
   {0, 0}
 };
 
@@ -1742,7 +1768,24 @@ typedef enum _SYSTEM_INFORMATION_CLASS {
   SystemCodeIntegrityUnlockModeInformation = 205,
   SystemLeapSecondInformation = 206,
   SystemFlags2Information = 207,
-  MaxSystemInfoClass = 208,
+  SystemCodeIntegritySyntheticCacheInformation = 209,
+  SystemFeatureConfigurationInformation = 210,
+  SystemFeatureConfigurationSectionInformation = 211,
+  SystemFeatureUsageSubscriptionInformation = 212,
+  SystemSecureSpeculationControlInformation = 213,
+  SystemSpacesBootInformation = 214,
+  SystemFwRamdiskInformation = 215,
+  SystemWheaIpmiHardwareInformation = 216,
+  SystemDifSetRuleClassInformation = 217,
+  SystemDifClearRuleClassInformation = 218,
+  SystemDifApplyPluginVerificationOnDriver = 219,
+  SystemDifRemovePluginVerificationOnDriver = 220,
+  SystemShadowStackInformation = 221,
+  SystemBuildVersionInformation = 222,
+  SystemPoolLimitInformation = 223,
+  SystemCodeIntegrityAddDynamicStore = 224,
+  SystemCodeIntegrityClearDynamicStores = 225,
+  MaxSystemInfoClass = 226,
 } SYSTEM_INFORMATION_CLASS;
 
 EnumMap SYSTEM_INFORMATION_CLASS_MAP[] = 
@@ -1955,6 +1998,23 @@ EnumMap SYSTEM_INFORMATION_CLASS_MAP[] =
   DEF(SystemCodeIntegrityUnlockModeInformation),
   DEF(SystemLeapSecondInformation),
   DEF(SystemFlags2Information),
+  DEF(SystemCodeIntegritySyntheticCacheInformation),
+  DEF(SystemFeatureConfigurationInformation),
+  DEF(SystemFeatureConfigurationSectionInformation),
+  DEF(SystemFeatureUsageSubscriptionInformation),
+  DEF(SystemSecureSpeculationControlInformation),
+  DEF(SystemSpacesBootInformation),
+  DEF(SystemFwRamdiskInformation),
+  DEF(SystemWheaIpmiHardwareInformation),
+  DEF(SystemDifSetRuleClassInformation),
+  DEF(SystemDifClearRuleClassInformation),
+  DEF(SystemDifApplyPluginVerificationOnDriver),
+  DEF(SystemDifRemovePluginVerificationOnDriver),
+  DEF(SystemShadowStackInformation),
+  DEF(SystemBuildVersionInformation),
+  DEF(SystemPoolLimitInformation),
+  DEF(SystemCodeIntegrityAddDynamicStore),
+  DEF(SystemCodeIntegrityClearDynamicStores),
   {0, 0}
 };
 
@@ -2142,7 +2202,9 @@ typedef enum _TOKEN_INFORMATION_CLASS {
   TokenBnoIsolation = 44,
   TokenChildProcessFlags = 45,
   TokenIsLessPrivilegedAppContainer = 46,
-  MaxTokenInfoClass = 47,
+  TokenIsSandboxed = 47,
+  TokenOriginatingProcessTrustLevel = 48,
+  MaxTokenInfoClass = 49,
 } TOKEN_INFORMATION_CLASS;
 
 EnumMap TOKEN_INFORMATION_CLASS_MAP[] = 
@@ -2193,6 +2255,8 @@ EnumMap TOKEN_INFORMATION_CLASS_MAP[] =
   DEF(TokenBnoIsolation),
   DEF(TokenChildProcessFlags),
   DEF(TokenIsLessPrivilegedAppContainer),
+  DEF(TokenIsSandboxed),
+  DEF(TokenOriginatingProcessTrustLevel),
   {0, 0}
 };
 
@@ -2283,7 +2347,8 @@ typedef enum _WORKERFACTORYINFOCLASS {
   WorkerFactoryTimeoutWaiters = 12,
   WorkerFactoryFlags = 13,
   WorkerFactoryThreadSoftMaximum = 14,
-  MaxWorkerFactoryInfoClass = 15,
+  WorkerFactoryThreadCpuSets = 15,
+  MaxWorkerFactoryInfoClass = 16,
 } WORKERFACTORYINFOCLASS;
 
 EnumMap WORKERFACTORYINFOCLASS_MAP[] = 
@@ -2304,6 +2369,7 @@ EnumMap WORKERFACTORYINFOCLASS_MAP[] =
   DEF(WorkerFactoryFlags),
   DEF(WorkerFactoryThreadSoftMaximum),
   DEF(MaxWorkerFactoryInfoClass),
+  DEF(WorkerFactoryThreadCpuSets),
   {0, 0}
 };
 
