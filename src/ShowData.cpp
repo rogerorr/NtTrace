@@ -22,7 +22,7 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.co.uk.
 */
 
-static char const szRCSID[] = "$Id: ShowData.cpp 1924 2020-09-29 13:22:00Z Roger $";
+static char const szRCSID[] = "$Id: ShowData.cpp 1948 2020-12-21 14:14:17Z roger $";
 
 #pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
 
@@ -324,6 +324,21 @@ void showPHandle( std::ostream & os, HANDLE hProcess, ULONG_PTR argVal )
 
         os << " [";
         showDword( os, handle );
+        os << "]";
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
+void showPByte( std::ostream & os, HANDLE hProcess, ULONG_PTR argVal )
+{
+    showPointer(os, hProcess, argVal);
+    if (argVal)
+    {
+        BYTE value = 0;
+        (void)readHelper(hProcess, (LPVOID)argVal, value);
+
+        os << " [";
+        showDword(os, value);
         os << "]";
     }
 }

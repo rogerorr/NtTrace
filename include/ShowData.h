@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 1948 $
 */
 
-// $Id: ShowData.h 1881 2020-04-09 20:55:12Z Roger $
+// $Id: ShowData.h 1948 2020-12-21 14:14:17Z roger $
 
 #include <windows.h>
 #include <ostream>
@@ -70,6 +70,9 @@ namespace showData
 
     /** show a pointer to handle from the debuggee */
     void showPHandle( std::ostream & os, HANDLE hProcess, ULONG_PTR argVal );
+
+    /** show a pointer to BYTE from the debuggee */
+    void showPByte( std::ostream & os, HANDLE hProcess, ULONG_PTR argVal );
 
     /** show a pointer to USHORT from the debuggee */
     void showPUshort( std::ostream & os, HANDLE hProcess, ULONG_PTR argVal );

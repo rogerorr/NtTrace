@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 1948 $
 */
 
-// $Id: EntryPoint.h 1881 2020-04-09 20:55:12Z Roger $
+// $Id: EntryPoint.h 1948 2020-12-21 14:14:17Z roger $
 
 #include <windows.h>
 
@@ -48,10 +48,12 @@ typedef enum
     argENUM,
     argMASK,
     argBOOLEAN,
+    argBYTE,
     argPOINTER,
     argPOBJECT_ATTRIBUTES,
     argPUNICODE_STRING,
     argPHANDLE,
+    argPBYTE,
     argPUSHORT,
     argPULONG,
     argACCESS_MASK,
