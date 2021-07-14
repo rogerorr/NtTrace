@@ -1,12 +1,11 @@
-# $Id: NtTrace.mak 1927 2020-10-24 19:22:38Z roger $
+# $Id: NtTrace.mak 1971 2021-07-08 21:26:10Z roger $
 
 #
-# This makefile requires Microsoft Visual Studio 2005 and above,
-# for dbghelp.h and the support for manifest files
+# This makefile requires Microsoft Visual Studio 2010 and above,
 #
 
 # COPYRIGHT
-#     Copyright (C) 2007,2015 by Roger Orr <rogero@howzatt.co.uk>
+#     Copyright (C) 2007,2021 by Roger Orr <rogero@howzatt.co.uk>
 # 
 #     This software is distributed in the hope that it will be useful, but
 #     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,7 +32,7 @@ $(BUILD) :
 	mkdir $(BUILD)
 
 clean :
-	@-del NtTrace.exe NtTrace.exe.manifest NtTrace.res *.pdb
+	@-del NtTrace.exe NtTrace.res *.pdb
 	@-rd /q /s $(BUILD)
 
 CCFLAGS = /nologo /MD /W3 /WX /Zi /Iinclude /D_CRT_SECURE_NO_WARNINGS
@@ -47,7 +46,6 @@ LINKFLAGS = /link /opt:ref,icf
 
 NtTrace.exe : $(BUILD)\$(*B).obj $(*B).res 
 	cl $(CCFLAGS) /Fe$@ $** $(LINKFLAGS)
-	if exist $(@).manifest mt.exe -nologo -manifest $(@).manifest -outputresource:$@
 
 # Dependencies
 

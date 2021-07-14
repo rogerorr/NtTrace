@@ -1,11 +1,10 @@
 // Resource file for include for project binaries
 //
-// $Id: version.rc 613 2010-03-09 23:59:36Z Roger $
+// $Id: version.rc 2046 2021-07-13 22:29:43Z roger $
 
 #include "winver.h"
 
 // Common values for the product suite
-#define MAJOR_VERSION 2
 #include "buildVersion.h"
 
 
