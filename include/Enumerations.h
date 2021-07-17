@@ -21,28 +21,26 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 2081 $
 */
 
-// $Id: Enumerations.h 1881 2020-04-09 20:55:12Z Roger $
+// $Id: Enumerations.h 2081 2021-07-17 17:50:08Z roger $
 
-namespace Enumerations
-{
-  /** Provide a single mapping from an enumeration value to a name */
-  struct EnumMap
-  {
-    unsigned long value; ///< The enumeration value
-    char const * name; ///< The corresponding name
-  };
+namespace Enumerations {
+/** Provide a single mapping from an enumeration value to a name */
+struct EnumMap {
+  unsigned long value; ///< The enumeration value
+  char const *name;    ///< The corresponding name
+};
 
-  /** Provide a mapping from an enumeration name to a zero-terminated array of EnumMap entries */
-  struct AllEnum
-  {
-    const char *name; ///< The enumeration name
-    EnumMap *pMap; ///< The corresponding EnumMap
-  };
+/** Provide a mapping from an enumeration name to a zero-terminated array of
+ * EnumMap entries */
+struct AllEnum {
+  const char *name; ///< The enumeration name
+  EnumMap *pMap;    ///< The corresponding EnumMap
+};
 
-  extern AllEnum allEnums[];
-}
+extern AllEnum allEnums[];
+} // namespace Enumerations
 
 #endif // ENUMERATIONS_H_

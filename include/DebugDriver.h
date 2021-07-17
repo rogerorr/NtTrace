@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1917 $
+    $Revision: 2081 $
 */
 
-// $Id: DebugDriver.h 1917 2020-08-15 23:13:45Z roger $
+// $Id: DebugDriver.h 2081 2021-07-17 17:50:08Z roger $
 
 #ifndef _WINDOWS_
 #include <windows.h>
@@ -32,8 +32,7 @@
 
 #include <map>
 
-namespace or2
-{
+namespace or2 {
 
 //////////////////////////////////////////////////////////////////////////
 /**
@@ -41,77 +40,97 @@ namespace or2
  *
  * This class provides the callbacks for the DebugDriver class.
  */
-class Debugger
-{
+class Debugger {
 public:
-    // callbacks on events
-    /** Exception occurred */
-    virtual void OnException( DWORD processId, DWORD threadId, HANDLE hProcess, HANDLE hThread, EXCEPTION_DEBUG_INFO const & DebugEvent, DWORD * pContinueExecution ) = 0;
+  // callbacks on events
+  /** Exception occurred */
+  virtual void OnException(DWORD processId, DWORD threadId, HANDLE hProcess,
+                           HANDLE hThread,
+                           EXCEPTION_DEBUG_INFO const &DebugEvent,
+                           DWORD *pContinueExecution) = 0;
 
-    /** Callback on thread creation */
-    virtual void OnCreateThread( DWORD processId, DWORD threadId, CREATE_THREAD_DEBUG_INFO const & CreateThread ) = 0;
+  /** Callback on thread creation */
+  virtual void OnCreateThread(DWORD processId, DWORD threadId,
+                              CREATE_THREAD_DEBUG_INFO const &CreateThread) = 0;
 
-    /** Callback on process creation */
-    virtual void OnCreateProcess( DWORD processId, DWORD threadId, CREATE_PROCESS_DEBUG_INFO const & CreateProcessInfo ) = 0;
+  /** Callback on process creation */
+  virtual void
+  OnCreateProcess(DWORD processId, DWORD threadId,
+                  CREATE_PROCESS_DEBUG_INFO const &CreateProcessInfo) = 0;
 
-    /** Callback on thread exit */
-    virtual void OnExitThread( DWORD processId, DWORD threadId, EXIT_THREAD_DEBUG_INFO const & ExitThread ) = 0;
+  /** Callback on thread exit */
+  virtual void OnExitThread(DWORD processId, DWORD threadId,
+                            EXIT_THREAD_DEBUG_INFO const &ExitThread) = 0;
 
-    /** Callback on process exit */
-    virtual void OnExitProcess( DWORD processId, DWORD threadId, EXIT_PROCESS_DEBUG_INFO const & ExitProcess ) = 0;
+  /** Callback on process exit */
+  virtual void OnExitProcess(DWORD processId, DWORD threadId,
+                             EXIT_PROCESS_DEBUG_INFO const &ExitProcess) = 0;
 
-    /** Callback on loading DLL */
-    virtual void OnLoadDll( DWORD processId, DWORD threadId, HANDLE hProcess, LOAD_DLL_DEBUG_INFO const & LoadDll ) = 0;
+  /** Callback on loading DLL */
+  virtual void OnLoadDll(DWORD processId, DWORD threadId, HANDLE hProcess,
+                         LOAD_DLL_DEBUG_INFO const &LoadDll) = 0;
 
-    /** Callback on unloading DLL */
-    virtual void OnUnloadDll( DWORD processId, DWORD threadId, UNLOAD_DLL_DEBUG_INFO const & UnloadDll ) = 0;
+  /** Callback on unloading DLL */
+  virtual void OnUnloadDll(DWORD processId, DWORD threadId,
+                           UNLOAD_DLL_DEBUG_INFO const &UnloadDll) = 0;
 
-    /** Callback on outputting a debug string */
-    virtual void OnOutputDebugString( DWORD processId, DWORD threadId, HANDLE hProcess, OUTPUT_DEBUG_STRING_INFO const & DebugString ) = 0;
+  /** Callback on outputting a debug string */
+  virtual void
+  OnOutputDebugString(DWORD processId, DWORD threadId, HANDLE hProcess,
+                      OUTPUT_DEBUG_STRING_INFO const &DebugString) = 0;
 
-    /** Is the debugger still active? */
-    virtual bool Active() { return true; }
+  /** Is the debugger still active? */
+  virtual bool Active() { return true; }
 
-    /** Virtual dtor for safe inheritance */
-    virtual ~Debugger() {}
+  /** Virtual dtor for safe inheritance */
+  virtual ~Debugger() {}
 };
 
 //////////////////////////////////////////////////////////////////////////
 /**
  * Adapter for stripped-down functionality of a Debugger
  */
-class DebuggerAdapter : public Debugger
-{
-#pragma warning( push )
-#pragma warning( disable: 4100 ) // unreferenced formal parameter
+class DebuggerAdapter : public Debugger {
+#pragma warning(push)
+#pragma warning(disable : 4100) // unreferenced formal parameter
 
 public:
-    // callbacks on events
-    /** Exception occurred */
-    virtual void OnException( HANDLE hProcess, HANDLE hThread, DWORD processId, DWORD threadId, EXCEPTION_DEBUG_INFO const & DebugEvent, DWORD * pContinueExecution ) {}
+  // callbacks on events
+  /** Exception occurred */
+  virtual void OnException(HANDLE hProcess, HANDLE hThread, DWORD processId,
+                           DWORD threadId,
+                           EXCEPTION_DEBUG_INFO const &DebugEvent,
+                           DWORD *pContinueExecution) {}
 
-    /** Callback on thread creation */
-    virtual void OnCreateThread( DWORD threadId, CREATE_THREAD_DEBUG_INFO const & CreateThread ) {}
+  /** Callback on thread creation */
+  virtual void OnCreateThread(DWORD threadId,
+                              CREATE_THREAD_DEBUG_INFO const &CreateThread) {}
 
-    /** Callback on process creation */
-    virtual void OnCreateProcess( DWORD processId, DWORD threadId, CREATE_PROCESS_DEBUG_INFO const & CreateProcessInfo ) {}
+  /** Callback on process creation */
+  virtual void
+  OnCreateProcess(DWORD processId, DWORD threadId,
+                  CREATE_PROCESS_DEBUG_INFO const &CreateProcessInfo) {}
 
-    /** Callback on thread exit */
-    virtual void OnExitThread( DWORD threadId, EXIT_THREAD_DEBUG_INFO const & ExitThread ) {}
+  /** Callback on thread exit */
+  virtual void OnExitThread(DWORD threadId,
+                            EXIT_THREAD_DEBUG_INFO const &ExitThread) {}
 
-    /** Callback on process exit */
-    virtual void OnExitProcess( DWORD processId, EXIT_PROCESS_DEBUG_INFO const & ExitProcess ) {}
+  /** Callback on process exit */
+  virtual void OnExitProcess(DWORD processId,
+                             EXIT_PROCESS_DEBUG_INFO const &ExitProcess) {}
 
-    /** Callback on loading DLL */
-    virtual void OnLoadDll( HANDLE hProcess, LOAD_DLL_DEBUG_INFO const & LoadDll ) {}
+  /** Callback on loading DLL */
+  virtual void OnLoadDll(HANDLE hProcess, LOAD_DLL_DEBUG_INFO const &LoadDll) {}
 
-    /** Callback on unloading DLL */
-    virtual void OnUnloadDll( UNLOAD_DLL_DEBUG_INFO const & UnloadDll ) {}
+  /** Callback on unloading DLL */
+  virtual void OnUnloadDll(UNLOAD_DLL_DEBUG_INFO const &UnloadDll) {}
 
-    /** Callback on outputting a debug string */
-    virtual void OnOutputDebugString( HANDLE hProcess, OUTPUT_DEBUG_STRING_INFO const & DebugString ) {}
+  /** Callback on outputting a debug string */
+  virtual void
+  OnOutputDebugString(HANDLE hProcess,
+                      OUTPUT_DEBUG_STRING_INFO const &DebugString) {}
 
-#pragma warning( pop )
+#pragma warning(pop)
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -121,29 +140,27 @@ public:
  * The DebugDriver class runs the debug loop until the debugee has finished.
  * Events are signified by callbacks to the supplied Debugger object
  */
-class DebugDriver
-{
+class DebugDriver {
 public:
-    /** Runs till debugee finishes, calling back 'debugger' for each event */
-    void Loop( Debugger & debugger );
+  /** Runs till debugee finishes, calling back 'debugger' for each event */
+  void Loop(Debugger &debugger);
 
 private:
-    //////////////////////////////////////////////////////////////////////////
-    // Data structure used for handling thread/process id -> handle mapping
-    typedef std::map< DWORD, HANDLE > ThreadMap;
-    struct ProcessEntry
-    {
-        ProcessEntry() : attached( false ) {}
-        bool attached;
-    	HANDLE hProcess;
-    	ThreadMap threadMap;
-    };
-    typedef std::map< DWORD, ProcessEntry > ProcessMap;
+  //////////////////////////////////////////////////////////////////////////
+  // Data structure used for handling thread/process id -> handle mapping
+  typedef std::map<DWORD, HANDLE> ThreadMap;
+  struct ProcessEntry {
+    ProcessEntry() : attached(false) {}
+    bool attached;
+    HANDLE hProcess;
+    ThreadMap threadMap;
+  };
+  typedef std::map<DWORD, ProcessEntry> ProcessMap;
 
 private:
-    ProcessMap processMap;
+  ProcessMap processMap;
 };
 
-} // namespace
+} // namespace or2
 
 #endif // DEBUGDRIVER_H_

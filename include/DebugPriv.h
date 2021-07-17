@@ -24,15 +24,14 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 2074 $
 */
 
-// $Id: DebugPriv.h 1881 2020-04-09 20:55:12Z Roger $
+// $Id: DebugPriv.h 2074 2021-07-17 17:07:41Z roger $
 
 #include "AdjustPriv.h"
 
-namespace or2
-{
+namespace or2 {
 
 /**
  * Changes the process's privilege so that kill works properly.
@@ -41,15 +40,13 @@ namespace or2
  * - TRUE - success
  * - FALSE - failure
  */
-BOOL
-inline
-EnableDebugPriv(
-    HANDLE hProcess = GetCurrentProcess() ///< handle of the process to which to give debug privilege
-    )
-{
-    return EnableNamedPriv( SE_DEBUG_NAME, hProcess );
+BOOL inline EnableDebugPriv(
+    HANDLE hProcess = GetCurrentProcess() ///< handle of the process to which to
+                                          ///< give debug privilege
+) {
+  return EnableNamedPriv(SE_DEBUG_NAME, hProcess);
 }
 
-}
+} // namespace or2
 
 #endif // DEBUG_PRIV_H_

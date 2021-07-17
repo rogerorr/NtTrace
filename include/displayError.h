@@ -25,26 +25,25 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 2074 $
 */
 
-// $Id: displayError.h 1881 2020-04-09 20:55:12Z Roger $
+// $Id: displayError.h 2074 2021-07-17 17:07:41Z roger $
 
 #include <iosfwd>
 #include <windows.h>
 
-namespace or2
-{
+namespace or2 {
 
 #pragma warning(push)
-#pragma warning(disable: 4512) // assignment operator could not be generated
+#pragma warning(disable : 4512) // assignment operator could not be generated
 
 /** manipulator */
 class displayError {
 public:
   /** Default ctor wraps GetLastError() */
   displayError();
- 
+
   /**
    * Construct from an hresult
    * @param hresult the error code to display
@@ -56,6 +55,7 @@ public:
    * @param os the output stream to write to
    */
   void printOn(std::ostream &os) const;
+
 private:
   HRESULT const hresult;
 };
@@ -63,9 +63,9 @@ private:
 #pragma warning(pop)
 
 /** Stream a displayError manipulator */
-std::ostream & operator<<(std::ostream & os, displayError const &se);
+std::ostream &operator<<(std::ostream &os, displayError const &se);
 
-}
+} // namespace or2
 
 #include "displayError.inl"
 

@@ -21,17 +21,16 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 2074 $
 */
 
 #include <string>
 #include <vector>
 
-namespace or2
-{
+namespace or2 {
 
 ////////////////////////////////////////////////////////////////
-/** Turn a string delimited by a given character into a vector of strings. 
+/** Turn a string delimited by a given character into a vector of strings.
  *
  * EXAMPLE<pre>
  *    \#include "SimpleTokenizer.h"
@@ -45,26 +44,24 @@ namespace or2
  *    </pre>
  *
  */
-inline
-void SimpleTokenizer(
-    std::string const & str, ///< string to tokenize
-    std::vector< std::string > * pTokens, ///< vector to populate
-    char delim = ',' ) ///< delimiter for strings
+inline void
+SimpleTokenizer(std::string const &str,            ///< string to tokenize
+                std::vector<std::string> *pTokens, ///< vector to populate
+                char delim = ',')                  ///< delimiter for strings
 {
-    std::string::size_type pos = 0;
-    std::string::size_type len = str.size();
+  std::string::size_type pos = 0;
+  std::string::size_type len = str.size();
 
-    while ( pos < len )
-    {
-        std::string::size_type nextpos = str.find( delim, pos );
+  while (pos < len) {
+    std::string::size_type nextpos = str.find(delim, pos);
 
-        if ( nextpos == std::string::npos )
-           nextpos = len;
-        pTokens->push_back( str.substr(pos, nextpos - pos ) );
-        pos = nextpos+1;
-    }
+    if (nextpos == std::string::npos)
+      nextpos = len;
+    pTokens->push_back(str.substr(pos, nextpos - pos));
+    pos = nextpos + 1;
+  }
 }
 
-}
+} // namespace or2
 
 #endif // SimpleTokenizer_h_

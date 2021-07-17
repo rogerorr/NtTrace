@@ -22,16 +22,16 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 2074 $
 */
 
-// $Id: ReadInt.h 1881 2020-04-09 20:55:12Z Roger $
+// $Id: ReadInt.h 2074 2021-07-17 17:07:41Z roger $
 
-#include <string> // for string
-#include <cstdlib> // for strtol 
+#include <cstdlib> // for strtol
+#include <string>  // for string
+#include <windows.h> // for LONGLONG
 
-namespace or2
-{
+namespace or2 {
 
 /** Convert a string into an integer.
  *
@@ -41,25 +41,20 @@ namespace or2
  * - true on successful conversion
  * - false on failure
  */
-inline
-bool readInt(
-   std::string const & value, ///< value to convert
-   int & result ) ///< returned result if successful conversion, otherwise partial result
+inline bool readInt(std::string const &value, ///< value to convert
+                    int &result) ///< returned result if successful conversion,
+                                 ///< otherwise partial result
 {
-   char *delim = 0;
+  char *delim = 0;
 
-   if ( ( value.length() >= 2 ) &&
-        ( value[0] == '0' ) &&
-        ( value[1] == 'x' || value[1] == 'X' ) )
-   {
-      result = strtoul( value.c_str() + 2, &delim, 16 );
-   }
-   else
-   {
-      result = strtol( value.c_str(), &delim, 10 );
-   }
+  if ((value.length() >= 2) && (value[0] == '0') &&
+      (value[1] == 'x' || value[1] == 'X')) {
+    result = strtoul(value.c_str() + 2, &delim, 16);
+  } else {
+    result = strtol(value.c_str(), &delim, 10);
+  }
 
-   return *delim == '\0';
+  return *delim == '\0';
 }
 
 /** Convert a string into an unsigned integer.
@@ -70,25 +65,21 @@ bool readInt(
  * - true on successful conversion
  * - false on failure
  */
-inline
-bool readInt(
-   std::string const & value, ///< value to convert
-   unsigned int & result ) ///< returned result if successful conversion, otherwise partial result
+inline bool
+readInt(std::string const &value, ///< value to convert
+        unsigned int &result)     ///< returned result if successful conversion,
+                                  ///< otherwise partial result
 {
-   char *delim = 0;
+  char *delim = 0;
 
-   if ( ( value.length() >= 2 ) &&
-        ( value[0] == '0' ) &&
-        ( value[1] == 'x' || value[1] == 'X' ) )
-   {
-      result = strtoul( value.c_str() + 2, &delim, 16 );
-   }
-   else
-   {
-      result = strtoul( value.c_str(), &delim, 10 );
-   }
+  if ((value.length() >= 2) && (value[0] == '0') &&
+      (value[1] == 'x' || value[1] == 'X')) {
+    result = strtoul(value.c_str() + 2, &delim, 16);
+  } else {
+    result = strtoul(value.c_str(), &delim, 10);
+  }
 
-   return *delim == '\0';
+  return *delim == '\0';
 }
 
 #if _MSC_VER >= 1500
@@ -100,28 +91,23 @@ bool readInt(
  * - true on successful conversion
  * - false on failure
  */
-inline
-bool readInt(
-   std::string const & value, ///< value to convert
-   LONGLONG & result ) ///< returned result if successful conversion, otherwise partial result
+inline bool readInt(std::string const &value, ///< value to convert
+                    LONGLONG &result)         ///< returned result if successful
+                                      ///< conversion, otherwise partial result
 {
-   char *delim = 0;
+  char *delim = 0;
 
-   if ( ( value.length() >= 2 ) &&
-        ( value[0] == '0' ) &&
-        ( value[1] == 'x' || value[1] == 'X' ) )
-   {
-      result = _strtoi64( value.c_str() + 2, &delim, 16 );
-   }
-   else
-   {
-      result = _strtoi64( value.c_str(), &delim, 10 );
-   }
+  if ((value.length() >= 2) && (value[0] == '0') &&
+      (value[1] == 'x' || value[1] == 'X')) {
+    result = _strtoi64(value.c_str() + 2, &delim, 16);
+  } else {
+    result = _strtoi64(value.c_str(), &delim, 10);
+  }
 
-   return *delim == '\0';
+  return *delim == '\0';
 }
 #endif // _MSC_VER >= 1500
 
-}
+} // namespace or2
 
 #endif // readInt_h_

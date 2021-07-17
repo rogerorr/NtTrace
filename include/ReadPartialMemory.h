@@ -21,53 +21,50 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 2074 $
 */
 
-// $Id: ReadPartialMemory.h 1881 2020-04-09 20:55:12Z Roger $
+// $Id: ReadPartialMemory.h 2074 2021-07-17 17:07:41Z roger $
 
 #include <Windows.h>
 
-namespace or2
+namespace or2 {
+/**
+ * Reads data from an area of memory in a specified process.
+ *
+ * The area to be read need only be partially accessible.
+ * The function reads the largest contiguous amount of data from 'address' and
+ * succeeds if this length is in [minSize, maxSize].
+ *
+ * @return the number of bytes read.  Zero implies failure - use GetLastError()
+ * for details
+ */
+inline SIZE_T
+ReadPartialProcessMemory(HANDLE hProcess, ///< Handle to process to read (needs
+                                          ///< PROCESS_VM_READ access)
+                         LPCVOID address, ///< Base address of area to read
+                         LPVOID buffer,   ///< Buffer to hold read data
+                         SIZE_T minSize, ///< Minimum amount to read for success
+                         SIZE_T maxSize) ///< Maximum size of buffer
 {
-  /**
-   * Reads data from an area of memory in a specified process.
-   *
-   * The area to be read need only be partially accessible.
-   * The function reads the largest contiguous amount of data from 'address' and
-   * succeeds if this length is in [minSize, maxSize].
-   *
-   * @return the number of bytes read.  Zero implies failure - use GetLastError() for details
-   */
-  inline
-  SIZE_T ReadPartialProcessMemory(
-    HANDLE hProcess, ///< Handle to process to read (needs PROCESS_VM_READ access)
-    LPCVOID address, ///< Base address of area to read
-    LPVOID buffer,   ///< Buffer to hold read data
-    SIZE_T minSize,  ///< Minimum amount to read for success
-    SIZE_T maxSize)  ///< Maximum size of buffer
-  {
-    SIZE_T length = maxSize;
-    while (length >= minSize)
-    {
-      if ( ReadProcessMemory(hProcess, address, buffer, length, 0) )
-      {
-        return length;
-      }
-      length--;
-
-      static SYSTEM_INFO SystemInfo;
-      static BOOL b = (GetSystemInfo(&SystemInfo), TRUE);
-
-      SIZE_T pageOffset = ((ULONG_PTR)address + length) % SystemInfo.dwPageSize;
-      if (pageOffset > length)
-        break;
-      length -= pageOffset;
+  SIZE_T length = maxSize;
+  while (length >= minSize) {
+    if (ReadProcessMemory(hProcess, address, buffer, length, 0)) {
+      return length;
     }
-    return 0;
+    length--;
+
+    static SYSTEM_INFO SystemInfo;
+    static BOOL b = (GetSystemInfo(&SystemInfo), TRUE);
+
+    SIZE_T pageOffset = ((ULONG_PTR)address + length) % SystemInfo.dwPageSize;
+    if (pageOffset > length)
+      break;
+    length -= pageOffset;
   }
+  return 0;
+}
 
-
-} // namespace
+} // namespace or2
 
 #endif // READPARTIALMEMORY_H_

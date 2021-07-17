@@ -21,13 +21,12 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 2074 $
 */
 
-// $Id: AdjustPriv.h 1881 2020-04-09 20:55:12Z Roger $
+// $Id: AdjustPriv.h 2074 2021-07-17 17:07:41Z roger $
 
-namespace or2
-{
+namespace or2 {
 
 /**
  * Attempt to grant the named privilege to the specified process.
@@ -37,71 +36,59 @@ namespace or2
  * - FALSE - failure [typically the process hasn't been granted the privilege]
  */
 
-BOOL
-inline
-EnableNamedPriv (
+BOOL inline EnableNamedPriv(
     LPCTSTR lpName, ///< name for the privilege token (from winnt.h)
-    HANDLE hProcess = GetCurrentProcess() ///< handle of the process to which to give the privilege
-    )
-{
-    HANDLE hToken;
-    LUID privValue;
-    TOKEN_PRIVILEGES tkp;
+    HANDLE hProcess = GetCurrentProcess() ///< handle of the process to which to
+                                          ///< give the privilege
+) {
+  HANDLE hToken;
+  LUID privValue;
+  TOKEN_PRIVILEGES tkp;
 
+  //
+  // Retrieve a handle of the access token
+  //
+  if (!OpenProcessToken(hProcess, TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
+                        &hToken)) {
+    std::cerr << "OpenProcessToken failed with: " << ::GetLastError()
+              << std::endl;
+    return FALSE;
+  }
 
-    //
-    // Retrieve a handle of the access token
-    //
-    if (!OpenProcessToken( hProcess,
-            TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,
-            &hToken))
-    {
-        std::cerr << "OpenProcessToken failed with: " << ::GetLastError() << std::endl;
-        return FALSE;
+  if (!LookupPrivilegeValue((LPSTR)NULL, lpName, &privValue)) {
+    std::cerr << "LookupPrivilegeValue failed with: " << GetLastError()
+              << std::endl;
+    return FALSE;
+  }
+
+  //
+  // Enable the privilege
+  //
+  tkp.PrivilegeCount = 1;
+  tkp.Privileges[0].Luid = privValue;
+  tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+  AdjustTokenPrivileges(hToken, FALSE, &tkp, sizeof(TOKEN_PRIVILEGES),
+                        (PTOKEN_PRIVILEGES)NULL, (PDWORD)NULL);
+
+  //
+  // The return value of AdjustTokenPrivileges couldn't be tested on older NT
+  // versions
+  //
+  DWORD lastError = GetLastError();
+  if (lastError != ERROR_SUCCESS) {
+    if (lastError == ERROR_NOT_ALL_ASSIGNED) {
+      // Can't enable permission we haven't got
+    } else {
+      std::cerr << "AdjustTokenPrivileges failed with: " << lastError
+                << std::endl;
     }
+    return FALSE;
+  }
 
-    if (!LookupPrivilegeValue((LPSTR) NULL,
-            lpName,
-            &privValue))
-    {
-        std::cerr << "LookupPrivilegeValue failed with: " << GetLastError() << std::endl;
-        return FALSE;
-    }
-
-    //
-    // Enable the privilege
-    //
-    tkp.PrivilegeCount = 1;
-    tkp.Privileges[0].Luid = privValue;
-    tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-
-    AdjustTokenPrivileges(hToken,
-        FALSE,
-        &tkp,
-        sizeof(TOKEN_PRIVILEGES),
-        (PTOKEN_PRIVILEGES) NULL,
-        (PDWORD) NULL);
-
-    //
-    // The return value of AdjustTokenPrivileges couldn't be tested on older NT versions
-    //
-    DWORD lastError = GetLastError();
-    if ( lastError != ERROR_SUCCESS)
-    {
-        if ( lastError == ERROR_NOT_ALL_ASSIGNED )
-        {
-            // Can't enable permission we haven't got
-        }
-        else
-        {
-            std::cerr << "AdjustTokenPrivileges failed with: " << lastError << std::endl;
-        }
-        return FALSE;
-    }
-
-    return TRUE;
+  return TRUE;
 }
 
-}
+} // namespace or2
 
 #endif // ADJUST_PRIV_H_

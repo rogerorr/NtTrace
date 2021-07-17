@@ -21,38 +21,38 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 2074 $
 */
 
-// $Id: Options.h 1881 2020-04-09 20:55:12Z Roger $
+// $Id: Options.h 2074 2021-07-17 17:07:41Z roger $
 
 #include <string>
 #include <vector>
 
 /** Namespace for general utility classes and functions */
-namespace or2
-{
+namespace or2 {
 
 /**
  * Class to handle command line options.
  *
- * This class is designed to handle simple command lines where a set of options (sometimes called flags)
- * precede a list of non-flag arguments.
+ * This class is designed to handle simple command lines where a set of options
+ *(sometimes called flags) precede a list of non-flag arguments.
  *
- * Options are identified by starting with either '-' or '/', and the option name is one or more characters.
- *<BR>
- * Options can be declared as 'bool', 'int', 'unsigned int', 'long', 'unsigned long', 'double' or 'string'.  For all
- * types other than 'bool' the value is supplied as the next command line argument.
+ * Options are identified by starting with either '-' or '/', and the option
+ *name is one or more characters. <BR> Options can be declared as 'bool', 'int',
+ *'unsigned int', 'long', 'unsigned long', 'double' or 'string'.  For all types
+ *other than 'bool' the value is supplied as the next command line argument.
  *
  * The number of (non-flag) arguments can be specified either as a single number
- * or a range of values, which can be open ended.  Once option processing is complete
- * the remaining arguments are available using STL iterators obtained from the begin() and end()
- * methods.
+ * or a range of values, which can be open ended.  Once option processing is
+ *complete the remaining arguments are available using STL iterators obtained
+ *from the begin() and end() methods.
  *
  * Three in-built options are supported:<UL>
  *<LI>-h (or -?) displays syntax help for the command line.
- *<LI>-ver prints the version string (provided in the constructor - typically an RCS 'Id' string
- *<LI>-- terminates flag processing and allows non-flag arguments which start with '-' or '/'
+ *<LI>-ver prints the version string (provided in the constructor - typically an
+ *RCS 'Id' string <LI>-- terminates flag processing and allows non-flag
+ *arguments which start with '-' or '/'
  *</UL>
  *
  * Example:
@@ -84,71 +84,79 @@ namespace or2
  *  This program does something</PRE>
  *</UL>
  */
-class Options
-{
+class Options {
 public:
-    /**
-     * Construct from rcs ID - for version info.
-     *
-     * The supplied string is automatically printed when the -ver option is used.
-     */
-    Options( char const * pRcsId );
+  /**
+   * Construct from rcs ID - for version info.
+   *
+   * The supplied string is automatically printed when the -ver option is used.
+   */
+  Options(char const *pRcsId);
 
-    /** Destructor  */
-    ~Options();
+  /** Destructor  */
+  ~Options();
 
-    /** Set a 'bool' option */
-    void set( std::string const & option, bool * pValue, std::string const & helpString = "" );
+  /** Set a 'bool' option */
+  void set(std::string const &option, bool *pValue,
+           std::string const &helpString = "");
 
-    /** Set an 'int' option */
-    void set( std::string const & option, int * pValue, std::string const & helpString = "" );
+  /** Set an 'int' option */
+  void set(std::string const &option, int *pValue,
+           std::string const &helpString = "");
 
-    /** Set an 'unsigned int' option */
-    void set( std::string const & option, unsigned int * pValue, std::string const & helpString = "" );
+  /** Set an 'unsigned int' option */
+  void set(std::string const &option, unsigned int *pValue,
+           std::string const &helpString = "");
 
-    /** Set a 'long' option */
-    void set( std::string const & option, long * pValue, std::string const & helpString = "" );
+  /** Set a 'long' option */
+  void set(std::string const &option, long *pValue,
+           std::string const &helpString = "");
 
-    /** Set an 'unsigned long' option */
-    void set( std::string const & option, unsigned long * pValue, std::string const & helpString = "" );
+  /** Set an 'unsigned long' option */
+  void set(std::string const &option, unsigned long *pValue,
+           std::string const &helpString = "");
 
-    /** Set an 'double' option */
-    void set( std::string const & option, double * pValue, std::string const & helpString = "" );
+  /** Set an 'double' option */
+  void set(std::string const &option, double *pValue,
+           std::string const &helpString = "");
 
-    /** Set a 'string' option */
-    void set( std::string const & option, std::string * pValue, std::string const & helpString = "");
+  /** Set a 'string' option */
+  void set(std::string const &option, std::string *pValue,
+           std::string const &helpString = "");
 
-    /** Set argument count (-1 => any number) */
-    void setArgs( int argCount, std::string const & helpString = "" );
+  /** Set argument count (-1 => any number) */
+  void setArgs(int argCount, std::string const &helpString = "");
 
-    /** Set argument count - min and max (-1 => any number) */
-    void setArgs( int argCountMin, int argCountMax, std::string const & helpString = "" );
+  /** Set argument count - min and max (-1 => any number) */
+  void setArgs(int argCountMin, int argCountMax,
+               std::string const &helpString = "");
 
-    /** Process the command line arguments, return false on bad argument or 'help' */
-    bool process( int argc, char ** argv, std::string const & usage = "" );
+  /** Process the command line arguments, return false on bad argument or 'help'
+   */
+  bool process(int argc, char **argv, std::string const &usage = "");
 
-    /** Get program name */
-    std::string pname() const;
+  /** Get program name */
+  std::string pname() const;
 
-    /** Iterator type returned by begin/end */
-    typedef std::vector<std::string>::const_iterator const_iterator; 
+  /** Iterator type returned by begin/end */
+  typedef std::vector<std::string>::const_iterator const_iterator;
 
-    /** Start of non-option arguments */
-    const_iterator begin() const;
+  /** Start of non-option arguments */
+  const_iterator begin() const;
 
-    /** End of non-option arguments */
-    const_iterator end() const;
+  /** End of non-option arguments */
+  const_iterator end() const;
 
 private:
-    // no copy/assign
-    Options( Options const & );
-    Options & operator=( Options const & );
+  // no copy/assign
+  Options(Options const &);
+  Options &operator=(Options const &);
 
-    struct Data;
-    Data * pData;
+  struct Data;
+  Data *pData;
 };
 
-}
+} // namespace or2
 
 // include the implementation
 #include "Options.inl"
