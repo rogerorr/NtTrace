@@ -27,9 +27,8 @@ EXAMPLE
     NtTrace 1234
 */
 
-static char const szRCSID[] = "$Id: NtTrace.cpp 1918 2020-08-16 10:32:14Z roger $";
+static char const szRCSID[] = "$Id: NtTrace.cpp 2064 2021-07-17 14:18:42Z roger $";
 
-#pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
 #pragma warning( disable: 4800 ) // forcing value to bool 'true' or 'false' (performance warning)
 #pragma warning( disable: 4511 4512 ) // copy ctor/op= could not be generated
 #pragma warning( disable: 4996 ) // 'asctime' and others were declared deprecated

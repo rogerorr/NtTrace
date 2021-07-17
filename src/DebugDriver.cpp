@@ -22,15 +22,13 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.co.uk.
 */
 
-#pragma warning( disable: 4786 ) // identifier was truncated to '255' characters
-
 #include "DebugDriver.h"
 
 #include <iostream>
 
 #include "displayError.h"
 
-static char const szRCSID[] = "$Id: DebugDriver.cpp 1917 2020-08-15 23:13:45Z roger $";
+static char const szRCSID[] = "$Id: DebugDriver.cpp 2064 2021-07-17 14:18:42Z roger $";
 
 //////////////////////////////////////////////////////////////////////////
 // Main debugger loop

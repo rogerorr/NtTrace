@@ -22,10 +22,9 @@ COPYRIGHT
     Please report bugs to rogero@howzatt.co.uk.
 */
 
-static char const szRCSID[] = "$Id: SymbolEngine.cpp 1915 2020-08-15 14:23:23Z Roger $";
+static char const szRCSID[] = "$Id: SymbolEngine.cpp 2057 2021-07-17 13:43:25Z roger $";
 
 #ifdef _MSC_VER
-#pragma warning( disable: 4786 ) // identifier was truncated to '255' chars
 #pragma warning( disable: 4511 4512 ) // copy constructor/assignment operator could not be generated
 #endif // _MSC_VER
 

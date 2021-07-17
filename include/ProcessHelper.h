@@ -22,13 +22,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 2056 $
 */
 
-// $Id: ProcessHelper.h 1881 2020-04-09 20:55:12Z Roger $
-
-
-#pragma warning( disable: 4786 )
+// $Id: ProcessHelper.h 2056 2021-07-17 11:45:00Z roger $
 
 #include <windows.h> // for CreateProcess
 #include <psapi.h> // for EnumProcesses
