@@ -4,8 +4,7 @@
 #include <ostream>
 #include <windows.h>
 
-namespace or2
-{
+namespace or2 {
 
 /**
     Implementation of function for displaying Win32 error to a stream.
@@ -30,73 +29,56 @@ namespace or2
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 2205 $
 */
 
-// $Id: displayError.inl 1881 2020-04-09 20:55:12Z Roger $
+// $Id: displayError.inl 2205 2021-07-20 15:24:55Z roger $
 
-inline 
-displayError::displayError()
-: hresult(GetLastError())
-{}
+inline displayError::displayError() : hresult(GetLastError()) {}
 
-inline 
-displayError::displayError(HRESULT hresult)
-: hresult(hresult)
-{}
+inline displayError::displayError(HRESULT hresult) : hresult(hresult) {}
 
-inline
-void displayError::printOn(std::ostream &os) const
-{
-   if ( hresult == 0 )
-   {
-      os << "no error";
-      return;
-   }
+inline void displayError::printOn(std::ostream &os) const {
+  if (hresult == 0) {
+    os << "no error";
+    return;
+  }
 
-   LPTSTR pszMsg = 0;
+  LPTSTR pszMsg = 0;
 
-   FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS,
-	0,
-	hresult,
-	MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-	(LPTSTR)&pszMsg,
-	0,
-	NULL );
-   if ( pszMsg != 0 )
-   {
-	size_t nLen = strlen(pszMsg);
-	if (nLen > 1 && pszMsg[nLen - 1] == '\n') {
-	    pszMsg[--nLen] = 0;
-	    if (nLen > 1 && pszMsg[nLen - 1] == '\r') {
-	        pszMsg[--nLen] = 0;
-	    }
-	    if (nLen > 1 && pszMsg[nLen - 1] == '.') {
-	        pszMsg[--nLen] = 0;
-	    }
-	}
+  FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+                    FORMAT_MESSAGE_IGNORE_INSERTS,
+                0, hresult, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                (LPTSTR)&pszMsg, 0, NULL);
+  if (pszMsg != 0) {
+    size_t nLen = strlen(pszMsg);
+    if (nLen > 1 && pszMsg[nLen - 1] == '\n') {
+      pszMsg[--nLen] = 0;
+      if (nLen > 1 && pszMsg[nLen - 1] == '\r') {
+        pszMsg[--nLen] = 0;
+      }
+      if (nLen > 1 && pszMsg[nLen - 1] == '.') {
+        pszMsg[--nLen] = 0;
+      }
+    }
 
-      if ( hresult < 0 )
-          os << std::hex;
-      os << "error " << hresult << std::dec << " (" << pszMsg << ")";
-      ::LocalFree( pszMsg );
-   }
-   else
-   {
-      if ( hresult < 0 )
-          os << std::hex;
-      os << "Win32 error: " << hresult << std::dec;
-   }
+    if (hresult < 0)
+      os << std::hex;
+    os << "error " << hresult << std::dec << " (" << pszMsg << ")";
+    ::LocalFree(pszMsg);
+  } else {
+    if (hresult < 0)
+      os << std::hex;
+    os << "Win32 error: " << hresult << std::dec;
+  }
 }
 
 /* Stream a displayError manipulator */
-inline
-std::ostream & operator<<(std::ostream & os, displayError const &se)
-{
+inline std::ostream &operator<<(std::ostream &os, displayError const &se) {
   se.printOn(os);
   return os;
 }
 
-} // namespace
+} // namespace or2
 
 #endif // DISPLAY_ERROR_INL_

@@ -22,13 +22,13 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2074 $
+    $Revision: 2088 $
 */
 
-// $Id: ReadInt.h 2074 2021-07-17 17:07:41Z roger $
+// $Id: ReadInt.h 2088 2021-07-18 14:05:43Z roger $
 
-#include <cstdlib> // for strtol
-#include <string>  // for string
+#include <cstdlib>   // for strtol
+#include <string>    // for string
 #include <windows.h> // for LONGLONG
 
 namespace or2 {

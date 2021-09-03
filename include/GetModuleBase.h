@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 1881 $
+    $Revision: 2172 $
 */
 
-// $Id: GetModuleBase.h 1881 2020-04-09 20:55:12Z Roger $
+// $Id: GetModuleBase.h 2172 2021-07-19 18:21:40Z roger $
 
 #ifndef _WINDOWS_
 #include <windows.h>
@@ -36,7 +36,7 @@
  * @param dwAddress the target address
  * @return the base address of the module, or zero if not identified
  */
-DWORD64 CALLBACK GetModuleBase( HANDLE hProcess, DWORD64 dwAddress );
+DWORD64 CALLBACK GetModuleBase(HANDLE hProcess, DWORD64 dwAddress);
 
 /**
  * Get module file name, correcting for a couple of common issues.
@@ -45,9 +45,10 @@ DWORD64 CALLBACK GetModuleBase( HANDLE hProcess, DWORD64 dwAddress );
  * @param hMod the module to query
  * @param szBuff the output filename buffer
  * @param bufLen the size of the output buffer
- * @returns the length of the string copied to the buffer, or zero on failure, 
+ * @returns the length of the string copied to the buffer, or zero on failure,
  * in which case call GetLastError for the underlying error code.
  */
-DWORD GetModuleFileNameWrapper( HANDLE hProcess, HMODULE hMod, char * szBuff, DWORD bufLen );
+DWORD GetModuleFileNameWrapper(HANDLE hProcess, HMODULE hMod, char *szBuff,
+                               DWORD bufLen);
 
 #endif // GETMODULEBASE_H_

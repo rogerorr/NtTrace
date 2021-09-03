@@ -22,18 +22,20 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2074 $
+    $Revision: 2203 $
 */
 
-// $Id: ProcessHelper.h 2074 2021-07-17 17:07:41Z roger $
+// $Id: ProcessHelper.h 2203 2021-07-19 23:23:31Z roger $
 
+// clang-format off
+#include <windows.h> // for CreateProcess
+// clang-format on
 #include <algorithm> // for transform
 #include <cctype>    // for tolower
 #include <iostream>
 #include <psapi.h> // for EnumProcesses
 #include <string>
 #include <vector>
-#include <windows.h> // for CreateProcess
 
 #include "Options.h"
 #include "readInt.h"

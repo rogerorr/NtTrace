@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2081 $
+    $Revision: 2105 $
 */
 
-// $Id: EntryPoint.h 2081 2021-07-17 17:50:08Z roger $
+// $Id: EntryPoint.h 2105 2021-07-19 08:03:31Z Roger $
 
 #include <windows.h>
 
@@ -192,8 +192,8 @@ private:
   std::string retTypeName;         // full name of return type
   unsigned char *targetAddress;
   unsigned char *preSave; // address of pre-save (for X64 fast-call)
-  DWORD
-      ssn; // System Service Number [Used to set Eax/Rax to pre-call breakpoint]
+  DWORD ssn;              // System Service Number
+                          // Used to set Eax/Rax to pre-call breakpoint
 
   NtCall insertBrkpt(HANDLE hProcess, unsigned char *address,
                      unsigned int offset, unsigned char *setssn);

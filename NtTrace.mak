@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 1971 2021-07-08 21:26:10Z roger $
+# $Id: NtTrace.mak 2239 2021-09-03 15:27:51Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
@@ -35,7 +35,7 @@ clean :
 	@-del NtTrace.exe NtTrace.res *.pdb
 	@-rd /q /s $(BUILD)
 
-CCFLAGS = /nologo /MD /W3 /WX /Zi /Iinclude /D_CRT_SECURE_NO_WARNINGS
+CCFLAGS = /nologo /MD /W3 /WX /Zi /Iinclude /D_CRT_SECURE_NO_WARNINGS /I "$(VSINSTALLDIR)\DIA SDK\include"
 LINKFLAGS = /link /opt:ref,icf
 
 {src}.cpp{$(BUILD)}.obj::
@@ -97,5 +97,4 @@ $(BUILD)\SymbolEngine.obj: \
 	"include/DbgHelper.h" \
 	"include/DbgHelper.inl" \
 	"include/StrFromWchar.h" \
-	"include/MSvcExceptions.h" \
-	"include/BasicType.h"
+	"include/MSvcExceptions.h"

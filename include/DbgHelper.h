@@ -21,14 +21,13 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2074 $
+    $Revision: 2234 $
 */
 
-// $Id: DbgHelper.h 2074 2021-07-17 17:07:41Z roger $
+// $Id: DbgHelper.h 2234 2021-09-02 22:13:14Z roger $
 
+#include <cvconst.h> //DIA SDK
 #include <windows.h>
-
-#include "SymTagEnum.h"
 
 #if (WINVER < 0x0500)
 // Check for original VC6 SDK
