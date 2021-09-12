@@ -8,7 +8,7 @@
 
     @author Roger Orr <rogero@howzatt.co.uk>
 
-    Copyright &copy; 2003.
+    Copyright &copy; 2003, 2021.
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -22,10 +22,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2172 $
+    $Revision: 2248 $
 */
 
-// $Id: SymbolEngine.h 2172 2021-07-19 18:21:40Z roger $
+// $Id: SymbolEngine.h 2248 2021-09-10 19:48:50Z roger $
 
 #include <iosfwd>
 #include <string>
@@ -38,20 +38,30 @@ namespace or2 {
 class SymbolEngine : public DbgHelper {
 public:
   /** Construct wrapper for specified process */
-  SymbolEngine(HANDLE hPRocess);
+  SymbolEngine(HANDLE hProcess);
 
   /** Destroy wrapper */
   ~SymbolEngine();
 
   /** Print address to a stream, return true if information cacheable */
-  bool printAddress(PVOID address, std::ostream &os) const;
+  bool printAddress(DWORD64 address, std::ostream &os) const;
+
+  /** Print inline address to a stream */
+  void printInlineAddress(DWORD64 address, DWORD inline_context,
+                          std::ostream &os) const;
 
   /** Convert address to a string */
-  std::string addressToName(PVOID address) const;
+  std::string addressToName(DWORD64 address) const;
+
+  /** Convert pointer to a string */
+  std::string addressToName(PVOID pointer) const;
+
+  /** Convert inline address to a string */
+  std::string inlineToName(DWORD64 address, DWORD inline_context) const;
 
   /** Provide a stack trace for the 'origContext' using current depth and params
    */
-  void StackTrace(HANDLE hThread, const CONTEXT &origContext,
+  void StackTrace(HANDLE hThread, const CONTEXT &context,
                   std::ostream &os) const;
 
   /** get context for the current thread, correcting the stack frame to the
@@ -117,6 +127,7 @@ public:
     /** callback function called for each enumerated local */
     virtual bool operator()(SymbolEngine const &eng,
                             struct _SYMBOL_INFO *pSymInfo) = 0;
+    virtual ~EnumLocalCallBack() {}
   };
 
   /** enumerate local variables at an address */

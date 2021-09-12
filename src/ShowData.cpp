@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2081 2021-07-17 17:50:08Z roger $";
+    "$Id: ShowData.cpp 2250 2021-09-10 20:33:26Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -69,11 +69,7 @@ std::ostream &operator<<(std::ostream &os, LARGE_INTEGER const &largeInteger) {
  */
 std::ostream &operator<<(std::ostream &os,
                          ULARGE_INTEGER const &ulargeInteger) {
-#if (_MSC_VER < 1300)
-  double d = static_cast<double>((LONGLONG)ulargeInteger.QuadPart);
-#else
   double d = static_cast<double>(ulargeInteger.QuadPart);
-#endif // _MSC_VER
   return os << d;
 }
 

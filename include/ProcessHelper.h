@@ -22,10 +22,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2203 $
+    $Revision: 2250 $
 */
 
-// $Id: ProcessHelper.h 2203 2021-07-19 23:23:31Z roger $
+// $Id: ProcessHelper.h 2250 2021-09-10 20:33:26Z roger $
 
 // clang-format off
 #include <windows.h> // for CreateProcess
@@ -209,14 +209,10 @@ FindProcesses(const char *pattern = 0 ///< pattern to match for process name
   DWORD const cProcesses = cbNeeded / sizeof(DWORD);
 
   std::string lowerPattern(pattern == 0 ? "" : pattern);
-#if _MSC_VER > 1200
   // avoid C4244 warning from tolower
   struct lcase {
     char operator()(char ch) { return static_cast<char>(tolower(ch)); }
   } lcase;
-#else
-#define lcase tolower
-#endif // _MSC_VER
 
   std::transform(lowerPattern.begin(), lowerPattern.end(), lowerPattern.begin(),
                  lcase);

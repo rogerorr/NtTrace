@@ -6,7 +6,7 @@ DESCRIPTION
     Additional symbol engine functionality
 
 COPYRIGHT
-    Copyright (C) 2003 by Roger Orr <rogero@howzatt.co.uk>
+    Copyright (C) 2003,2021 by Roger Orr <rogero@howzatt.co.uk>
 
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2238 2021-09-03 14:34:03Z roger $";
+    "$Id: SymbolEngine.cpp 2249 2021-09-10 19:51:28Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -56,6 +56,7 @@ static char const szRCSID[] =
 #pragma comment(lib, "psapi")
 
 // helper function
+namespace or2 {
 namespace {
 // fix for problem with resource leak in symsrv
 void fixSymSrv();
@@ -72,16 +73,124 @@ void addParams(std::ostream &os, WORDSIZE *pParams, size_t maxParams) {
   }
 }
 
-void showVariablesAt(std::ostream &os, DWORD64 codeOffset, DWORD64 frameOffset,
-                     const CONTEXT &context, or2::SymbolEngine const &eng);
-
 struct RegInfo {
-  RegInfo(std::string name, DWORD64 value) : name(std::move(name)), value(value) {}
+  RegInfo(std::string name, DWORD64 value)
+      : name(std::move(name)), value(value) {}
   std::string name;
   DWORD64 value;
 };
 
 RegInfo getRegInfo(ULONG reg, const CONTEXT &context);
+
+#ifdef DBGHELP_6_1_APIS
+
+struct EngineCallBack {
+  EngineCallBack(SymbolEngine const &eng, SymbolEngine::EnumLocalCallBack &cb)
+      : eng(eng), cb(cb) {}
+
+  static BOOL CALLBACK enumSymbolsProc(PSYMBOL_INFO pSymInfo,
+                                       ULONG /*SymbolSize*/,
+                                       PVOID UserContext) {
+    EngineCallBack &thisCb = *(EngineCallBack *)UserContext;
+
+    return thisCb.cb(thisCb.eng, pSymInfo);
+  }
+
+  SymbolEngine const &eng;
+  SymbolEngine::EnumLocalCallBack &cb;
+};
+
+struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
+  VariableCallBack(std::ostream &opf, DWORD64 frameOffset,
+                   const CONTEXT &context)
+      : opf(opf), frameOffset(frameOffset), context(context) {}
+
+  virtual bool operator()(SymbolEngine const &eng, PSYMBOL_INFO pSymInfo) {
+    std::string name(pSymInfo->Name, pSymInfo->NameLen);
+    eng.decorateName(name, pSymInfo->ModBase, pSymInfo->TypeIndex);
+    if (!(pSymInfo->Flags & SYMFLAG_LOCAL)) {
+      // Ignore anything not a local variable
+    } else if (pSymInfo->Flags & SYMFLAG_NULL) {
+      // Ignore 'NULL' objects
+    } else if ((pSymInfo->Flags & SYMFLAG_REGREL) ||
+               (pSymInfo->Flags & SYMFLAG_FRAMEREL)) {
+      opf << "  " << name;
+
+      const RegInfo reg_info = (pSymInfo->Flags & SYMFLAG_REGREL)
+                                   ? getRegInfo(pSymInfo->Register, context)
+                                   : RegInfo("frame", frameOffset);
+      if (reg_info.name.empty()) {
+        opf << " [register '" << pSymInfo->Register << "']";
+      } else {
+        opf << " [" << reg_info.name;
+        if (pSymInfo->Address > 0x7fffffff)
+          opf << "-" << std::hex << -(int)pSymInfo->Address << std::dec;
+        else
+          opf << "+" << std::hex << (int)pSymInfo->Address << std::dec;
+        opf << "]";
+
+        if (pSymInfo->Size == sizeof(char)) {
+          unsigned char data;
+          eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
+                         sizeof(data));
+          if (isprint(data))
+            opf << " = '" << data << '\'';
+          else
+            opf << " = " << (int)data;
+        } else if (pSymInfo->Size == sizeof(short)) {
+          unsigned short data;
+          eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
+                         sizeof(data));
+          opf << " = " << data;
+        } else if ((pSymInfo->Size == sizeof(int)) || (pSymInfo->Size == 0)) {
+          unsigned int data;
+          eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
+                         sizeof(data));
+          opf << " = 0x" << std::hex << data << std::dec;
+        } else if ((pSymInfo->Size == 8) &&
+                   (name.compare(0, 6, "double") == 0)) {
+          double data;
+          eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
+                         sizeof(data));
+          opf << " = " << data;
+        } else if ((pSymInfo->Size == 8)) {
+          LONGLONG data;
+          eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
+                         sizeof(data));
+          opf << " = 0x" << std::hex << data << std::dec;
+        }
+      }
+      opf << std::endl;
+    } else if (pSymInfo->Flags & SYMFLAG_REGISTER) {
+      opf << "  " << name;
+      const RegInfo reg_info = getRegInfo(pSymInfo->Register, context);
+      if (reg_info.name.empty()) {
+        opf << " (register '" << pSymInfo->Register << "\')";
+      } else {
+        opf << " (" << reg_info.name << ") = 0x" << std::hex << reg_info.value
+            << std::dec;
+      }
+      opf << std::endl;
+    } else {
+      opf << "  " << name << " Flags: " << std::hex << pSymInfo->Flags
+          << std::dec << std::endl;
+    }
+
+    return true;
+  }
+
+  std::ostream &opf;
+  DWORD64 frameOffset;
+  const CONTEXT &context;
+};
+
+#endif // DBGHELP_6_1_APIS
+
+void showVariablesAt(std::ostream &os, DWORD64 codeOffset, DWORD64 frameOffset,
+                     const CONTEXT &context, SymbolEngine const &eng);
+void showInlineVariablesAt(std::ostream &os, DWORD64 codeOffset,
+                           DWORD64 frameOffset, const CONTEXT &context,
+                           DWORD inline_context, SymbolEngine const &eng);
 
 //////////////////////////////////////////////////////////
 // Helper function: getBaseType maps PDB type + length to C++ name
@@ -94,12 +203,11 @@ BOOL getWow64ThreadContext(HANDLE hProcess, HANDLE hThread,
 #endif // _M_X64
 } // namespace
 
-namespace or2 {
-
 /////////////////////////////////////////////////////////////////////////////////////
 /** Implementation class */
 struct SymbolEngine::Impl {
-  std::map<void const *, std::string> addressMap;
+  std::map<DWORD64, std::string> addressMap;
+  std::map<std::pair<DWORD64, DWORD>, std::string> inlineMap;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -163,17 +271,17 @@ void SymbolEngine::setSehDepth(int value) { maxSehDepth = value; }
 int SymbolEngine::getSehDepth() const { return maxSehDepth; }
 
 /////////////////////////////////////////////////////////////////////////////////////
-bool SymbolEngine::printAddress(PVOID address, std::ostream &os) const {
+bool SymbolEngine::printAddress(DWORD64 address, std::ostream &os) const {
   bool cacheSymbol(true);
 
   // Despite having GetModuleBase in the call to StackWalk it needs help for the
   // addresses
-  ::GetModuleBase(GetProcess(), (DWORD64)address);
+  ::GetModuleBase(GetProcess(), address);
 
   ///////////////////////////////
   // Log the module + offset
   MEMORY_BASIC_INFORMATION mbInfo;
-  if (::VirtualQueryEx(GetProcess(), address, &mbInfo, sizeof mbInfo) &&
+  if (::VirtualQueryEx(GetProcess(), (PVOID)address, &mbInfo, sizeof mbInfo) &&
       ((mbInfo.State & MEM_FREE) == 0) && ((mbInfo.Type & MEM_IMAGE) != 0)) {
     std::ostringstream str;
     HMODULE const hmod = (HMODULE)mbInfo.AllocationBase;
@@ -185,13 +293,12 @@ bool SymbolEngine::printAddress(PVOID address, std::ostream &os) const {
       str << hmod;
     } else
       str << strrchr(szFileName, '\\') + 1;
-    str << " + 0x" << std::hex
-        << ((ULONG_PTR)address - (ULONG_PTR)mbInfo.AllocationBase) << std::dec;
+    str << " + 0x" << std::hex << (address - (ULONG_PTR)mbInfo.AllocationBase) << std::dec;
 
     os << std::setw(30) << std::left << str.str().c_str()
        << std::right; // c_str() fixes VC6 bug with setw
   } else {
-    os << address;
+    os << (PVOID)address;
     return false;
   }
 
@@ -211,7 +318,7 @@ bool SymbolEngine::printAddress(PVOID address, std::ostream &os) const {
   pSym->MaxNameLen = sizeof(SymInfo.name);
 
   DWORD64 dwDisplacement64(0);
-  if (SymFromAddr((DWORD64)address, &dwDisplacement64, pSym))
+  if (SymFromAddr(address, &dwDisplacement64, pSym))
 #else
   struct {
     IMAGEHLP_SYMBOL64 symInfo;
@@ -222,7 +329,7 @@ bool SymbolEngine::printAddress(PVOID address, std::ostream &os) const {
   pSym->MaxNameLength = sizeof(SymInfo.name);
 
   DWORD64 dwDisplacement64;
-  if (GetSymFromAddr64((DWORD)address, &dwDisplacement64, pSym))
+  if (GetSymFromAddr64(address, &dwDisplacement64, pSym))
 #endif
   {
     os << " " << pSym->Name;
@@ -241,7 +348,7 @@ bool SymbolEngine::printAddress(PVOID address, std::ostream &os) const {
   if (showLines) {
     DbgInit<IMAGEHLP_LINE64> lineInfo;
     DWORD dwDisplacement(0);
-    if (GetLineFromAddr64((DWORD64)address, &dwDisplacement, &lineInfo)) {
+    if (GetLineFromAddr64(address, &dwDisplacement, &lineInfo)) {
       os << "   " << lineInfo.FileName << "(" << lineInfo.LineNumber << ")";
       if (dwDisplacement != 0) {
         os << " + " << dwDisplacement << " byte"
@@ -253,15 +360,79 @@ bool SymbolEngine::printAddress(PVOID address, std::ostream &os) const {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
+/** Print inline address to a stream */
+void SymbolEngine::printInlineAddress(DWORD64 address, DWORD inline_context,
+                                      std::ostream &os) const {
+  ///////////////////////////////
+  // Log the symbol name
+#ifdef DBGHELP_6_2_APIS
+  struct {
+    SYMBOL_INFO symInfo;
+    char name[4 * 256];
+  } SymInfo = {{sizeof(SymInfo.symInfo)}, ""};
+
+  PSYMBOL_INFO pSym = &SymInfo.symInfo;
+  pSym->MaxNameLen = sizeof(SymInfo.name);
+
+  DWORD64 dwDisplacement64(0);
+  if (FromInlineContext(address, inline_context, &dwDisplacement64, pSym)) {
+    os << pSym->Name;
+    if (dwDisplacement64 != 0) {
+      int displacement = static_cast<int>(dwDisplacement64);
+      if (displacement < 0)
+        os << " - " << -displacement;
+      else
+        os << " + " << displacement;
+    }
+  }
+
+  ///////////////////////////////
+  // Log the line number
+  if (showLines) {
+    DbgInit<IMAGEHLP_LINE64> lineInfo;
+    DWORD dwDisplacement(0);
+    if (GetLineFromInlineContext(address, inline_context, 0, &dwDisplacement,
+                                 &lineInfo)) {
+      os << "   " << lineInfo.FileName << "(" << lineInfo.LineNumber << ")";
+      if (dwDisplacement != 0) {
+        os << " + " << dwDisplacement << " byte"
+           << (dwDisplacement == 1 ? "" : "s");
+      }
+    }
+  }
+#endif // DBGHELP_6_2_APIS
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
 // Convert address to a string.
-std::string SymbolEngine::addressToName(PVOID address) const {
-  std::map<void const *, std::string>::iterator it =
-      pImpl->addressMap.find(address);
+std::string SymbolEngine::addressToName(DWORD64 address) const {
+  std::map<DWORD64, std::string>::iterator it = pImpl->addressMap.find(address);
   if (it == pImpl->addressMap.end()) {
     std::ostringstream oss;
     if (!printAddress(address, oss))
       return oss.str();
     it = pImpl->addressMap.insert(std::make_pair(address, oss.str())).first;
+  }
+
+  return it->second;
+}
+
+// Convert pointer to a string.
+std::string SymbolEngine::addressToName(PVOID pointer) const {
+  return addressToName(DWORD64(pointer));
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
+// Convert inline address to a string.
+std::string SymbolEngine::inlineToName(DWORD64 address,
+                                       DWORD inline_context) const {
+  std::pair<DWORD64, DWORD> key(address, inline_context);
+  std::map<std::pair<DWORD64, DWORD>, std::string>::iterator it =
+      pImpl->inlineMap.find(key);
+  if (it == pImpl->inlineMap.end()) {
+    std::ostringstream oss;
+    printInlineAddress(address, inline_context, oss);
+    it = pImpl->inlineMap.insert(std::make_pair(key, oss.str())).first;
   }
 
   return it->second;
@@ -342,26 +513,27 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
                        pContext, NULL,
                        0, // implies ::SymFunctionTableAccess,
                        ::GetModuleBase, NULL)) {
-    if (stackFrame.AddrFrame.Offset == 0)
+    const DWORD64 frame = stackFrame.AddrFrame.Offset;
+    if (frame == 0)
       break;
 
-    if (stackFrame.AddrPC.Offset == 0) {
+    const DWORD64 pc = stackFrame.AddrPC.Offset;
+    if (pc == 0) {
       os << "Null address\n";
       break;
     }
 
     if (currFrame != 0) {
-      if (currFrame >= stackFrame.AddrFrame.Offset) {
-        os << "Stack frame: " << (PVOID)stackFrame.AddrFrame.Offset
-           << " out of sequence\n";
+      if (currFrame >= frame) {
+        os << "Stack frame: " << (PVOID)frame << " out of sequence\n";
         break;
       }
     }
-    currFrame = stackFrame.AddrFrame.Offset;
+    currFrame = frame;
 
     // This helps x64 stack walking -- I think this might be a bug as the
     // function is already supplied in the StackWalk64 call ...
-    ::GetModuleBase(GetProcess(), stackFrame.AddrPC.Offset);
+    ::GetModuleBase(GetProcess(), pc);
 
     if (skip > 0) {
       skip--;
@@ -373,7 +545,7 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
         break;
     }
 
-    if (isExecutable(stackFrame.AddrPC.Offset)) {
+    if (isExecutable(pc)) {
       nonExec = 0;
     } else {
       ++nonExec;
@@ -381,7 +553,15 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
         break;
     }
 
-    os << addressToName((PVOID)stackFrame.AddrPC.Offset);
+    // We now think we have a frame worth processing
+
+    const DWORD inline_count = AddrIncludeInlineTrace(pc);
+
+    os << addressToName(pc);
+
+    if (inline_count) {
+      os << " (" << inline_count << " inlined)";
+    }
 
     if (nonExec) {
       os << " (non executable)";
@@ -390,15 +570,15 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
     os << "\n";
 
 #if 0
-        os << "AddrPC: " << (PVOID)stackFrame.AddrPC.Offset
-           << " AddrReturn: " << (PVOID)stackFrame.AddrReturn.Offset
-           << " AddrFrame: " << (PVOID)stackFrame.AddrFrame.Offset
-           << " AddrStack: " << (PVOID)stackFrame.AddrStack.Offset
-           << " FuncTableEntry: " << (PVOID)stackFrame.FuncTableEntry
-           << " Far: " << stackFrame.Far
-           << " Virtual: " << stackFrame.Virtual
-           << " AddrBStore: " << (PVOID)stackFrame.AddrBStore.Offset
-           << "\n";
+    os << "AddrPC: " << (PVOID)stackFrame.AddrPC.Offset
+       << " AddrReturn: " << (PVOID)stackFrame.AddrReturn.Offset
+       << " AddrFrame: " << (PVOID)stackFrame.AddrFrame.Offset
+       << " AddrStack: " << (PVOID)stackFrame.AddrStack.Offset
+       << " FuncTableEntry: " << (PVOID)stackFrame.FuncTableEntry
+       << " Far: " << stackFrame.Far
+       << " Virtual: " << stackFrame.Virtual
+       << " AddrBStore: " << (PVOID)stackFrame.AddrBStore.Offset
+       << "\n";
 #endif
 
     if (showParams) {
@@ -410,6 +590,22 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
     if (showVariables) {
       showVariablesAt(os, stackFrame.AddrPC.Offset, stackFrame.AddrFrame.Offset,
                       rwContext, *this);
+    }
+
+    // Expand inline frames
+    if (inline_count) {
+      DWORD inline_context(0), frame_index(0);
+      if (QueryInlineTrace(pc, 0, pc, pc, &inline_context, &frame_index)) {
+        for (DWORD i = 0; i < inline_count; i++, inline_context++) {
+          os << std::setw(31) << std::left << "[inline frame]"
+             << inlineToName(pc, inline_context) << '\n';
+          if (showVariables) {
+            showInlineVariablesAt(os, stackFrame.AddrPC.Offset,
+                                  stackFrame.AddrFrame.Offset, rwContext,
+                                  inline_context, *this);
+          }
+        }
+      }
     }
   }
 
@@ -437,11 +633,11 @@ BOOL __declspec(naked)
   rc = ::GetThreadContext(GetCurrentThread(), pContext);
 
   if (rc) {
-    _asm mov eax, [ebp + 4]; /* return address */
+    _asm mov eax, [ ebp + 4 ]; /* return address */
     _asm mov regIp, eax;
-    _asm lea eax, [ebp + 0ch]; /* caller's SP before pushing pContext */
+    _asm lea eax, [ ebp + 0ch ]; /* caller's SP before pushing pContext */
     _asm mov regSp, eax;
-    _asm mov eax, [ebp]; /* caller's BP */
+    _asm mov eax, [ ebp ]; /* caller's BP */
     _asm mov regBp, eax;
 
     pContext->Eip = regIp;
@@ -500,8 +696,7 @@ void SymbolEngine::SEHTrace(PVOID ExceptionList, std::ostream &os) const {
 
         // For Msvc Cpp handlers params[2] is actually the return address
         if (isMsvcHandler) {
-          os << " [" << addressToName((PVOID)(ULONG_PTR)extendedFrame.Params[2])
-             << "]";
+          os << " [" << addressToName(extendedFrame.Params[2]) << "]";
         }
         os << "\n";
       }
@@ -732,30 +927,14 @@ BOOL SymbolEngine::enumLocalVariables(DWORD64 codeOffset, DWORD64 frameOffset,
                                       EnumLocalCallBack &cb) const {
 #ifdef DBGHELP_6_1_APIS
 
-  struct CallBack {
-    CallBack(SymbolEngine const &eng, EnumLocalCallBack &cb)
-        : eng(eng), cb(cb) {}
-
-    static BOOL CALLBACK enumSymbolsProc(PSYMBOL_INFO pSymInfo,
-                                         ULONG /*SymbolSize*/,
-                                         PVOID UserContext) {
-      CallBack &thisCb = *(CallBack *)UserContext;
-
-      return thisCb.cb(thisCb.eng, pSymInfo);
-    }
-
-    SymbolEngine const &eng;
-    EnumLocalCallBack &cb;
-  };
-
   IMAGEHLP_STACK_FRAME stackFrame = {0};
   stackFrame.InstructionOffset = codeOffset;
   stackFrame.FrameOffset = frameOffset;
 
   BOOL ret = SetContext(&stackFrame, 0);
   // Note: by experiment with SymUnpack must ignore failures from SetContext ...
-  CallBack callBack(*this, cb);
-  ret = EnumSymbols(0, "*", CallBack::enumSymbolsProc, &callBack);
+  EngineCallBack callBack(*this, cb);
+  ret = EnumSymbols(0, "*", EngineCallBack::enumSymbolsProc, &callBack);
   return ret;
 
 #else
@@ -835,8 +1014,6 @@ bool SymbolEngine::isExecutable(DWORD64 address) const {
   return ret;
 }
 
-} // namespace or2
-
 namespace {
 
 //////////////////////////////////////////////////////////
@@ -856,94 +1033,23 @@ void fixSymSrv() {
 void showVariablesAt(std::ostream &os, DWORD64 codeOffset, DWORD64 frameOffset,
                      const CONTEXT &context, or2::SymbolEngine const &eng) {
 #ifdef DBGHELP_6_1_APIS
-
-  struct CallBack : public or2::SymbolEngine::EnumLocalCallBack {
-    CallBack(std::ostream &opf, DWORD64 frameOffset, const CONTEXT &context)
-        : opf(opf), frameOffset(frameOffset), context(context) {}
-
-    virtual bool operator()(or2::SymbolEngine const &eng,
-                            PSYMBOL_INFO pSymInfo) {
-      std::string name(pSymInfo->Name, pSymInfo->NameLen);
-      eng.decorateName(name, pSymInfo->ModBase, pSymInfo->TypeIndex);
-      if (!(pSymInfo->Flags & SYMFLAG_LOCAL)) {
-        // Ignore anything not a local variable
-      } else if (pSymInfo->Flags & SYMFLAG_NULL) {
-        // Ignore 'NULL' objects
-      } else if ((pSymInfo->Flags & SYMFLAG_REGREL) ||
-                 (pSymInfo->Flags & SYMFLAG_FRAMEREL)) {
-        opf << "  " << name;
-
-        const RegInfo reg_info = (pSymInfo->Flags & SYMFLAG_REGREL)
-                                     ? getRegInfo(pSymInfo->Register, context)
-                                     : RegInfo("frame", frameOffset);
-        if (reg_info.name.empty()) {
-          opf << " [register '" << pSymInfo->Register << "']";
-        } else {
-          opf << " [" << reg_info.name;
-          if (pSymInfo->Address > 0x7fffffff)
-            opf << "-" << std::hex << -(int)pSymInfo->Address << std::dec;
-          else
-            opf << "+" << std::hex << (int)pSymInfo->Address << std::dec;
-          opf << "]";
-
-          if (pSymInfo->Size == sizeof(char)) {
-            unsigned char data;
-            eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
-                           sizeof(data));
-            if (isprint(data))
-              opf << " = '" << data << '\'';
-            else
-              opf << " = " << (int)data;
-          } else if (pSymInfo->Size == sizeof(short)) {
-            unsigned short data;
-            eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
-                           sizeof(data));
-            opf << " = " << data;
-          } else if ((pSymInfo->Size == sizeof(int)) || (pSymInfo->Size == 0)) {
-            unsigned int data;
-            eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
-                           sizeof(data));
-            opf << " = 0x" << std::hex << data << std::dec;
-          } else if ((pSymInfo->Size == 8) &&
-                     (name.compare(0, 6, "double") == 0)) {
-            double data;
-            eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
-                           sizeof(data));
-            opf << " = " << data;
-          } else if ((pSymInfo->Size == 8)) {
-            LONGLONG data;
-            eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
-                           sizeof(data));
-            opf << " = 0x" << std::hex << data << std::dec;
-          }
-        }
-        opf << std::endl;
-      } else if (pSymInfo->Flags & SYMFLAG_REGISTER) {
-        opf << "  " << name;
-        const RegInfo reg_info = getRegInfo(pSymInfo->Register, context);
-        if (reg_info.name.empty()) {
-          opf << " (register '" << pSymInfo->Register << "\')";
-        } else {
-          opf << " (" << reg_info.name << ") = 0x" << std::hex << reg_info.value
-              << std::dec;
-        }
-        opf << std::endl;
-      } else {
-        opf << "  " << name << " Flags: " << std::hex << pSymInfo->Flags
-            << std::dec << std::endl;
-      }
-
-      return true;
-    }
-
-    std::ostream &opf;
-    DWORD64 frameOffset;
-    const CONTEXT &context;
-  };
-
-  CallBack cb(os, frameOffset, context);
+  VariableCallBack cb(os, frameOffset, context);
 
   eng.enumLocalVariables(codeOffset, frameOffset, cb);
+#endif // DBGHELP_6_1_APIS
+}
+
+void showInlineVariablesAt(std::ostream &os, DWORD64 codeOffset,
+                           DWORD64 frameOffset, const CONTEXT &context,
+                           DWORD inline_context, SymbolEngine const &eng) {
+#ifdef DBGHELP_6_1_APIS
+  if (eng.SetScopeFromInlineContext(codeOffset, inline_context)) {
+    VariableCallBack cb(os, frameOffset, context);
+
+    EngineCallBack callBack(eng, cb);
+    eng.EnumSymbolsEx(0, "*", EngineCallBack::enumSymbolsProc, &callBack,
+                      SYMENUM_OPTIONS_INLINE);
+  }
 #endif // DBGHELP_6_1_APIS
 }
 
@@ -952,8 +1058,8 @@ void showVariablesAt(std::ostream &os, DWORD64 codeOffset, DWORD64 frameOffset,
 RegInfo getRegInfo(ULONG reg, const CONTEXT &context) {
   switch (reg) {
 #ifdef _M_IX86
-#define CASE(REG, NAME, SRC, MASK)           \
-  case CV_REG_##REG:                       \
+#define CASE(REG, NAME, SRC, MASK)                                             \
+  case CV_REG_##REG:                                                           \
     return RegInfo(NAME, context.SRC & MASK)
 
     CASE(AL, "al", Eax, 0xff);
@@ -975,13 +1081,13 @@ RegInfo getRegInfo(ULONG reg, const CONTEXT &context) {
     CASE(ECX, "ecx", Ecx, ~0u);
     CASE(EDX, "edx", Edx, ~0u);
     CASE(ESP, "esp", Esp, ~0u);
-    case CV_ALLREG_VFRAME: // x86 alternative
+  case CV_ALLREG_VFRAME: // x86 alternative
     CASE(EBP, "ebp", Ebp, ~0u);
     CASE(ESI, "esi", Esi, ~0u);
     CASE(EDI, "edi", Edi, ~0u);
 #elif _M_X64
-#define CASE(REG, NAME, SRC, MASK)           \
-  case CV_AMD64_##REG:                       \
+#define CASE(REG, NAME, SRC, MASK)                                             \
+  case CV_AMD64_##REG:                                                         \
     return RegInfo(NAME, context.SRC & MASK)
 
     CASE(AL, "al", Rax, 0xff);
@@ -1182,3 +1288,4 @@ BOOL getWow64ThreadContext(HANDLE hProcess, HANDLE hThread,
 #endif // _M_X64
 
 } // namespace
+} // namespace or2

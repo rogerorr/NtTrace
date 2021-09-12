@@ -6,7 +6,7 @@
 
     @author Roger Orr <rogero@howzatt.co.uk>
 
-    Copyright &copy; 2003.
+    Copyright &copy; 2003, 2021.
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -20,10 +20,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2234 $
+    $Revision: 2246 $
 */
 
-// $Id: DbgHelper.inl 2234 2021-09-02 22:13:14Z roger $
+// $Id: DbgHelper.inl 2246 2021-09-09 20:32:36Z roger $
 
 #include <iostream>
 
@@ -37,52 +37,54 @@ inline std::ostream &operator<<(std::ostream &os, enum SymTagEnum const value) {
   static struct {
     int value;
     char const *name;
-  } enumValues[] = {DEF(SymTagNull),
-                    DEF(SymTagExe),
-                    DEF(SymTagCompiland),
-                    DEF(SymTagCompilandDetails),
-                    DEF(SymTagCompilandEnv),
-                    DEF(SymTagFunction),
-                    DEF(SymTagBlock),
-                    DEF(SymTagData),
-                    DEF(SymTagAnnotation),
-                    DEF(SymTagLabel),
-                    DEF(SymTagPublicSymbol),
-                    DEF(SymTagUDT),
-                    DEF(SymTagEnum),
-                    DEF(SymTagFunctionType),
-                    DEF(SymTagPointerType),
-                    DEF(SymTagArrayType),
-                    DEF(SymTagBaseType),
-                    DEF(SymTagTypedef),
-                    DEF(SymTagBaseClass),
-                    DEF(SymTagFriend),
-                    DEF(SymTagFunctionArgType),
-                    DEF(SymTagFuncDebugStart),
-                    DEF(SymTagFuncDebugEnd),
-                    DEF(SymTagUsingNamespace),
-                    DEF(SymTagVTableShape),
-                    DEF(SymTagVTable),
-                    DEF(SymTagCustom),
-                    DEF(SymTagThunk),
-                    DEF(SymTagCustomType),
-                    DEF(SymTagManagedType),
-                    DEF(SymTagDimension),
-                    DEF(SymTagCallSite),
-                    DEF(SymTagInlineSite),
-                    DEF(SymTagBaseInterface),
-                    DEF(SymTagVectorType),
-                    DEF(SymTagMatrixType),
-                    DEF(SymTagHLSLType),
-                    #if (_MSC_VER >= 1900)
-                    DEF(SymTagCaller),
-                    DEF(SymTagCallee),
-                    DEF(SymTagExport),
-                    DEF(SymTagHeapAllocationSite),
-                    DEF(SymTagCoffGroup),
-                    #endif // _MSC_VER
-                    DEF(SymTagMax),
-                    {0, 0}};
+  } enumValues[] = {
+    DEF(SymTagNull),
+    DEF(SymTagExe),
+    DEF(SymTagCompiland),
+    DEF(SymTagCompilandDetails),
+    DEF(SymTagCompilandEnv),
+    DEF(SymTagFunction),
+    DEF(SymTagBlock),
+    DEF(SymTagData),
+    DEF(SymTagAnnotation),
+    DEF(SymTagLabel),
+    DEF(SymTagPublicSymbol),
+    DEF(SymTagUDT),
+    DEF(SymTagEnum),
+    DEF(SymTagFunctionType),
+    DEF(SymTagPointerType),
+    DEF(SymTagArrayType),
+    DEF(SymTagBaseType),
+    DEF(SymTagTypedef),
+    DEF(SymTagBaseClass),
+    DEF(SymTagFriend),
+    DEF(SymTagFunctionArgType),
+    DEF(SymTagFuncDebugStart),
+    DEF(SymTagFuncDebugEnd),
+    DEF(SymTagUsingNamespace),
+    DEF(SymTagVTableShape),
+    DEF(SymTagVTable),
+    DEF(SymTagCustom),
+    DEF(SymTagThunk),
+    DEF(SymTagCustomType),
+    DEF(SymTagManagedType),
+    DEF(SymTagDimension),
+    DEF(SymTagCallSite),
+    DEF(SymTagInlineSite),
+    DEF(SymTagBaseInterface),
+    DEF(SymTagVectorType),
+    DEF(SymTagMatrixType),
+    DEF(SymTagHLSLType),
+#if (_MSC_VER >= 1900)
+    DEF(SymTagCaller),
+    DEF(SymTagCallee),
+    DEF(SymTagExport),
+    DEF(SymTagHeapAllocationSite),
+    DEF(SymTagCoffGroup),
+#endif // _MSC_VER
+    DEF(SymTagMax),
+    {0, 0}
+  };
 
 #undef DEF
 
@@ -157,7 +159,8 @@ inline HANDLE DbgHelper::GetProcess() const { return m_hProcess; }
 
 #ifndef DBGHELP_6_1_APIS
 
-inline BOOL DbgHelper::GetSymFromAddr64(DWORD dwAddr, PDWORD64 pdwDisplacement,
+inline BOOL DbgHelper::GetSymFromAddr64(DWORD64 dwAddr,
+                                        PDWORD64 pdwDisplacement,
                                         PIMAGEHLP_SYMBOL64 Symbol) const {
   return ::SymGetSymFromAddr64(m_hProcess, dwAddr, pdwDisplacement, Symbol);
 }
@@ -337,8 +340,6 @@ DbgHelper::WriteMiniDump(DWORD processId, HANDLE hFile, MINIDUMP_TYPE DumpType,
   return bRet;
 }
 
-#undef DYN_LOAD
-
 /** Test whether EnumSymbols API is available */
 inline BOOL DbgHelper::IsEnumSymbolsAvailable() const {
   // Run a test which won't produce any callbacks
@@ -346,6 +347,105 @@ inline BOOL DbgHelper::IsEnumSymbolsAvailable() const {
 }
 
 #endif // DBGHELP_6_1_APIS
+
+#ifdef DBGHELP_6_2_APIS
+/** Number of inline frames at the given address */
+inline DWORD DbgHelper::AddrIncludeInlineTrace(DWORD64 address) const {
+  typedef DWORD IMAGEAPI SymAddrIncludeInlineTrace(HANDLE hProcess,
+                                                   DWORD64 Address);
+
+  DYN_LOAD(SymAddrIncludeInlineTrace);
+
+  DWORD result = 0;
+  if (pfnSymAddrIncludeInlineTrace) {
+    result = pfnSymAddrIncludeInlineTrace(m_hProcess, address);
+  }
+  return result;
+}
+
+/** Get inline context */
+inline BOOL DbgHelper::QueryInlineTrace(DWORD64 StartAddress,
+                                        DWORD StartContext,
+                                        DWORD64 StartRetAddress,
+                                        DWORD64 CurAddress, LPDWORD CurContext,
+                                        LPDWORD CurFrameIndex) const {
+  typedef BOOL IMAGEAPI SymQueryInlineTrace(
+      HANDLE hProcess, DWORD64 StartAddress, DWORD StartContext,
+      DWORD64 StartRetAddress, DWORD64 CurAddress, LPDWORD CurContext,
+      LPDWORD CurFrameIndex);
+
+  DYN_LOAD(SymQueryInlineTrace);
+
+  return pfnSymQueryInlineTrace &&
+         pfnSymQueryInlineTrace(m_hProcess, StartAddress, StartContext,
+                                StartRetAddress, CurAddress, CurContext,
+                                CurFrameIndex);
+}
+
+/** Get Symbol from inline context */
+inline BOOL DbgHelper::FromInlineContext(DWORD64 Address, DWORD InlineContext,
+                                         PDWORD64 pDisplacement,
+                                         PSYMBOL_INFO Symbol) const {
+  typedef BOOL IMAGEAPI SymFromInlineContext(
+      HANDLE hProcess, DWORD64 Address, DWORD InlineContext,
+      PDWORD64 pDisplacement, PSYMBOL_INFO Symbol);
+
+  DYN_LOAD(SymFromInlineContext);
+
+  return pfnSymFromInlineContext &&
+         pfnSymFromInlineContext(m_hProcess, Address, InlineContext,
+                                 pDisplacement, Symbol);
+}
+
+/** Get Line from inline context */
+inline BOOL DbgHelper::GetLineFromInlineContext(DWORD64 Address,
+                                                DWORD InlineContext,
+                                                DWORD64 ModuleBaseAddress,
+                                                PDWORD pDisplacement,
+                                                PIMAGEHLP_LINE64 Line64) const {
+  typedef BOOL IMAGEAPI SymGetLineFromInlineContext(
+      HANDLE hProcess, DWORD64 Address, DWORD InlineContext,
+      DWORD64 ModuleBaseAddress, PDWORD pDisplacement, PIMAGEHLP_LINE64 Line64);
+
+  DYN_LOAD(SymGetLineFromInlineContext);
+
+  return pfnSymGetLineFromInlineContext &&
+         pfnSymGetLineFromInlineContext(m_hProcess, Address, InlineContext,
+                                        ModuleBaseAddress, pDisplacement,
+                                        Line64);
+}
+
+/** Enumerate inline symbols at a given address and inline context. */
+inline BOOL
+DbgHelper::EnumSymbolsEx(ULONG64 BaseOfDll, PCSTR Mask,
+                         PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
+                         PVOID UserContext, DWORD Options) const {
+  typedef BOOL IMAGEAPI SymEnumSymbolsEx(
+      HANDLE hProcess, ULONG64 BaseOfDll, PCSTR Mask,
+      PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, PVOID UserContext,
+      DWORD Options);
+
+  DYN_LOAD(SymEnumSymbolsEx);
+
+  return pfnSymEnumSymbolsEx &&
+         pfnSymEnumSymbolsEx(m_hProcess, BaseOfDll, Mask, EnumSymbolsCallback,
+                             UserContext, Options);
+}
+
+inline BOOL DbgHelper::SetScopeFromInlineContext(DWORD64 Address,
+                                                 DWORD InlineContext) const {
+  typedef BOOL IMAGEAPI SymSetScopeFromInlineContext(
+      HANDLE hProcess, DWORD64 Address, DWORD InlineContext);
+
+  DYN_LOAD(SymSetScopeFromInlineContext);
+
+  return pfnSymSetScopeFromInlineContext &&
+         pfnSymSetScopeFromInlineContext(m_hProcess, Address, InlineContext);
+}
+
+#endif // DBGHELP_6_2_APIS
+
+#undef DYN_LOAD
 
 } // namespace or2
 

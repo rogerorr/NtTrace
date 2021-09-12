@@ -7,7 +7,7 @@
 
     @author Roger Orr <rogero@howzatt.co.uk>
 
-    Copyright &copy; 2003.
+    Copyright &copy; 2003, 2021.
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2234 $
+    $Revision: 2246 $
 */
 
-// $Id: DbgHelper.h 2234 2021-09-02 22:13:14Z roger $
+// $Id: DbgHelper.h 2246 2021-09-09 20:32:36Z roger $
 
 #include <cvconst.h> //DIA SDK
 #include <windows.h>
@@ -46,6 +46,10 @@
 
 #ifdef SSRVOPT_TRACE // identifies newer DbgHelp.h (!)
 #define DBGHELP_6_1_APIS
+#endif
+
+#ifdef INLINE_FRAME_CONTEXT_INIT // identifies addition of Inline frame handling
+#define DBGHELP_6_2_APIS
 #endif
 
 #ifdef DBGHELP_6_1_APIS
@@ -95,7 +99,7 @@ public:
 #ifndef DBGHELP_6_1_APIS
 
   /** Get symbolic information for the input address. */
-  BOOL GetSymFromAddr64(DWORD dwAddr, PDWORD64 pdwDisplacement,
+  BOOL GetSymFromAddr64(DWORD64 dwAddr, PDWORD64 pdwDisplacement,
                         PIMAGEHLP_SYMBOL64 Symbol) const;
 
 #else
@@ -142,6 +146,35 @@ public:
                      PMINIDUMP_CALLBACK_INFORMATION CallbackParam);
 
 #endif // DBGHELP_6_1_APIS
+
+#ifdef DBGHELP_6_2_APIS
+  /** Number of inline frames at the given address */
+  DWORD AddrIncludeInlineTrace(DWORD64 address) const;
+
+  /** Get inline context */
+  BOOL QueryInlineTrace(DWORD64 StartAddress, DWORD StartContext,
+                        DWORD64 StartRetAddress, DWORD64 CurAddress,
+                        LPDWORD CurContext, LPDWORD CurFrameIndex) const;
+
+  /** Get Symbol from inline context */
+  BOOL FromInlineContext(DWORD64 Address, DWORD InlineContext,
+                         PDWORD64 pDisplacement, PSYMBOL_INFO Symbol) const;
+
+  /** Get Line from inline context */
+  BOOL GetLineFromInlineContext(DWORD64 Address, DWORD InlineContext,
+                                DWORD64 ModuleBaseAddress, PDWORD pDisplacement,
+                                PIMAGEHLP_LINE64 Line64) const;
+
+  /** Sets the local scope to the symbol that matches the specified address and
+   * inline context. */
+  BOOL SetScopeFromInlineContext(DWORD64 Address, DWORD InlineContext) const;
+
+  /** The EnumSymbolsEx function enumerates all symbols in a process. */
+  BOOL EnumSymbolsEx(ULONG64 BaseOfDll, PCSTR Mask,
+                     PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
+                     PVOID UserContext, DWORD Options) const;
+
+#endif // DBGHELP_6_2_APIS
 
 private:
   // suppress copy and assign
