@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2249 2021-09-10 19:51:28Z roger $";
+    "$Id: SymbolEngine.cpp 2252 2021-09-16 21:55:22Z Roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -115,50 +115,9 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
     } else if ((pSymInfo->Flags & SYMFLAG_REGREL) ||
                (pSymInfo->Flags & SYMFLAG_FRAMEREL)) {
       opf << "  " << name;
-
-      const RegInfo reg_info = (pSymInfo->Flags & SYMFLAG_REGREL)
-                                   ? getRegInfo(pSymInfo->Register, context)
-                                   : RegInfo("frame", frameOffset);
-      if (reg_info.name.empty()) {
-        opf << " [register '" << pSymInfo->Register << "']";
-      } else {
-        opf << " [" << reg_info.name;
-        if (pSymInfo->Address > 0x7fffffff)
-          opf << "-" << std::hex << -(int)pSymInfo->Address << std::dec;
-        else
-          opf << "+" << std::hex << (int)pSymInfo->Address << std::dec;
-        opf << "]";
-
-        if (pSymInfo->Size == sizeof(char)) {
-          unsigned char data;
-          eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
-                         sizeof(data));
-          if (isprint(data))
-            opf << " = '" << data << '\'';
-          else
-            opf << " = " << (int)data;
-        } else if (pSymInfo->Size == sizeof(short)) {
-          unsigned short data;
-          eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
-                         sizeof(data));
-          opf << " = " << data;
-        } else if ((pSymInfo->Size == sizeof(int)) || (pSymInfo->Size == 0)) {
-          unsigned int data;
-          eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
-                         sizeof(data));
-          opf << " = 0x" << std::hex << data << std::dec;
-        } else if ((pSymInfo->Size == 8) &&
-                   (name.compare(0, 6, "double") == 0)) {
-          double data;
-          eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
-                         sizeof(data));
-          opf << " = " << data;
-        } else if ((pSymInfo->Size == 8)) {
-          LONGLONG data;
-          eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
-                         sizeof(data));
-          opf << " = 0x" << std::hex << data << std::dec;
-        }
+      showValue(name, eng, pSymInfo);
+      if (pSymInfo->Flags & SYMFLAG_PARAMETER) {
+         opf << " (parameter)";
       }
       opf << std::endl;
     } else if (pSymInfo->Flags & SYMFLAG_REGISTER) {
@@ -170,6 +129,9 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
         opf << " (" << reg_info.name << ") = 0x" << std::hex << reg_info.value
             << std::dec;
       }
+      if (pSymInfo->Flags & SYMFLAG_PARAMETER) {
+         opf << " (parameter)";
+      }
       opf << std::endl;
     } else {
       opf << "  " << name << " Flags: " << std::hex << pSymInfo->Flags
@@ -177,6 +139,54 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
     }
 
     return true;
+  }
+  
+  // Show the value of a register-relative value
+  void showValue(const std::string & name, SymbolEngine const &eng, PSYMBOL_INFO pSymInfo) {
+    const RegInfo reg_info = (pSymInfo->Flags & SYMFLAG_REGREL)
+                             ? getRegInfo(pSymInfo->Register, context)
+                             : RegInfo("frame", frameOffset);
+    if (reg_info.name.empty()) {
+      opf << " [register '" << pSymInfo->Register << "']";
+    } else {
+      opf << " [" << reg_info.name;
+      if (pSymInfo->Address > 0x7fffffff)
+        opf << "-" << std::hex << -(int)pSymInfo->Address << std::dec;
+      else
+        opf << "+" << std::hex << (int)pSymInfo->Address << std::dec;
+      opf << "]";
+
+      if (pSymInfo->Size == sizeof(char)) {
+        unsigned char data;
+        eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
+                       sizeof(data));
+        if (isprint(data))
+          opf << " = '" << data << '\'';
+        else
+          opf << " = " << (int)data;
+      } else if (pSymInfo->Size == sizeof(short)) {
+        unsigned short data;
+        eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
+                       sizeof(data));
+        opf << " = " << data;
+      } else if ((pSymInfo->Size == sizeof(int)) || (pSymInfo->Size == 0)) {
+        unsigned int data;
+        eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
+                       sizeof(data));
+        opf << " = 0x" << std::hex << data << std::dec;
+      } else if ((pSymInfo->Size == 8) &&
+                 (name.compare(0, 6, "double") == 0)) {
+        double data;
+        eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
+                       sizeof(data));
+        opf << " = " << data;
+      } else if ((pSymInfo->Size == 8)) {
+        LONGLONG data;
+        eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
+                       sizeof(data));
+        opf << " = 0x" << std::hex << data << std::dec;
+      }
+    }
   }
 
   std::ostream &opf;

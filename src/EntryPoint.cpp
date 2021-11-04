@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2081 2021-07-17 17:50:08Z roger $";
+    "$Id: EntryPoint.cpp 2265 2021-11-04 22:15:52Z roger $";
 
 #include "EntryPoint.h"
 
@@ -649,6 +649,7 @@ void EntryPoint::setArgument(int argNum, std::string const &argType,
       {argENUM, "FS_INFORMATION_CLASS"},
       {argENUM, "HARDERROR_RESPONSE_OPTION"},
       {argENUM, "IO_SESSION_STATE"},
+      {argENUM, "IORING_CREATE_REQUIRED_FLAGS"},
       {argENUM, "JOB_INFORMATION_CLASS"},
       {argENUM, "KEY_INFORMATION_CLASS"},
       {argENUM, "KEY_SET_INFORMATION_CLASS"},
@@ -663,6 +664,7 @@ void EntryPoint::setArgument(int argNum, std::string const &argType,
       {argENUM, "POWER_ACTION"},
       {argENUM, "POWER_INFORMATION_LEVEL"},
       {argENUM, "PROCESSINFOCLASS"},
+      {argENUM, "QUEUE_USER_APC_FLAGS"},
       {argENUM, "RESOURCEMANAGER_INFORMATION_CLASS"},
       {argENUM, "SECTION_INFORMATION_CLASS"},
       {argENUM, "SECTION_INHERIT"},

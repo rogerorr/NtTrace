@@ -27,7 +27,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: Enumerations.cpp 2081 2021-07-17 17:50:08Z roger $";
+    "$Id: Enumerations.cpp 2266 2021-11-04 22:23:40Z roger $";
 
 #include "Enumerations.h"
 
@@ -388,6 +388,13 @@ EnumMap IO_SESSION_STATE_MAP[] = {DEF(IoSessionStateCreated),
                                   DEF(IoSessionStateLoggedOff),
                                   DEF(IoSessionStateTerminated),
                                   {0, 0}};
+
+typedef enum _IORING_CREATE_REQUIRED_FLAGS {
+  IORING_CREATE_REQUIRED_FLAGS_NONE = 0,
+} IORING_CREATE_REQUIRED_FLAGS;
+
+EnumMap IORING_CREATE_REQUIRED_FLAGS_MAP[] = {
+    DEF(IORING_CREATE_REQUIRED_FLAGS_NONE), {0, 0}};
 
 typedef enum _JOBOBJECTINFOCLASS {
   JobObjectBasicAccountingInformation = 1,
@@ -1223,6 +1230,16 @@ EnumMap PROCESSINFOCLASS_MAP[] = {
     DEF(ProcessAltSystemCallInformation),
     DEF(ProcessDynamicEHContinuationTargets),
 
+    {0, 0}};
+
+typedef enum _QUEUE_USER_APC_FLAGS {
+  QUEUE_USER_APC_FLAGS_NONE = 0,
+  QUEUE_USER_APC_FLAGS_SPECIAL_USER_APC = 1,
+} QUEUE_USER_APC_FLAGS;
+
+EnumMap QUEUE_USER_APC_FLAGS_MAP[] = {
+    DEF(QUEUE_USER_APC_FLAGS_NONE),
+    DEF(QUEUE_USER_APC_FLAGS_SPECIAL_USER_APC),
     {0, 0}};
 
 typedef enum _RESOURCEMANAGER_INFORMATION_CLASS {
@@ -2200,6 +2217,7 @@ struct AllEnum allEnums[] = {DEF(ALPC_MESSAGE_INFORMATION_CLASS),
                              DEF(FS_INFORMATION_CLASS),
                              DEF(HARDERROR_RESPONSE_OPTION),
                              DEF(IO_SESSION_STATE),
+                             DEF(IORING_CREATE_REQUIRED_FLAGS),
                              DEF(JOB_INFORMATION_CLASS),
                              DEF(KEY_INFORMATION_CLASS),
                              DEF(KEY_SET_INFORMATION_CLASS),
@@ -2216,6 +2234,7 @@ struct AllEnum allEnums[] = {DEF(ALPC_MESSAGE_INFORMATION_CLASS),
                              DEF(POWER_ACTION),
                              DEF(POWER_INFORMATION_LEVEL),
                              DEF(PROCESSINFOCLASS),
+                             DEF(QUEUE_USER_APC_FLAGS),
                              DEF(RESOURCEMANAGER_INFORMATION_CLASS),
                              DEF(SECTION_INFORMATION_CLASS),
                              DEF(SECTION_INHERIT),
