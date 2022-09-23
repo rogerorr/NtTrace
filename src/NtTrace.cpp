@@ -28,7 +28,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2325 2022-09-23 21:52:35Z roger $";
+    "$Id: NtTrace.cpp 2328 2022-09-23 22:27:58Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -87,7 +87,7 @@ public:
    * @param os the output stream to write to
    */
   TrapNtDebugger(std::ostream &os)
-      : os(os), bNoDlls(false), bNoExcept(false), bActive(true) {}
+      : os(os), bLogDlls(true), bNoExcept(false), bActive(true) {}
 
   // callbacks on events
   virtual void OnException(DWORD processId, DWORD threadId, HANDLE hProcess,
@@ -113,13 +113,13 @@ public:
   virtual bool Active() { return bActive; }
 
   /**
-   * Set the 'nodlls' flag.
+   * Set the 'log dlls' flag.
    * @param b the new value: if true dll load/unload will be ignored
    */
-  void setNoDlls(bool b) { bNoDlls = b; }
+  void setLogDlls(bool b) { bLogDlls = b; }
 
-  /** Get the 'nodlls' flag */
-  bool getNoDlls() const { return bNoDlls; }
+  /** Get the 'log dlls' flag */
+  bool getLogDlls() const { return bLogDlls; }
 
   /**
    * Set the 'noexception' flag.
@@ -165,7 +165,7 @@ public:
   void setCtrlC();
 
 private:
-  bool bNoDlls;
+  bool bLogDlls;
   bool bNoExcept;
   std::ostream &os;
 
@@ -623,21 +623,20 @@ void TrapNtDebugger::OnExitProcess(DWORD processId, DWORD threadId,
 //////////////////////////////////////////////////////////////////////////
 void TrapNtDebugger::OnLoadDll(DWORD processId, DWORD threadId, HANDLE hProcess,
                                LOAD_DLL_DEBUG_INFO const &LoadDll) {
-  if (bNoDlls)
-    return;
-
-  header(processId, threadId);
-  os << "Loaded DLL at " << LoadDll.lpBaseOfDll << " ";
-  if (LoadDll.lpBaseOfDll == 0) {
-    os << "Null DLL";
-  } else {
-    if (!LoadDll.lpImageName ||
-        !showName(os, hProcess, LoadDll.lpImageName, LoadDll.fUnicode)) {
-      showModuleNameEx(hProcess, LoadDll.lpBaseOfDll, LoadDll.hFile);
+  if (bLogDlls) {
+    header(processId, threadId);
+    os << "Loaded DLL at " << LoadDll.lpBaseOfDll << " ";
+    if (LoadDll.lpBaseOfDll == 0) {
+      os << "Null DLL";
+    } else {
+      if (!LoadDll.lpImageName ||
+          !showName(os, hProcess, LoadDll.lpImageName, LoadDll.fUnicode)) {
+        showModuleNameEx(hProcess, LoadDll.lpBaseOfDll, LoadDll.hFile);
+      }
     }
+    os << std::endl;
   }
-  os << std::endl;
-
+  
   if (LoadDll.lpBaseOfDll == TargetDll) {
     SetDllBreakpoints(hProcess);
   }
@@ -646,11 +645,10 @@ void TrapNtDebugger::OnLoadDll(DWORD processId, DWORD threadId, HANDLE hProcess,
 //////////////////////////////////////////////////////////////////////////
 void TrapNtDebugger::OnUnloadDll(DWORD processId, DWORD threadId,
                                  UNLOAD_DLL_DEBUG_INFO const &UnloadDll) {
-  if (bNoDlls)
-    return;
-
-  header(processId, threadId);
-  os << "Unload of DLL at " << UnloadDll.lpBaseOfDll << std::endl;
+  if (bLogDlls) {
+    header(processId, threadId);
+    os << "Unload of DLL at " << UnloadDll.lpBaseOfDll << std::endl;
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -952,7 +950,7 @@ int main(int argc, char **argv) {
 
   TrapNtDebugger debugger((outputFile.length() != 0) ? (std::ostream &)ofs
                                                      : std::cout);
-  debugger.setNoDlls(bNoDlls);
+  debugger.setLogDlls(!bNoDlls);
   debugger.setNoException(bNoExcept);
   debugger.setFilter(filter);
   debugger.setCategory(category);
