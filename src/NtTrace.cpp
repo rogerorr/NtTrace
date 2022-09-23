@@ -28,7 +28,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2081 2021-07-17 17:50:08Z roger $";
+    "$Id: NtTrace.cpp 2325 2022-09-23 21:52:35Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -86,7 +86,8 @@ public:
    * Construct a debugger
    * @param os the output stream to write to
    */
-  TrapNtDebugger(std::ostream &os) : os(os), bNoExcept(false), bActive(true) {}
+  TrapNtDebugger(std::ostream &os)
+      : os(os), bNoDlls(false), bNoExcept(false), bActive(true) {}
 
   // callbacks on events
   virtual void OnException(DWORD processId, DWORD threadId, HANDLE hProcess,
@@ -110,6 +111,15 @@ public:
                                    HANDLE hProcess,
                                    OUTPUT_DEBUG_STRING_INFO const &DebugString);
   virtual bool Active() { return bActive; }
+
+  /**
+   * Set the 'nodlls' flag.
+   * @param b the new value: if true dll load/unload will be ignored
+   */
+  void setNoDlls(bool b) { bNoDlls = b; }
+
+  /** Get the 'nodlls' flag */
+  bool getNoDlls() const { return bNoDlls; }
 
   /**
    * Set the 'noexception' flag.
@@ -155,6 +165,7 @@ public:
   void setCtrlC();
 
 private:
+  bool bNoDlls;
   bool bNoExcept;
   std::ostream &os;
 
@@ -184,6 +195,8 @@ private:
   bool inverseFilter;               // If true, exclude when filtered
   std::vector<std::string>
       filters; // If not empty, filter for 'active' entry points
+
+  std::set<DWORD> initialised_processes;
 
   void OnBreakpoint(DWORD processId, DWORD threadId, HANDLE hProcess,
                     HANDLE hThread, LPVOID exceptionAddress);
@@ -414,7 +427,11 @@ void TrapNtDebugger::OnBreakpoint(DWORD processId, DWORD threadId,
     it = NtCalls.find(exceptionAddress);
     if (it == NtCalls.end()) {
       header(processId, threadId);
-      os << "Breakpoint at " << exceptionAddress << std::endl;
+      if (initialised_processes.insert(processId).second) {
+        os << "Initial breakpoint" << std::endl;
+      } else {
+        os << "Breakpoint at " << exceptionAddress << std::endl;
+      }
     } else {
 #ifdef _M_IX86
       NTSTATUS rc = Context.Eax;
@@ -600,11 +617,15 @@ void TrapNtDebugger::OnExitProcess(DWORD processId, DWORD threadId,
   os << "Process " << processId << " exit code: " << ExitProcess.dwExitCode
      << std::endl;
   processes.erase(processId);
+  initialised_processes.erase(processId);
 }
 
 //////////////////////////////////////////////////////////////////////////
 void TrapNtDebugger::OnLoadDll(DWORD processId, DWORD threadId, HANDLE hProcess,
                                LOAD_DLL_DEBUG_INFO const &LoadDll) {
+  if (bNoDlls)
+    return;
+
   header(processId, threadId);
   os << "Loaded DLL at " << LoadDll.lpBaseOfDll << " ";
   if (LoadDll.lpBaseOfDll == 0) {
@@ -625,6 +646,9 @@ void TrapNtDebugger::OnLoadDll(DWORD processId, DWORD threadId, HANDLE hProcess,
 //////////////////////////////////////////////////////////////////////////
 void TrapNtDebugger::OnUnloadDll(DWORD processId, DWORD threadId,
                                  UNLOAD_DLL_DEBUG_INFO const &UnloadDll) {
+  if (bNoDlls)
+    return;
+
   header(processId, threadId);
   os << "Unload of DLL at " << UnloadDll.lpBaseOfDll << std::endl;
 }
@@ -870,6 +894,7 @@ int main(int argc, char **argv) {
   std::string category;
   std::string filter;
   std::string codeFilter;
+  bool bNoDlls(false);
   bool bNoExcept(false);
   bool noDebugHeap(false);
   bool bNoNames(false);
@@ -893,6 +918,7 @@ int main(int argc, char **argv) {
               "File,Process,Registry, ? for list)");
   options.set("hd", &noDebugHeap, "Don't use debug heap");
   options.set("nonames", &bNoNames, "Don't name arguments");
+  options.set("nodlls", &bNoDlls, "Don't process DLL load/unload");
   options.set("noexcept", &bNoExcept, "Don't process exceptions");
   options.set("out", &outputFile, "Output file");
   options.set("pre", &bPreTrace, "Trace pre-call as well as post-call");
@@ -926,6 +952,7 @@ int main(int argc, char **argv) {
 
   TrapNtDebugger debugger((outputFile.length() != 0) ? (std::ostream &)ofs
                                                      : std::cout);
+  debugger.setNoDlls(bNoDlls);
   debugger.setNoException(bNoExcept);
   debugger.setFilter(filter);
   debugger.setCategory(category);

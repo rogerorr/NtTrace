@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2252 2021-09-16 21:55:22Z Roger $";
+    "$Id: SymbolEngine.cpp 2303 2022-04-15 19:21:36Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -117,7 +117,7 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
       opf << "  " << name;
       showValue(name, eng, pSymInfo);
       if (pSymInfo->Flags & SYMFLAG_PARAMETER) {
-         opf << " (parameter)";
+        opf << " (parameter)";
       }
       opf << std::endl;
     } else if (pSymInfo->Flags & SYMFLAG_REGISTER) {
@@ -130,7 +130,7 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
             << std::dec;
       }
       if (pSymInfo->Flags & SYMFLAG_PARAMETER) {
-         opf << " (parameter)";
+        opf << " (parameter)";
       }
       opf << std::endl;
     } else {
@@ -140,12 +140,13 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
 
     return true;
   }
-  
+
   // Show the value of a register-relative value
-  void showValue(const std::string & name, SymbolEngine const &eng, PSYMBOL_INFO pSymInfo) {
+  void showValue(const std::string &name, SymbolEngine const &eng,
+                 PSYMBOL_INFO pSymInfo) {
     const RegInfo reg_info = (pSymInfo->Flags & SYMFLAG_REGREL)
-                             ? getRegInfo(pSymInfo->Register, context)
-                             : RegInfo("frame", frameOffset);
+                                 ? getRegInfo(pSymInfo->Register, context)
+                                 : RegInfo("frame", frameOffset);
     if (reg_info.name.empty()) {
       opf << " [register '" << pSymInfo->Register << "']";
     } else {
@@ -174,8 +175,7 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
         eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
                        sizeof(data));
         opf << " = 0x" << std::hex << data << std::dec;
-      } else if ((pSymInfo->Size == 8) &&
-                 (name.compare(0, 6, "double") == 0)) {
+      } else if ((pSymInfo->Size == 8) && (name.compare(0, 6, "double") == 0)) {
         double data;
         eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
                        sizeof(data));
@@ -303,7 +303,8 @@ bool SymbolEngine::printAddress(DWORD64 address, std::ostream &os) const {
       str << hmod;
     } else
       str << strrchr(szFileName, '\\') + 1;
-    str << " + 0x" << std::hex << (address - (ULONG_PTR)mbInfo.AllocationBase) << std::dec;
+    str << " + 0x" << std::hex << (address - (ULONG_PTR)mbInfo.AllocationBase)
+        << std::dec;
 
     os << std::setw(30) << std::left << str.str().c_str()
        << std::right; // c_str() fixes VC6 bug with setw
