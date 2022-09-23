@@ -60,6 +60,7 @@ Options:<br>
 <tr><td>  -filter   </td><td> Comma delimited list of substrings to filter on </td></tr>
 <tr><td>  -category </td><td> Comma delimited list of categories to trace (eg File,Process,Registry, ? for list) *</td></tr>
 <tr><td>  -nonames  </td><td> Don't name arguments </td></tr>
+<tr><td>  -nodlls   </td><td> Don't process DLL load/unload </td></tr>
 <tr><td>  -noexcept </td><td> Don't process exceptions </td></tr>
 <tr><td>  -out      </td><td> Output file </td></tr>
 <tr><td>  -pre      </td><td> Trace pre-call as well as post-call </td></tr>
@@ -91,6 +92,14 @@ Build the appropriate binary (32-bit or 64-bit) for your target program.
 <p>
 (See Readme.txt for full details)
 <p>
+
+<hr>
+Version 2325 - 23-Sep-2022<br>
+Recent changes:
+<ul>
+<li>Add -nodlls option
+<li>Distinguish the initial process breakpoint
+</ul>
 
 <hr>
 Version 2266 - 04-Nov-2021<br>
