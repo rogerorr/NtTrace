@@ -29,7 +29,7 @@ NtTrace uses the debugging interface on Windows to intercept the returns from th
 <b>Example:</b>
 <code><pre>
 C:> NtTrace -filter File cmd
-Process 2428 starting at 4AD0B814
+Process 2428 starting at 4AD0B814 with command line "cmd"
 Loaded DLL at 77F40000 ntdll.dll
 NtOpenFile( FileHandle=0x12fb38 [0x14], DesiredAccess=SYNCHRONIZE|0x20, ObjectAttributes="\??\C:\WWW\NtTrace\", IoStatusBlock=0x0012FAE4 [0/1], ShareAccess=3, OpenOptions=0x21 ) => 0
 NtQueryVolumeInformationFile( FileHandle=0x14, IoStatusBlock=0x0012FAE4 [0/8], FsInformation=0x12faf4, Length=8, FsInformationClass=4 [FileFsDeviceInformation] ) => 0
@@ -47,7 +47,7 @@ Process 2428 exit code: 0
 </pre></code>
 
 <b>Syntax:</b><br>
-&nbsp; nttrace [-a] [-e] [-config *] [-errors *] [-export *] [-filter *] [-category *] [-nonames] [-noexcept] [-out *] [-pre] [-stack] [-time] [-delta] [-pid] [-tid] [-nl] [pid | cmd <args>]
+&nbsp; nttrace [-a] [-e] [-v] [-config *] [-errors *] [-export *] [-filter *] [-category *] [-hd] [-nonames] [-nodlls] [-noexcept] [-out *] [-pre] [-stack] [-time] [-delta] [-pid] [-tid] [-nl] [pid | cmd <args>]
 <p>
 Options:<br>
 <table border=0>
@@ -59,6 +59,7 @@ Options:<br>
 <tr><td>  -export   </td><td> Export symbols once loaded [for testing] </td></tr>
 <tr><td>  -filter   </td><td> Comma delimited list of substrings to filter on </td></tr>
 <tr><td>  -category </td><td> Comma delimited list of categories to trace (eg File,Process,Registry, ? for list) *</td></tr>
+<tr><td>  -hd       </td><td> Don't use debug heap</td></tr>
 <tr><td>  -nonames  </td><td> Don't name arguments </td></tr>
 <tr><td>  -nodlls   </td><td> Don't process DLL load/unload </td></tr>
 <tr><td>  -noexcept </td><td> Don't process exceptions </td></tr>
@@ -92,6 +93,14 @@ Build the appropriate binary (32-bit or 64-bit) for your target program.
 <p>
 (See Readme.txt for full details)
 <p>
+
+<hr>
+Version 2335 - 15-Oct-2022<br>
+Recent changes:
+<ul>
+<li>New entry points for Windows 11 22H2
+<li>Show command line for created processes
+</ul>
 
 <hr>
 Version 2325 - 23-Sep-2022<br>
