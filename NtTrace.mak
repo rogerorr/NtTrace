@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 2239 2021-09-03 15:27:51Z roger $
+# $Id: NtTrace.mak 2335 2022-10-15 22:14:44Z Roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
@@ -79,6 +79,7 @@ $(BUILD)\EntryPoint.obj : \
 	"include\displayError.inl" \
 	"include\DbgHelper.h" \
 	"include\DbgHelper.inl" \
+	"include\NtDllStruct.h" \
 	"include\SymbolEngine.h" \
 	"include\TrapNtOpcodes.h" \
 	"include\ShowData.h"
@@ -87,6 +88,7 @@ $(BUILD)\ShowData.obj: \
 	"include\Enumerations.h" \
 	"include\NtDllStruct.h" \
 	"include\MsvcExceptions.h" \
+	"include\ProcessInfo.h" \
 	"include\ReadPartialMemory.h" \
 	"include\ShowData.h"
 

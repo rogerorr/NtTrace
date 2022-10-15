@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2081 $
+    $Revision: 2335 $
 */
 
-// $Id: ShowData.h 2081 2021-07-17 17:50:08Z roger $
+// $Id: ShowData.h 2335 2022-10-15 22:14:44Z Roger $
 
 #include <ostream>
 #include <windows.h>
@@ -59,6 +59,9 @@ bool showName(std::ostream &os, HANDLE hProcess, LPVOID lpImageName,
  */
 bool showString(std::ostream &os, HANDLE hProcess, LPVOID lpString,
                 bool bUnicode, WORD nStringLength);
+                   
+/** Show the commnand line from the target process */
+void showCommandLine(std::ostream &os, HANDLE hProcess);
 
 /** show Object Attrributes from the debuggee */
 void showObjectAttributes(std::ostream &os, HANDLE hProcess, LPVOID pvoid);

@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2250 2021-09-10 20:33:26Z roger $";
+    "$Id: ShowData.cpp 2335 2022-10-15 22:14:44Z Roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -39,6 +39,7 @@ static char const szRCSID[] =
 
 // or2 includes
 #include <MsvcExceptions.h>
+#include <ProcessInfo.h>
 #include <ReadPartialMemory.h>
 
 namespace {
@@ -234,6 +235,35 @@ bool showString(std::ostream &os, HANDLE hProcess, LPVOID lpString,
     }
   }
   return newline;
+}
+
+//////////////////////////////////////////////////////////////////////////
+void showCommandLine(std::ostream &os, HANDLE hProcess)
+{
+static NtQueryInformationProcess *pfnNtQueryInformationProcess =
+      (NtQueryInformationProcess *)::GetProcAddress(
+          ::GetModuleHandle("NTDLL"), "NtQueryInformationProcess");
+
+  if (pfnNtQueryInformationProcess == 0) {
+    return;
+  }
+
+  PROCESS_BASIC_INFORMATION ProcessInformation = {0};
+  pfnNtQueryInformationProcess(hProcess, ProcessBasicInformation,
+                               &ProcessInformation, sizeof(ProcessInformation),
+                               0);
+
+  if (ProcessInformation.PebBaseAddress == 0) {
+    return;
+  }
+
+  PEB peb = {0};
+  if (!ReadProcessMemory(hProcess, ProcessInformation.PebBaseAddress, &peb,
+                         sizeof(peb), 0)) {
+    return;
+  }
+
+  showUnicodeString(os, hProcess, &peb.ProcessParameters->CommandLine);
 }
 
 //////////////////////////////////////////////////////////////////////////

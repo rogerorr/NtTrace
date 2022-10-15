@@ -28,7 +28,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2328 2022-09-23 22:27:58Z roger $";
+    "$Id: NtTrace.cpp 2335 2022-10-15 22:14:44Z Roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -590,7 +590,10 @@ void TrapNtDebugger::OnCreateProcess(
     CREATE_PROCESS_DEBUG_INFO const &CreateProcessInfo) {
   header(processId, threadId);
   os << "Process " << processId << " starting at "
-     << CreateProcessInfo.lpStartAddress << std::endl;
+     << CreateProcessInfo.lpStartAddress << " with command line: ";
+  showCommandLine(os, CreateProcessInfo.hProcess);
+  os << std::endl;
+  
   processes[processId] = CreateProcessInfo.hProcess;
 
   if (!CreateProcessInfo.lpImageName ||
