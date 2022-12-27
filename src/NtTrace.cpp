@@ -28,10 +28,10 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2335 2022-10-15 22:14:44Z Roger $";
+    "$Id: NtTrace.cpp 2342 2022-12-27 13:05:52Z roger $";
 
-#pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
-                                     // (performance warning)
+#pragma warning(disable : 4800) // forcing value to bool 'true' or 'false'
+                                // (performance warning)
 #pragma warning(disable : 4511 4512) // copy ctor/op= could not be generated
 #pragma warning(disable : 4996) // 'asctime' and others were declared deprecated
 
@@ -593,7 +593,7 @@ void TrapNtDebugger::OnCreateProcess(
      << CreateProcessInfo.lpStartAddress << " with command line: ";
   showCommandLine(os, CreateProcessInfo.hProcess);
   os << std::endl;
-  
+
   processes[processId] = CreateProcessInfo.hProcess;
 
   if (!CreateProcessInfo.lpImageName ||
@@ -639,7 +639,7 @@ void TrapNtDebugger::OnLoadDll(DWORD processId, DWORD threadId, HANDLE hProcess,
     }
     os << std::endl;
   }
-  
+
   if (LoadDll.lpBaseOfDll == TargetDll) {
     SetDllBreakpoints(hProcess);
   }
