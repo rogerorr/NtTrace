@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2203 $
+    $Revision: 2342 $
 */
 
-// $Id: ProcessInfo.h 2203 2021-07-19 23:23:31Z roger $
+// $Id: ProcessInfo.h 2342 2022-12-27 13:05:52Z roger $
 
 #include "NtDllStruct.h"
 
@@ -203,7 +203,7 @@ inline _PEB *getCurrentPeb() {
 #pragma warning(disable : 4035) // no return value
 inline _PEB *getCurrentPeb() {
   // 0x30 = offset of PEB in TIB
-  _asm mov eax, dword ptr fs : [ 0x30 ]
+  _asm mov eax, dword ptr fs : [0x30]
 }
 #pragma warning(pop)
 #endif // _M_X64

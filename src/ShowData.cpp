@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2335 2022-10-15 22:14:44Z Roger $";
+    "$Id: ShowData.cpp 2342 2022-12-27 13:05:52Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -238,9 +238,8 @@ bool showString(std::ostream &os, HANDLE hProcess, LPVOID lpString,
 }
 
 //////////////////////////////////////////////////////////////////////////
-void showCommandLine(std::ostream &os, HANDLE hProcess)
-{
-static NtQueryInformationProcess *pfnNtQueryInformationProcess =
+void showCommandLine(std::ostream &os, HANDLE hProcess) {
+  static NtQueryInformationProcess *pfnNtQueryInformationProcess =
       (NtQueryInformationProcess *)::GetProcAddress(
           ::GetModuleHandle("NTDLL"), "NtQueryInformationProcess");
 

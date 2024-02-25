@@ -23,12 +23,12 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2303 2022-04-15 19:21:36Z roger $";
+    "$Id: SymbolEngine.cpp 2342 2022-12-27 13:05:52Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
                                      // could not be generated
-#endif                               // _MSC_VER
+#endif // _MSC_VER
 
 #include "SymbolEngine.h"
 
@@ -644,11 +644,11 @@ BOOL __declspec(naked)
   rc = ::GetThreadContext(GetCurrentThread(), pContext);
 
   if (rc) {
-    _asm mov eax, [ ebp + 4 ]; /* return address */
+    _asm mov eax, [ebp + 4]; /* return address */
     _asm mov regIp, eax;
-    _asm lea eax, [ ebp + 0ch ]; /* caller's SP before pushing pContext */
+    _asm lea eax, [ebp + 0ch]; /* caller's SP before pushing pContext */
     _asm mov regSp, eax;
-    _asm mov eax, [ ebp ]; /* caller's BP */
+    _asm mov eax, [ebp]; /* caller's BP */
     _asm mov regBp, eax;
 
     pContext->Eip = regIp;
