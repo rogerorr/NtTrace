@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2335 2022-10-15 22:14:44Z Roger $";
+    "$Id: EntryPoint.cpp 2394 2024-02-25 15:56:29Z roger $";
 
 #include "EntryPoint.h"
 
@@ -35,9 +35,9 @@ static char const szRCSID[] =
 #include <vector>
 #include <windows.h>
 
+#include "NtDllStruct.h"
 #include "SymbolEngine.h"
 #include "displayError.h"
-#include "NtDllStruct.h"
 
 #include "ShowData.h"
 #include "TrapNtOpcodes.h"
@@ -885,7 +885,7 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
     for (size_t i = 0, end = getArgumentCount(); i < end; i++) {
       Argument::ARG argVal = argv[i];
       Argument const &argument = getArgument(i);
-      os << &", "[i == 0];
+      if (i) os << ", ";
       if (bNames && !argument.name.empty())
         os << argument.name << "=";
       bool const dup = !args.insert(argVal).second;
@@ -894,9 +894,9 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
   }
 
   if (before) {
-    os << " ) ...";
+    os << ") ...";
   } else {
-    os << " ) => ";
+    os << ") => ";
     showDword(os, returnCode);
 
     if (returnCode != 0 && retType == retNTSTATUS) {
