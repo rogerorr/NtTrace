@@ -48,7 +48,8 @@ using or2::displayError;
 namespace {
 void printStackTrace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
                      CONTEXT const &Context);
-}
+std::string buffToHex(unsigned char *buffer, size_t length);
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // Module data
@@ -532,7 +533,9 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
     std::cerr << "Already trapping: " << name << std::endl;
     return NtCall();
   } else if (preamble == 0) {
-    std::cerr << "Cannot trap " << name << " - wrong signature" << std::endl;
+    std::cerr << "Cannot trap " << name
+              << " - wrong signature: " << buffToHex(instruction, MAX_PREAMBLE)
+              << std::endl;
     return NtCall();
   } else if (setssn == 0) {
     std::cerr << "Cannot trap " << name
@@ -885,7 +888,8 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
     for (size_t i = 0, end = getArgumentCount(); i < end; i++) {
       Argument::ARG argVal = argv[i];
       Argument const &argument = getArgument(i);
-      if (i) os << ", ";
+      if (i)
+        os << ", ";
       if (bNames && !argument.name.empty())
         os << argument.name << "=";
       bool const dup = !args.insert(argVal).second;
@@ -952,6 +956,21 @@ void printStackTrace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
 bool isBlankOrComment(std::string const &lbuf) {
   return ((lbuf.length() == 0) || (lbuf[0] == ';') || (lbuf[0] == '#'));
 }
+
+// Convert buffer to hex characters, eg "[fe 00 ab]"
+std::string buffToHex(unsigned char *buffer, size_t length) {
+  std::ostringstream oss;
+  oss << std::setfill('0') << std::hex << '[';
+  for (size_t idx = 0; idx != length; ++idx) {
+    unsigned int value = buffer[idx];
+    if (idx)
+      oss << " ";
+    oss << std::setw(2) << value;
+  }
+  oss << ']';
+  return oss.str();
+}
+
 } // namespace
 
 // Process a typedef line (starting after the typedef)
