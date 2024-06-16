@@ -22,10 +22,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2248 $
+    $Revision: 2427 $
 */
 
-// $Id: SymbolEngine.h 2248 2021-09-10 19:48:50Z roger $
+// $Id: SymbolEngine.h 2427 2024-06-16 15:33:16Z roger $
 
 #include <iosfwd>
 #include <string>
@@ -42,6 +42,13 @@ public:
 
   /** Destroy wrapper */
   ~SymbolEngine();
+
+  /**
+   * GetModuleBase: try to get information about a module being loaded.
+   * @param dwAddress the target address
+   * @return the base address of the module, or zero if not identified
+   */
+  DWORD64 GetModuleBase(DWORD64 dwAddress) const;
 
   /** Print address to a stream, return true if information cacheable */
   bool printAddress(DWORD64 address, std::ostream &os) const;

@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2342 2022-12-27 13:05:52Z roger $";
+    "$Id: SymbolEngine.cpp 2427 2024-06-16 15:33:16Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -281,12 +281,18 @@ void SymbolEngine::setSehDepth(int value) { maxSehDepth = value; }
 int SymbolEngine::getSehDepth() const { return maxSehDepth; }
 
 /////////////////////////////////////////////////////////////////////////////////////
+DWORD64 SymbolEngine::GetModuleBase(DWORD64 dwAddress) const
+{
+  return ::GetModuleBase(GetProcess(), dwAddress);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
 bool SymbolEngine::printAddress(DWORD64 address, std::ostream &os) const {
   bool cacheSymbol(true);
 
   // Despite having GetModuleBase in the call to StackWalk it needs help for the
   // addresses
-  ::GetModuleBase(GetProcess(), address);
+  GetModuleBase(address);
 
   ///////////////////////////////
   // Log the module + offset
@@ -518,7 +524,7 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
 
   // Despite having GetModuleBase in the call to StackWalk it needs help for the
   // first address
-  ::GetModuleBase(GetProcess(), stackFrame.AddrPC.Offset);
+  GetModuleBase(stackFrame.AddrPC.Offset);
 
   while (::StackWalk64(machineType, GetProcess(), hThread, &stackFrame,
                        pContext, NULL,
@@ -544,7 +550,7 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
 
     // This helps x64 stack walking -- I think this might be a bug as the
     // function is already supplied in the StackWalk64 call ...
-    ::GetModuleBase(GetProcess(), pc);
+    GetModuleBase(pc);
 
     if (skip > 0) {
       skip--;
