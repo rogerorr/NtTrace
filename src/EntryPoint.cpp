@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2410 2024-03-31 14:58:05Z roger $";
+    "$Id: EntryPoint.cpp 2455 2024-09-05 22:37:56Z roger $";
 
 #include "EntryPoint.h"
 
@@ -287,6 +287,10 @@ void Argument::showArgument(std::ostream &os, HANDLE hProcess, ARG argVal,
 
   case argPFILE_NETWORK_OPEN_INFORMATION:
     showPFileNetworkInfo(os, hProcess, (PFILE_NETWORK_OPEN_INFORMATION)argVal);
+    break;
+
+  case argPRTL_USER_PROCESS_PARAMETERS:
+    showUserProcessParams(os, hProcess, (PRTL_USER_PROCESS_PARAMETERS)argVal);
     break;
   }
 }
@@ -725,6 +729,7 @@ void EntryPoint::setArgument(int argNum, std::string const &argType,
       {argPLARGE_INTEGER, "PLARGE_INTEGER"},
       {argPLPC_MESSAGE, "PLPC_MESSAGE"},
       {argPOBJECT_ATTRIBUTES, "POBJECT_ATTRIBUTES"},
+      {argPRTL_USER_PROCESS_PARAMETERS, "PRTL_USER_PROCESS_PARAMETERS"},
       {argPUNICODE_STRING, "PUNICODE_STRING"},
   };
 

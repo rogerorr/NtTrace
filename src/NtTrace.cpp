@@ -28,10 +28,10 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2342 2022-12-27 13:05:52Z roger $";
+    "$Id: NtTrace.cpp 2439 2024-07-15 08:43:54Z roger $";
 
-#pragma warning(disable : 4800) // forcing value to bool 'true' or 'false'
-                                // (performance warning)
+#pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
+                                     // (performance warning)
 #pragma warning(disable : 4511 4512) // copy ctor/op= could not be generated
 #pragma warning(disable : 4996) // 'asctime' and others were declared deprecated
 
@@ -365,7 +365,15 @@ BOOL CALLBACK populateCallback(PSYMBOL_INFO pSymInfo, ULONG /*SymbolSize*/,
 void TrapNtDebugger::populateOffsets() {
   or2::SymbolEngine eng(GetCurrentProcess());
   DWORD64 baseAddress((DWORD64)TargetDll);
-  eng.LoadModule64(0, target.c_str(), 0, baseAddress, 0);
+  char chFileName[MAX_PATH + 1] = "";
+  if (!GetModuleFileNameEx(GetCurrentProcess(), TargetDll, chFileName,
+                           sizeof(chFileName))) {
+    strcpy(chFileName, target.c_str());
+  }
+  if (0 == eng.LoadModule64(0, chFileName, 0, baseAddress, 0)) {
+    std::cerr << "Warning: Unable to load module for " << target << " at "
+              << TargetDll << '\n';
+  }
   DbgInit<IMAGEHLP_MODULE64> ModuleInfo;
   if (!eng.GetModuleInfo64(baseAddress, &ModuleInfo) ||
       (ModuleInfo.SymType != SymPdb)) {
@@ -543,8 +551,8 @@ void TrapNtDebugger::OnException(DWORD processId, DWORD threadId,
              Exception.ExceptionRecord.ExceptionCode == CLR_EXCEPTION_V4) {
     header(processId, threadId);
     os << "CLR exception, HR: "
-       << (PVOID)(UINT_PTR)(
-              HRESULT)Exception.ExceptionRecord.ExceptionInformation[0]
+       << (PVOID)(UINT_PTR)(HRESULT)
+              Exception.ExceptionRecord.ExceptionInformation[0]
        << std::endl;
   } else if (Exception.ExceptionRecord.ExceptionCode == MSVC_NOTIFICATION) {
     if (Exception.ExceptionRecord.ExceptionInformation[0] == 0x1000) {

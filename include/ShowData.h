@@ -21,16 +21,17 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2342 $
+    $Revision: 2455 $
 */
 
-// $Id: ShowData.h 2342 2022-12-27 13:05:52Z roger $
+// $Id: ShowData.h 2455 2024-09-05 22:37:56Z roger $
 
 #include <ostream>
 #include <windows.h>
 
 // or2 includes
 #include <NtDllStruct.h> // For Nt native data types
+#include <ProcessInfo.h>
 
 /** namespace for functions showing data from another process */
 namespace showData {
@@ -113,6 +114,10 @@ void showPFileBasicInfo(std::ostream &os, HANDLE hProcess,
 /** show network open information from the debuggee */
 void showPFileNetworkInfo(std::ostream &os, HANDLE hProcess,
                           PFILE_NETWORK_OPEN_INFORMATION pFileNetworkInfo);
+
+/** show user process parameters from the debuggee */
+void showUserProcessParams(std::ostream &os, HANDLE hProcess,
+                           PRTL_USER_PROCESS_PARAMETERS pUserProcessParams);
 
 /** Convert msvc throw information into a type name */
 void showThrowType(std::ostream &os, HANDLE hProcess, ULONG_PTR throwInfo,

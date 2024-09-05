@@ -23,29 +23,29 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2427 2024-06-16 15:33:16Z roger $";
+    "$Id: SymbolEngine.cpp 2451 2024-07-26 22:17:17Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
                                      // could not be generated
-#endif // _MSC_VER
+#endif                               // _MSC_VER
 
 #include "SymbolEngine.h"
 
 // clang-format off
 #include <windows.h>
 // clang-format on
-#include <psapi.h>
 #include <comutil.h>
+#include <psapi.h>
 #pragma comment(lib, "oleaut32.lib")
 #pragma comment(lib, "comsupp.lib")
 
 // stl
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+#include <map>
 #include <sstream>
 #include <typeinfo>
-#include <map>
 
 #include "../include/MsvcExceptions.h"
 #include "../include/StrFromWchar.h"
@@ -281,8 +281,7 @@ void SymbolEngine::setSehDepth(int value) { maxSehDepth = value; }
 int SymbolEngine::getSehDepth() const { return maxSehDepth; }
 
 /////////////////////////////////////////////////////////////////////////////////////
-DWORD64 SymbolEngine::GetModuleBase(DWORD64 dwAddress) const
-{
+DWORD64 SymbolEngine::GetModuleBase(DWORD64 dwAddress) const {
   return ::GetModuleBase(GetProcess(), dwAddress);
 }
 

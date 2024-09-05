@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2105 $
+    $Revision: 2455 $
 */
 
-// $Id: EntryPoint.h 2105 2021-07-19 08:03:31Z Roger $
+// $Id: EntryPoint.h 2455 2024-09-05 22:37:56Z roger $
 
 #include <windows.h>
 
@@ -61,7 +61,8 @@ typedef enum {
   argPLARGE_INTEGER,
   argPLPC_MESSAGE,
   argPFILE_BASIC_INFORMATION,
-  argPFILE_NETWORK_OPEN_INFORMATION
+  argPFILE_NETWORK_OPEN_INFORMATION,
+  argPRTL_USER_PROCESS_PARAMETERS
 } ArgType;
 
 typedef enum {

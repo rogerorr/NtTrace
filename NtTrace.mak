@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 2335 2022-10-15 22:14:44Z Roger $
+# $Id: NtTrace.mak 2455 2024-09-05 22:37:56Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
@@ -53,12 +53,13 @@ $(BUILD)\NtTrace.obj : "include\DebugPriv.h" \
 	"include\AdjustPriv.h" \
 	"include\displayError.h" \
 	"include\displayError.inl" \
+	"include\MsvcExceptions.h" \
+	"include\NtDllStruct.h" \
 	"include\Options.h" \
 	"include\Options.inl" \
 	"include\ProcessHelper.h" \
-	"include\NtDllStruct.h" \
+	"include\ProcessInfo.h" \
 	"include\SimpleTokenizer.h" \
-	"include\MsvcExceptions.h" \
 	include\DebugDriver.h \
 	include\EntryPoint.h \
 	include\ShowData.h \
@@ -80,6 +81,7 @@ $(BUILD)\EntryPoint.obj : \
 	"include\DbgHelper.h" \
 	"include\DbgHelper.inl" \
 	"include\NtDllStruct.h" \
+	"include\ProcessInfo.h" \
 	"include\SymbolEngine.h" \
 	"include\TrapNtOpcodes.h" \
 	"include\ShowData.h"
