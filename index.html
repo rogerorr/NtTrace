@@ -47,11 +47,11 @@ Process 2428 exit code: 0
 </pre></code>
 
 <b>Syntax:</b><br>
-&nbsp; nttrace [-a] [-e] [-v] [-config *] [-errors *] [-export *] [-filter *] [-category *] [-hd] [-nonames] [-nodlls] [-noexcept] [-out *] [-pre] [-stack] [-time] [-delta] [-pid] [-tid] [-nl] [pid | cmd <args>]
+&nbsp; nttrace [-a] [-e] [-v] [-config *] [-errors *] [-export *] [-filter *] [-category *] [-hd] [-nonames] [-nodlls] [-noexcept] [-out *] [-pre] [-stack] [-time] [-delta] [-pid] [-tid] [-nl] [pid | cmd &lt;args&gt;]
 <p>
 Options:<br>
 <table border=0>
-<tr><td>  -a        </td><td> attach to existing process &lt;cmd&gt; rather than starting a fresh &lt;cmd&gt; </td></tr>
+<tr><td>  -a        </td><td> attach to existing process &lt;pid or cmd&gt; rather than starting a fresh &lt;cmd&gt; </td></tr>
 <tr><td>  -e        </td><td> Only log errors </td></tr>
 <tr><td>  -v        </td><td> More verbose logging</td></tr>
 <tr><td>  -config   </td><td> Specify config file </td></tr>
@@ -69,6 +69,7 @@ Options:<br>
 <tr><td>  -time     </td><td> show timestamp </td></tr>
 <tr><td>  -delta    </td><td> show delta time </td></tr>
 <tr><td>  -pid      </td><td> show process ID </td></tr>
+<tr><td>  -tid      </td><td> show thread ID </td></tr>
 <tr><td>  -nl       </td><td> force newline on OutputDebugString </td></tr>
 
 </table>
