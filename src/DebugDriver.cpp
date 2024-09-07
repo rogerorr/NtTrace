@@ -29,7 +29,7 @@ COPYRIGHT
 #include "displayError.h"
 
 static char const szRCSID[] =
-    "$Id: DebugDriver.cpp 2081 2021-07-17 17:50:08Z roger $";
+    "$Id: DebugDriver.cpp 2464 2024-09-07 21:31:35Z roger $";
 
 //////////////////////////////////////////////////////////////////////////
 // Main debugger loop
@@ -82,7 +82,7 @@ void or2::DebugDriver::Loop(Debugger &debugger) {
                                DebugEvent.u.CreateProcessInfo);
 
       // Close unwanted handle (following John Robbins)
-      if ((DebugEvent.u.CreateProcessInfo.hFile != 0) &&
+      if ((DebugEvent.u.CreateProcessInfo.hFile != nullptr) &&
           (!CloseHandle(DebugEvent.u.CreateProcessInfo.hFile))) {
         std::cerr << "Unable to close process file handle: " << displayError()
                   << std::endl;
@@ -120,7 +120,7 @@ void or2::DebugDriver::Loop(Debugger &debugger) {
                          hProcess, DebugEvent.u.LoadDll);
 
       // Close unwanted handle (following John Robbins)
-      if ((DebugEvent.u.LoadDll.hFile != 0) &&
+      if ((DebugEvent.u.LoadDll.hFile != nullptr) &&
           (!CloseHandle(DebugEvent.u.LoadDll.hFile))) {
         std::cerr << "Unable to close dll file handle: " << displayError()
                   << std::endl;

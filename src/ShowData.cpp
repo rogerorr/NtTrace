@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2458 2024-09-07 17:44:34Z roger $";
+    "$Id: ShowData.cpp 2467 2024-09-07 21:35:42Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -46,7 +46,8 @@ namespace {
 /** Read an object of type 'T' at remoteAddress in the specified process */
 template <typename T>
 BOOL readHelper(HANDLE hProcess, LPVOID remoteAddress, T &theValue) {
-  return ReadProcessMemory(hProcess, remoteAddress, &theValue, sizeof(T), 0);
+  return ReadProcessMemory(hProcess, remoteAddress, &theValue, sizeof(T),
+                           nullptr);
 }
 
 void ensurePopulated();
@@ -185,14 +186,14 @@ void showMask(std::ostream &os, ULONG_PTR value, std::string const &enumName) {
 // Show a module name from the debuggee
 bool showName(std::ostream &os, HANDLE hProcess, LPVOID lpImageName,
               bool bUnicode) {
-  void *lpString = 0;
+  void *lpString = nullptr;
 
-  if (lpImageName == 0)
+  if (lpImageName == nullptr)
     return false;
 
   if (!readHelper(hProcess, lpImageName, lpString)) {
     os << "null";
-  } else if (lpString == 0) {
+  } else if (lpString == nullptr) {
     return false;
   } else {
     showString(os, hProcess, lpString, bUnicode, MAX_PATH);
@@ -211,7 +212,7 @@ bool showString(std::ostream &os, HANDLE hProcess, LPVOID lpString,
     std::vector<wchar_t> chVector(nStringLength + 1);
     or2::ReadPartialProcessMemory(hProcess, lpString, &chVector[0], 1,
                                   nStringLength * sizeof(wchar_t));
-    size_t const wcLen = wcstombs(0, &chVector[0], 0);
+    size_t const wcLen = wcstombs(nullptr, &chVector[0], 0);
     if (wcLen == (size_t)-1) {
       os << "invalid string";
     } else {
@@ -243,22 +244,22 @@ void showCommandLine(std::ostream &os, HANDLE hProcess) {
       (NtQueryInformationProcess *)::GetProcAddress(
           ::GetModuleHandle("NTDLL"), "NtQueryInformationProcess");
 
-  if (pfnNtQueryInformationProcess == 0) {
+  if (pfnNtQueryInformationProcess == nullptr) {
     return;
   }
 
   PROCESS_BASIC_INFORMATION ProcessInformation = {0};
   pfnNtQueryInformationProcess(hProcess, ProcessBasicInformation,
                                &ProcessInformation, sizeof(ProcessInformation),
-                               0);
+                               nullptr);
 
-  if (ProcessInformation.PebBaseAddress == 0) {
+  if (ProcessInformation.PebBaseAddress == nullptr) {
     return;
   }
 
   PEB peb = {0};
   if (!ReadProcessMemory(hProcess, ProcessInformation.PebBaseAddress, &peb,
-                         sizeof(peb), 0)) {
+                         sizeof(peb), nullptr)) {
     return;
   }
 
@@ -282,7 +283,7 @@ void showObjectAttributes(std::ostream &os, HANDLE hProcess,
 //////////////////////////////////////////////////////////////////////////
 void showUnicodeString(std::ostream &os, HANDLE hProcess,
                        PUNICODE_STRING pTargetUnicodeString) {
-  if (pTargetUnicodeString == 0)
+  if (pTargetUnicodeString == nullptr)
     os << "null";
   else {
     UNICODE_STRING unicodeString = {0};
@@ -426,7 +427,7 @@ void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal) {
 void showPClientId(std::ostream &os, HANDLE hProcess, PCLIENT_ID pClientId) {
   showPointer(os, hProcess, (ULONG_PTR)pClientId);
   if (pClientId) {
-    CLIENT_ID clientId = {0};
+    CLIENT_ID clientId = {nullptr};
     (void)readHelper(hProcess, pClientId, clientId);
 
     os << " [";
@@ -575,16 +576,16 @@ void showUserProcessParams(std::ostream &os, HANDLE hProcess,
 //////////////////////////////////////////////////////////////////////////
 // Convert windows NT error into a text string, if possible.
 void showWinError(std::ostream &os, HRESULT hResult) {
-  char *pszMsg = 0;
-  HMODULE hmod = 0;
+  char *pszMsg = nullptr;
+  HMODULE hmod = nullptr;
 
   DWORD hmodFlags(hmod ? FORMAT_MESSAGE_FROM_HMODULE : 0);
   FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
                     FORMAT_MESSAGE_IGNORE_INSERTS | hmodFlags,
                 hmod, hResult, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (LPTSTR)&pszMsg, 0, NULL);
+                (LPTSTR)&pszMsg, 0, nullptr);
 
-  if (pszMsg != 0) {
+  if (pszMsg != nullptr) {
     size_t nLen = strlen(pszMsg);
     if (nLen > 1 && pszMsg[nLen - 1] == '\n') {
       pszMsg[nLen - 1] = 0;

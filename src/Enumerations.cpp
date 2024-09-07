@@ -27,7 +27,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: Enumerations.cpp 2459 2024-09-07 17:46:05Z roger $";
+    "$Id: Enumerations.cpp 2467 2024-09-07 21:35:42Z roger $";
 
 #include "Enumerations.h"
 
@@ -49,7 +49,7 @@ EnumMap ALPC_MESSAGE_INFORMATION_CLASS_MAP[] = {
     DEF(AlpcMessageDirectStatusInformation),
     DEF(AlpcMessageHandleInformation),
     DEF(MaxAlpcMessageInfoClass),
-    {0, 0}};
+    {0, nullptr}};
 
 enum ALPC_PORT_INFORMATION_CLASS {
   AlpcBasicInformation = 0,
@@ -81,7 +81,7 @@ EnumMap ALPC_PORT_INFORMATION_CLASS_MAP[] = {
     DEF(AlpcCompletionListRundownInformation),
     DEF(AlpcWaitForPortReferences),
     DEF(AlpcServerSessionInformation),
-    {0, 0}};
+    {0, nullptr}};
 
 enum ATOM_INFORMATION_CLASS {
   AtomBasicInformation = 0,
@@ -89,21 +89,22 @@ enum ATOM_INFORMATION_CLASS {
 };
 
 EnumMap ATOM_INFORMATION_CLASS_MAP[] = {
-    DEF(AtomBasicInformation), DEF(AtomTableInformation), {0, 0}};
+    DEF(AtomBasicInformation), DEF(AtomTableInformation), {0, nullptr}};
 
 enum AUDIT_EVENT_TYPE {
   AuditEventObjectAccess = 0,
   AuditEventDirectoryServiceAccess = 1,
 };
 
-EnumMap AUDIT_EVENT_TYPE_MAP[] = {
-    DEF(AuditEventObjectAccess), DEF(AuditEventDirectoryServiceAccess), {0, 0}};
+EnumMap AUDIT_EVENT_TYPE_MAP[] = {DEF(AuditEventObjectAccess),
+                                  DEF(AuditEventDirectoryServiceAccess),
+                                  {0, nullptr}};
 
 enum DEBUGOBJECTINFOCLASS { // (not found in pdb files)
   DebugObjectKillOnExit = 1,
 };
 
-EnumMap DEBUGOBJECTINFOCLASS_MAP[] = {DEF(DebugObjectKillOnExit), {0, 0}};
+EnumMap DEBUGOBJECTINFOCLASS_MAP[] = {DEF(DebugObjectKillOnExit), {0, nullptr}};
 
 enum DEVICE_POWER_STATE {
   PowerDeviceUnspecified = 0,
@@ -120,7 +121,7 @@ EnumMap DEVICE_POWER_STATE_MAP[] = {DEF(PowerDeviceUnspecified),
                                     DEF(PowerDeviceD2),
                                     DEF(PowerDeviceD3),
                                     DEF(PowerDeviceMaximum),
-                                    {0, 0}};
+                                    {0, nullptr}};
 
 enum DIRECTORY_NOTIFY_INFORMATION_CLASS {
   DirectoryNotifyInformation = 1,
@@ -130,7 +131,7 @@ enum DIRECTORY_NOTIFY_INFORMATION_CLASS {
 EnumMap DIRECTORY_NOTIFY_INFORMATION_CLASS_MAP[] = {
     DEF(DirectoryNotifyInformation),
     DEF(DirectoryNotifyExtendedInformation),
-    {0, 0}};
+    {0, nullptr}};
 
 enum ENLISTMENT_INFORMATION_CLASS {
   EnlistmentBasicInformation = 0,
@@ -142,13 +143,14 @@ EnumMap ENLISTMENT_INFORMATION_CLASS_MAP[] = {
     DEF(EnlistmentBasicInformation),
     DEF(EnlistmentRecoveryInformation),
     DEF(EnlistmentCrmInformation),
-    {0, 0}};
+    {0, nullptr}};
 
 enum EVENT_INFORMATION_CLASS {
   EventBasicInformation = 0,
 };
 
-EnumMap EVENT_INFORMATION_CLASS_MAP[] = {DEF(EventBasicInformation), {0, 0}};
+EnumMap EVENT_INFORMATION_CLASS_MAP[] = {DEF(EventBasicInformation),
+                                         {0, nullptr}};
 
 enum EVENT_TYPE {
   NotificationEvent = 0,
@@ -156,7 +158,7 @@ enum EVENT_TYPE {
 };
 
 EnumMap EVENT_TYPE_MAP[] = {
-    DEF(NotificationEvent), DEF(SynchronizationEvent), {0, 0}};
+    DEF(NotificationEvent), DEF(SynchronizationEvent), {0, nullptr}};
 
 enum FILE_INFORMATION_CLASS {
   FileDirectoryInformation = 1,
@@ -314,7 +316,7 @@ EnumMap FILE_INFORMATION_CLASS_MAP[] = {
     DEF(FileStorageReserveIdInformation),
     DEF(FileCaseSensitiveInformationForceAccessCheck),
     DEF(FileMaximumInformation),
-    {0, 0}};
+    {0, nullptr}};
 
 enum FSINFOCLASS {
   FsVolumeInformation = 1,
@@ -342,7 +344,7 @@ EnumMap FS_INFORMATION_CLASS_MAP[] = {
     DEF(FsDriverPathInformation),   DEF(FsVolumeFlagsInformation),
     DEF(FsSectorSizeInformation),   DEF(FsDataCopyInformation),
     DEF(FsMetadataSizeInformation), DEF(FsFullSizeInformationEx),
-    DEF(FileFsMaximumInformation),  {0, 0}};
+    DEF(FileFsMaximumInformation),  {0, nullptr}};
 
 enum HARDERROR_RESPONSE_OPTION {
   OptionAbortRetryIgnore = 0,
@@ -365,7 +367,7 @@ EnumMap HARDERROR_RESPONSE_OPTION_MAP[] = {DEF(OptionAbortRetryIgnore),
                                            DEF(OptionShutdownSystem),
                                            DEF(OptionOkNoWait),
                                            DEF(OptionCancelTryContinue),
-                                           {0, 0}};
+                                           {0, nullptr}};
 
 enum IO_SESSION_STATE {
   IoSessionStateCreated = 1,
@@ -387,14 +389,14 @@ EnumMap IO_SESSION_STATE_MAP[] = {DEF(IoSessionStateCreated),
                                   DEF(IoSessionStateLoggedOn),
                                   DEF(IoSessionStateLoggedOff),
                                   DEF(IoSessionStateTerminated),
-                                  {0, 0}};
+                                  {0, nullptr}};
 
 enum IORING_CREATE_REQUIRED_FLAGS {
   IORING_CREATE_REQUIRED_FLAGS_NONE = 0,
 };
 
 EnumMap IORING_CREATE_REQUIRED_FLAGS_MAP[] = {
-    DEF(IORING_CREATE_REQUIRED_FLAGS_NONE), {0, 0}};
+    DEF(IORING_CREATE_REQUIRED_FLAGS_NONE), {0, nullptr}};
 
 enum JOBOBJECTINFOCLASS {
   JobObjectBasicAccountingInformation = 1,
@@ -494,7 +496,7 @@ EnumMap JOB_INFORMATION_CLASS_MAP[] = {
     DEF(JobObjectSiloSystemRoot),
     DEF(JobObjectEnergyTrackingState),
     DEF(JobObjectThreadImpersonationInformation),
-    {0, 0}};
+    {0, nullptr}};
 
 enum KEY_INFORMATION_CLASS {
   KeyBasicInformation = 0,
@@ -521,7 +523,7 @@ EnumMap KEY_INFORMATION_CLASS_MAP[] = {DEF(KeyBasicInformation),
                                        DEF(KeyTrustInformation),
                                        DEF(KeyLayerInformation),
                                        DEF(MaxKeyInfoClass),
-                                       {0, 0}};
+                                       {0, nullptr}};
 
 enum KEY_SET_INFORMATION_CLASS {
   KeyWriteTimeInformation = 0,
@@ -542,7 +544,7 @@ EnumMap KEY_SET_INFORMATION_CLASS_MAP[] = {DEF(KeyWriteTimeInformation),
                                            DEF(KeySetHandleTagsInformation),
                                            DEF(KeySetLayerInformation),
                                            DEF(MaxKeySetInfoClass),
-                                           {0, 0}};
+                                           {0, nullptr}};
 
 enum KEY_VALUE_INFORMATION_CLASS {
   KeyValueBasicInformation = 0,
@@ -562,7 +564,7 @@ EnumMap KEY_VALUE_INFORMATION_CLASS_MAP[] = {
     DEF(KeyValuePartialInformationAlign64),
     DEF(KeyValueLayerInformation),
     DEF(MaxKeyValueInfoClass),
-    {0, 0}};
+    {0, nullptr}};
 
 enum KPROFILE_SOURCE {
   ProfileTime = 0,
@@ -617,7 +619,7 @@ EnumMap KPROFILE_SOURCE_MAP[] = {DEF(ProfileTime),
                                  DEF(ProfileMemoryBarrierCycles),
                                  DEF(ProfileLoadLinkedIssues),
                                  DEF(ProfileMaximum),
-                                 {0, 0}};
+                                 {0, nullptr}};
 
 enum KTMOBJECT_TYPE {
   KTMOBJECT_TRANSACTION = 0,
@@ -630,7 +632,7 @@ enum KTMOBJECT_TYPE {
 EnumMap KTMOBJECT_TYPE_MAP[] = {
     DEF(KTMOBJECT_TRANSACTION),      DEF(KTMOBJECT_TRANSACTION_MANAGER),
     DEF(KTMOBJECT_RESOURCE_MANAGER), DEF(KTMOBJECT_ENLISTMENT),
-    DEF(KTMOBJECT_INVALID),          {0, 0}};
+    DEF(KTMOBJECT_INVALID),          {0, nullptr}};
 
 /** Type of LPC messages */
 enum LPC_TYPE { // (not found in pdb files)
@@ -664,7 +666,7 @@ EnumMap LPC_TYPE_MAP[] = {DEF(LPC_INIT),
                           DEF(LPC_CONNECTION_REPLY),
                           DEF(LPC_CANCELED),
                           DEF(LPC_UNREGISTER_PROCESS),
-                          {0, 0}};
+                          {0, nullptr}};
 
 enum MEMORY_INFORMATION_CLASS {
   MemoryBasicInformation = 0,
@@ -694,7 +696,7 @@ EnumMap MEMORY_INFORMATION_CLASS_MAP[] = {
     DEF(MemoryEnclaveImageInformation),
     DEF(MemoryBasicInformationCapped),
     DEF(MemoryPhysicalContiguityInformation),
-    {0, 0}};
+    {0, nullptr}};
 
 enum PARTITION_INFORMATION_CLASS {
   SystemMemoryPartitionInformation = 0,
@@ -720,7 +722,7 @@ EnumMap MEMORY_PARTITION_INFORMATION_CLASS_MAP[] = {
     DEF(SystemMemoryPartitionNodeInformation),
     DEF(SystemMemoryPartitionCreateLargePages),
     DEF(SystemMemoryPartitionMax),
-    {0, 0}};
+    {0, nullptr}};
 
 enum MUTANT_INFORMATION_CLASS {
   MutantBasicInformation = 0,
@@ -728,7 +730,7 @@ enum MUTANT_INFORMATION_CLASS {
 };
 
 EnumMap MUTANT_INFORMATION_CLASS_MAP[] = {
-    DEF(MutantBasicInformation), DEF(MutantOwnerInformation), {0, 0}};
+    DEF(MutantBasicInformation), DEF(MutantOwnerInformation), {0, nullptr}};
 
 enum NOTIFICATION_MASK { // (not found in pdb files)
   TRANSACTION_NOTIFY_PREPREPARE = 0x00000001,
@@ -769,7 +771,7 @@ EnumMap NOTIFICATION_MASK_MAP[] = {DEF(TRANSACTION_NOTIFY_PREPREPARE),
                                    DEF(TRANSACTION_NOTIFY_TM_ONLINE),
                                    DEF(TRANSACTION_NOTIFY_REQUEST_OUTCOME),
                                    DEF(TRANSACTION_NOTIFY_COMMIT_FINALIZE),
-                                   {0, 0}};
+                                   {0, nullptr}};
 
 enum OBJECT_INFORMATION_CLASS {
   ObjectBasicInformation = 0,
@@ -788,7 +790,7 @@ EnumMap OBJECT_INFORMATION_CLASS_MAP[] = {DEF(ObjectBasicInformation),
                                           DEF(ObjectHandleFlagInformation),
                                           DEF(ObjectSessionInformation),
                                           DEF(ObjectSessionObjectInformation),
-                                          {0, 0}};
+                                          {0, nullptr}};
 
 enum PORT_INFORMATION_CLASS {
   PortBasicInformation = 0,
@@ -796,7 +798,7 @@ enum PORT_INFORMATION_CLASS {
 };
 
 EnumMap PORT_INFORMATION_CLASS_MAP[] = {
-    DEF(PortBasicInformation), DEF(PortDumpInformation), {0, 0}};
+    DEF(PortBasicInformation), DEF(PortDumpInformation), {0, nullptr}};
 
 enum POWER_ACTION {
   PowerActionNone = 0,
@@ -815,7 +817,7 @@ EnumMap POWER_ACTION_MAP[] = {
     DEF(PowerActionSleep),       DEF(PowerActionHibernate),
     DEF(PowerActionShutdown),    DEF(PowerActionShutdownReset),
     DEF(PowerActionShutdownOff), DEF(PowerActionWarmEject),
-    DEF(PowerActionDisplayOff),  {0, 0}};
+    DEF(PowerActionDisplayOff),  {0, nullptr}};
 
 enum POWER_INFORMATION_LEVEL {
   SystemPowerPolicyAc = 0,
@@ -1014,7 +1016,7 @@ EnumMap POWER_INFORMATION_LEVEL_MAP[] = {
     DEF(EnergyTrackerQuery),
     DEF(UpdateBlackBoxRecorder),
     DEF(SessionAllowExternalDmaDevices),
-    {0, 0}};
+    {0, nullptr}};
 
 enum PROCESSINFOCLASS {
   ProcessBasicInformation = 0,
@@ -1230,7 +1232,7 @@ EnumMap PROCESSINFOCLASS_MAP[] = {
     DEF(ProcessAltSystemCallInformation),
     DEF(ProcessDynamicEHContinuationTargets),
 
-    {0, 0}};
+    {0, nullptr}};
 
 enum QUEUE_USER_APC_FLAGS {
   QUEUE_USER_APC_FLAGS_NONE = 0,
@@ -1240,7 +1242,7 @@ enum QUEUE_USER_APC_FLAGS {
 EnumMap QUEUE_USER_APC_FLAGS_MAP[] = {
     DEF(QUEUE_USER_APC_FLAGS_NONE),
     DEF(QUEUE_USER_APC_FLAGS_SPECIAL_USER_APC),
-    {0, 0}};
+    {0, nullptr}};
 
 enum RESOURCEMANAGER_INFORMATION_CLASS {
   ResourceManagerBasicInformation = 0,
@@ -1250,7 +1252,7 @@ enum RESOURCEMANAGER_INFORMATION_CLASS {
 EnumMap RESOURCEMANAGER_INFORMATION_CLASS_MAP[] = {
     DEF(ResourceManagerBasicInformation),
     DEF(ResourceManagerCompletionInformation),
-    {0, 0}};
+    {0, nullptr}};
 
 enum SECTION_INFORMATION_CLASS {
   SectionBasicInformation = 0,
@@ -1264,7 +1266,7 @@ enum SECTION_INFORMATION_CLASS {
 EnumMap SECTION_INFORMATION_CLASS_MAP[] = {
     DEF(SectionBasicInformation),         DEF(SectionImageInformation),
     DEF(SectionRelocationInformation),    DEF(SectionOriginalBaseInformation),
-    DEF(SectionInternalImageInformation), {0, 0}};
+    DEF(SectionInternalImageInformation), {0, nullptr}};
 
 enum SECURITY_INFORMATION { // (not found in pdb files)
   OWNER_SECURITY_INFORMATION = 0x00000001,
@@ -1288,21 +1290,21 @@ EnumMap SECURITY_INFORMATION_MAP[] = {
     DEF(UNPROTECTED_DACL_SECURITY_INFORMATION),
     DEF(PROTECTED_SACL_SECURITY_INFORMATION),
     DEF(PROTECTED_DACL_SECURITY_INFORMATION),
-    {0, 0}};
+    {0, nullptr}};
 
 enum SECTION_INHERIT {
   ViewShare = 1,
   ViewUnmap = 2,
 };
 
-EnumMap SECTION_INHERIT_MAP[] = {DEF(ViewShare), DEF(ViewUnmap), {0, 0}};
+EnumMap SECTION_INHERIT_MAP[] = {DEF(ViewShare), DEF(ViewUnmap), {0, nullptr}};
 
 enum SEMAPHORE_INFORMATION_CLASS {
   SemaphoreBasicInformation = 0,
 };
 
 EnumMap SEMAPHORE_INFORMATION_CLASS_MAP[] = {DEF(SemaphoreBasicInformation),
-                                             {0, 0}};
+                                             {0, nullptr}};
 
 enum SHUTDOWN_ACTION {
   ShutdownNoReboot = 0,
@@ -1315,7 +1317,7 @@ EnumMap SHUTDOWN_ACTION_MAP[] = {DEF(ShutdownNoReboot),
                                  DEF(ShutdownReboot),
                                  DEF(ShutdownPowerOff),
                                  DEF(ShutdownRebootForRecovery),
-                                 {0, 0}};
+                                 {0, nullptr}};
 
 enum SYSDBG_COMMAND {
   SysDbgQueryModuleInformation = 0,
@@ -1398,7 +1400,7 @@ EnumMap SYSDBG_COMMAND_MAP[] = {DEF(SysDbgQueryModuleInformation),
                                 DEF(SysDbgClearUmAttachPid),
                                 DEF(SysDbgGetLiveKernelDump),
                                 DEF(SysDbgKdPullRemoteFile),
-                                {0, 0}};
+                                {0, nullptr}};
 
 enum SYSTEM_POWER_STATE {
   PowerSystemUnspecified = 0,
@@ -1415,7 +1417,7 @@ EnumMap SYSTEM_POWER_STATE_MAP[] = {
     DEF(PowerSystemUnspecified), DEF(PowerSystemWorking),
     DEF(PowerSystemSleeping1),   DEF(PowerSystemSleeping2),
     DEF(PowerSystemSleeping3),   DEF(PowerSystemHibernate),
-    DEF(PowerSystemShutdown),    {0, 0}};
+    DEF(PowerSystemShutdown),    {0, nullptr}};
 
 enum SYSTEM_INFORMATION_CLASS {
   SystemBasicInformation = 0,
@@ -1872,7 +1874,7 @@ EnumMap SYSTEM_INFORMATION_CLASS_MAP[] = {
     DEF(SystemPoolLimitInformation),
     DEF(SystemCodeIntegrityAddDynamicStore),
     DEF(SystemCodeIntegrityClearDynamicStores),
-    {0, 0}};
+    {0, nullptr}};
 
 enum THREADINFOCLASS {
   ThreadBasicInformation = 0,
@@ -1980,13 +1982,14 @@ EnumMap THREADINFOCLASS_MAP[] = {DEF(ThreadBasicInformation),
                                  DEF(ThreadManageWritesToExecutableMemory),
                                  DEF(ThreadPowerThrottlingState),
                                  DEF(ThreadWorkloadClass),
-                                 {0, 0}};
+                                 {0, nullptr}};
 
 enum TIMER_INFORMATION_CLASS {
   TimerBasicInformation = 0,
 };
 
-EnumMap TIMER_INFORMATION_CLASS_MAP[] = {DEF(TimerBasicInformation), {0, 0}};
+EnumMap TIMER_INFORMATION_CLASS_MAP[] = {DEF(TimerBasicInformation),
+                                         {0, nullptr}};
 
 enum TIMER_TYPE {
   NotificationTimer = 0,
@@ -1994,7 +1997,7 @@ enum TIMER_TYPE {
 };
 
 EnumMap TIMER_TYPE_MAP[] = {
-    DEF(NotificationTimer), DEF(SynchronizationTimer), {0, 0}};
+    DEF(NotificationTimer), DEF(SynchronizationTimer), {0, nullptr}};
 
 enum TOKEN_INFORMATION_CLASS {
   TokenUser = 1,
@@ -2097,14 +2100,14 @@ EnumMap TOKEN_INFORMATION_CLASS_MAP[] = {
     DEF(TokenIsLessPrivilegedAppContainer),
     DEF(TokenIsSandboxed),
     DEF(TokenOriginatingProcessTrustLevel),
-    {0, 0}};
+    {0, nullptr}};
 
 enum TOKEN_TYPE {
   TokenPrimary = 1,
   TokenImpersonation = 2,
 };
 
-EnumMap TOKEN_TYPE_MAP[] = {{0, 0}};
+EnumMap TOKEN_TYPE_MAP[] = {{0, nullptr}};
 
 enum TRANSACTION_INFORMATION_CLASS {
   TransactionBasicInformation = 0,
@@ -2122,7 +2125,7 @@ EnumMap TRANSACTION_INFORMATION_CLASS_MAP[] = {
     DEF(TransactionSuperiorEnlistmentInformation),
     DEF(TransactionBindInformation),
     DEF(TransactionDTCPrivateInformation),
-    {0, 0}};
+    {0, nullptr}};
 
 enum TRANSACTIONMANAGER_INFORMATION_CLASS {
   TransactionManagerBasicInformation = 0,
@@ -2140,7 +2143,7 @@ EnumMap TRANSACTIONMANAGER_INFORMATION_CLASS_MAP[] = {
     DEF(TransactionManagerOnlineProbeInformation),
     DEF(TransactionManagerRecoveryInformation),
     DEF(TransactionManagerOldestTransactionInformation),
-    {0, 0}};
+    {0, nullptr}};
 
 enum WAIT_TYPE {
   WaitAll = 0,
@@ -2153,7 +2156,7 @@ EnumMap WAIT_TYPE_MAP[] = {DEF(WaitAll),
                            DEF(WaitAny),
                            DEF(WaitNotification),
                            DEF(WaitDequeue),
-                           {0, 0}};
+                           {0, nullptr}};
 
 enum WORKERFACTORYINFOCLASS {
   WorkerFactoryTimeout = 0,
@@ -2192,7 +2195,7 @@ EnumMap WORKERFACTORYINFOCLASS_MAP[] = {DEF(WorkerFactoryTimeout),
                                         DEF(WorkerFactoryThreadSoftMaximum),
                                         DEF(MaxWorkerFactoryInfoClass),
                                         DEF(WorkerFactoryThreadCpuSets),
-                                        {0, 0}};
+                                        {0, nullptr}};
 
 #undef DEF
 
@@ -2253,7 +2256,7 @@ struct AllEnum allEnums[] = {DEF(ALPC_MESSAGE_INFORMATION_CLASS),
                              DEF(TRANSACTIONMANAGER_INFORMATION_CLASS),
                              DEF(WAIT_TYPE),
                              DEF(WORKERFACTORYINFOCLASS),
-                             {0, 0}};
+                             {nullptr, nullptr}};
 
 #undef DEF
 

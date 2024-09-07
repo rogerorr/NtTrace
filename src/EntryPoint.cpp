@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2458 2024-09-07 17:44:34Z roger $";
+    "$Id: EntryPoint.cpp 2467 2024-09-07 21:35:42Z roger $";
 
 #include "EntryPoint.h"
 
@@ -319,7 +319,7 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
 
   unsigned char instruction[8];
 
-  if (!ReadProcessMemory(hProcess, address + offset, instruction, 8, 0)) {
+  if (!ReadProcessMemory(hProcess, address + offset, instruction, 8, nullptr)) {
     std::cerr << "Cannot read instructions for " << name << ": "
               << displayError() << std::endl;
     return NtCall();
@@ -335,7 +335,8 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
       instruction[1] = instruction[0];
       instruction[0] = BRKPT;
 
-      if (!WriteProcessMemory(hProcess, address + offset, instruction, 4, 0)) {
+      if (!WriteProcessMemory(hProcess, address + offset, instruction, 4,
+                              nullptr)) {
         std::cerr << "Cannot write trap for " << name << ": " << displayError()
                   << std::endl;
         return NtCall();
@@ -344,7 +345,8 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
     } else {
       // We must replace the return itself
       instruction[0] = BRKPT;
-      if (!WriteProcessMemory(hProcess, address + offset, instruction, 1, 0)) {
+      if (!WriteProcessMemory(hProcess, address + offset, instruction, 1,
+                              nullptr)) {
         std::cerr << "Cannot write trap for " << name << ": " << displayError()
                   << std::endl;
         return NtCall();
@@ -358,7 +360,8 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
 
     // We must replace the return itself
     instruction[0] = BRKPT;
-    if (!WriteProcessMemory(hProcess, address + offset, instruction, 1, 0)) {
+    if (!WriteProcessMemory(hProcess, address + offset, instruction, 1,
+                            nullptr)) {
       std::cerr << "Cannot write trap for " << name << ": " << displayError()
                 << std::endl;
       return NtCall();
@@ -435,7 +438,7 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
     instruction[3] = NOP;
     instruction[4] = NOP;
 
-    if (!WriteProcessMemory(hProcess, setssn, instruction, 5, 0)) {
+    if (!WriteProcessMemory(hProcess, setssn, instruction, 5, nullptr)) {
       std::cerr << "Cannot write trap for " << name << ": " << displayError()
                 << std::endl;
       return NtCall();
@@ -462,11 +465,11 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
     address = reinterpret_cast<unsigned char *>(hTargetDll) + dllOffset;
   } else {
     FARPROC pProc = GetProcAddress(hTargetDll, name.c_str());
-    if (0 == pProc) {
+    if (nullptr == pProc) {
       DWORD errorCode = GetLastError();
       if (errorCode == ERROR_PROC_NOT_FOUND) {
         if (!exported.empty() &&
-            (pProc = GetProcAddress(hTargetDll, exported.c_str())) != 0) {
+            (pProc = GetProcAddress(hTargetDll, exported.c_str())) != nullptr) {
           // Found entry point using the exported name
         } else {
           // Entry points are allowed to be absent!
@@ -488,7 +491,7 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
   unsigned int preamble = 0;
   unsigned char instruction[MAX_PREAMBLE];
   if (!ReadProcessMemory(hProcess, address, instruction, sizeof(instruction),
-                         0)) {
+                         nullptr)) {
     std::cerr << "Cannot trap " << name << " - unable to read memory at "
               << (void *)address << ": " << displayError() << std::endl;
     return NtCall();
@@ -504,12 +507,10 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
     return NtCall();
   }
 
-  unsigned char *setssn = 0;
-  for (unsigned int idx = 0; idx != sizeof(signatures) / sizeof(signatures[0]);
-       idx++) {
+  unsigned char *setssn = nullptr;
+  for (auto pCheck : signatures) {
     unsigned int offset = 0;
-    setssn = 0;
-    unsigned char const *pCheck = signatures[idx];
+    setssn = nullptr;
     for (; *pCheck != 0; pCheck += 2) {
       if (instruction[offset] == BRKPT) {
         // already pre-trace trapping!
@@ -541,7 +542,7 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
               << " - wrong signature: " << buffToHex(instruction, MAX_PREAMBLE)
               << std::endl;
     return NtCall();
-  } else if (setssn == 0) {
+  } else if (setssn == nullptr) {
     std::cerr << "Cannot trap " << name
               << " - cannot find system service number" << std::endl;
     return NtCall();
@@ -552,7 +553,7 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
     std::cout << "Instrumenting " << name << " at: " << (void *)address
               << ", ssn: 0x" << std::hex << ssn << std::dec << "\n";
   }
-  return insertBrkpt(hProcess, address, preamble, bPreTrace ? setssn : 0);
+  return insertBrkpt(hProcess, address, preamble, bPreTrace ? setssn : nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -562,7 +563,7 @@ bool EntryPoint::clearNtTrap(HANDLE hProcess, NtCall const &ntCall) const {
     char instruction[1 + 4];
     instruction[0] = MOVdwordEax;
     memcpy(instruction + 1, &ssn, sizeof(ssn));
-    if (!WriteProcessMemory(hProcess, preSave, instruction, 5, 0)) {
+    if (!WriteProcessMemory(hProcess, preSave, instruction, 5, nullptr)) {
       std::cerr << "Cannot clear trap for " << name << ": " << displayError()
                 << std::endl;
       return false;
@@ -598,7 +599,8 @@ bool EntryPoint::clearNtTrap(HANDLE hProcess, NtCall const &ntCall) const {
       break;
     }
     if (len) {
-      if (!WriteProcessMemory(hProcess, targetAddress, instruction, len, 0)) {
+      if (!WriteProcessMemory(hProcess, targetAddress, instruction, len,
+                              nullptr)) {
         std::cerr << "Cannot clear trap for " << name << ": " << displayError()
                   << std::endl;
         return false;
@@ -738,11 +740,10 @@ void EntryPoint::setArgument(int argNum, std::string const &argType,
 
   ArgType eArgType = argULONG_PTR;
   bool found(false);
-  for (int idx = 0; idx != sizeof(argTypes) / sizeof(argTypes[0]); ++idx) {
-    if ((argType == argTypes[idx].argTypeName) ||
-        (alias == argTypes[idx].argTypeName)) {
+  for (auto idx : argTypes) {
+    if ((argType == idx.argTypeName) || (alias == idx.argTypeName)) {
       found = true;
-      eArgType = argTypes[idx].eArgType;
+      eArgType = idx.eArgType;
       break;
     }
   }
@@ -794,11 +795,10 @@ void EntryPoint::setReturnType(std::string const &typeName,
   std::string const alias = (it == typedefs.end() ? std::string() : it->second);
   ReturnType eRetType = retNTSTATUS;
   bool found(false);
-  for (int idx = 0; idx != sizeof(retTypes) / sizeof(retTypes[0]); ++idx) {
-    if ((typeName == retTypes[idx].retTypeName) ||
-        (alias == retTypes[idx].retTypeName)) {
+  for (auto type : retTypes) {
+    if ((typeName == type.retTypeName) || (alias == type.retTypeName)) {
       found = true;
-      eRetType = retTypes[idx].eRetType;
+      eRetType = type.eRetType;
       break;
     }
   }
@@ -834,7 +834,7 @@ void EntryPoint::doPreSave(HANDLE hProcess, HANDLE hThread,
   saveArea[3] = Context.R9;
   PVOID saveTarget = (PVOID)(Context.Rsp + sizeof(ULONG_PTR));
   if (!WriteProcessMemory(hProcess, saveTarget, saveArea, sizeof(saveArea),
-                          0)) {
+                          nullptr)) {
     std::cerr << "Can't save register values at " << saveTarget << ": "
               << displayError() << std::endl;
   }
@@ -883,9 +883,9 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
   if (getArgumentCount()) {
     std::set<Argument::ARG> args;
     std::vector<Argument::ARG> argv(getArgumentCount());
-    if (!ReadProcessMemory(hProcess, (LPVOID)(stack + sizeof(Argument::ARG)),
-                           &argv[0],
-                           sizeof(sizeof(Argument::ARG)) * argv.size(), 0)) {
+    if (!ReadProcessMemory(
+            hProcess, (LPVOID)(stack + sizeof(Argument::ARG)), &argv[0],
+            sizeof(sizeof(Argument::ARG)) * argv.size(), nullptr)) {
       os << "read error: " << GetLastError() << std::endl;
       return;
     }
@@ -948,10 +948,10 @@ void printStackTrace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
   static std::map<HANDLE, or2::SymbolEngine *> engines;
 
   or2::SymbolEngine *pEngine = engines[hProcess];
-  if (pEngine == 0) {
+  if (pEngine == nullptr) {
     pEngine = new or2::SymbolEngine(hProcess);
     // Ensure ntdll.dll is in place (early on dbghelp doesn't find it)
-    pEngine->LoadModule64(0, "ntdll.dll", 0,
+    pEngine->LoadModule64(nullptr, "ntdll.dll", nullptr,
                           (DWORD64)GetModuleHandle("ntdll.dll"), 0);
     engines[hProcess] = pEngine;
   }
@@ -1028,7 +1028,7 @@ bool EntryPoint::readEntryPoints(std::istream &cfgFile,
   std::string lastTypeName;
   std::string lbuf;
   int argNum = -1;
-  EntryPoint *currEntryPoint = 0;
+  EntryPoint *currEntryPoint = nullptr;
   int lineNo = 0;
   while (std::getline(cfgFile, lbuf)) {
     lineNo++;
@@ -1097,7 +1097,7 @@ bool EntryPoint::readEntryPoints(std::istream &cfgFile,
 
       // Add the new entry point (or update the existing one)
       currEntryPoint = existingFunctions[functionName];
-      if (currEntryPoint == 0) {
+      if (currEntryPoint == nullptr) {
         currEntryPoint = const_cast<EntryPoint *>(
             &*entryPoints.insert(EntryPoint(functionName, sCategory))
                   .first); // std::set constness
@@ -1178,7 +1178,7 @@ bool EntryPoint::readEntryPoints(std::istream &cfgFile,
       if (bEnded) {
         // Done with this function
         argNum = -1;
-        currEntryPoint = 0;
+        currEntryPoint = nullptr;
       }
     }
   }
@@ -1188,7 +1188,7 @@ bool EntryPoint::readEntryPoints(std::istream &cfgFile,
 //////////////////////////////////////////////////////////////////////////
 // Print self to a stream, as a function prototype
 void EntryPoint::writeExport(std::ostream &os) const {
-  if (targetAddress == 0 && !disabled)
+  if (targetAddress == nullptr && !disabled)
     os << "//inactive\n";
   os << "//[" << (disabled ? "-" : "") << category << "]\n";
   if (retType == retNTSTATUS) {

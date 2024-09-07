@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2458 2024-09-07 17:44:34Z roger $";
+    "$Id: SymbolEngine.cpp 2467 2024-09-07 21:35:42Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -48,8 +48,8 @@ static char const szRCSID[] =
 #include <typeinfo>
 
 #include "../include/MsvcExceptions.h"
+#include "../include/ReadPartialMemory.h"
 #include "../include/StrFromWchar.h"
-#include "../include/readPartialMemory.h"
 
 #include "GetModuleBase.h"
 
@@ -526,9 +526,9 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
   GetModuleBase(stackFrame.AddrPC.Offset);
 
   while (::StackWalk64(machineType, GetProcess(), hThread, &stackFrame,
-                       pContext, NULL,
-                       0, // implies ::SymFunctionTableAccess,
-                       ::GetModuleBase, NULL)) {
+                       pContext, nullptr,
+                       nullptr, // implies ::SymFunctionTableAccess,
+                       ::GetModuleBase, nullptr)) {
     const DWORD64 frame = stackFrame.AddrFrame.Offset;
     if (frame == 0)
       break;
@@ -678,7 +678,7 @@ void(WINAPI *SymbolEngine::GetCurrentThreadContext)(PCONTEXT pContext) =
 void SymbolEngine::SEHTrace(PVOID ExceptionList, std::ostream &os) const {
   // Got the first entry of the exception stack
   for (int i = 0; (maxSehDepth < 0) || (i < maxSehDepth); ++i) {
-    if (ExceptionList == (PVOID)(INT_PTR)-1 || ExceptionList == 0)
+    if (ExceptionList == (PVOID)(INT_PTR)-1 || ExceptionList == nullptr)
       break;
 
     struct Frame {
@@ -695,7 +695,7 @@ void SymbolEngine::SEHTrace(PVOID ExceptionList, std::ostream &os) const {
     os << addressToName(frame.handler);
     os << "\n";
 
-    PVOID catchHandler = 0;
+    PVOID catchHandler = nullptr;
     bool isMsvcHandler = findMsvcCppHandler(frame.handler, &catchHandler);
 
     if (showParams) {
@@ -749,7 +749,7 @@ void SymbolEngine::SEHTrace(PVOID ExceptionList, std::ostream &os) const {
 bool SymbolEngine::findMsvcCppHandler(PVOID sehHandler,
                                       PVOID *msvcHandler) const {
   // Set the default return value
-  *msvcHandler = 0;
+  *msvcHandler = nullptr;
 
   BYTE buffer[1 + sizeof(PVOID)]; // read mov instruction
   PVOID *bufptr;                  // pointer into buffer
@@ -835,7 +835,8 @@ bool SymbolEngine::ReadMemory(LPCVOID lpBaseAddress, // base of memory area
 {
 #pragma warning(disable : 4800) // forcing value to bool 'true' or 'false'
 
-  return ReadProcessMemory(GetProcess(), lpBaseAddress, lpBuffer, nSize, 0);
+  return ReadProcessMemory(GetProcess(), lpBaseAddress, lpBuffer, nSize,
+                           nullptr);
 }
 
 //////////////////////////////////////////////////////////
@@ -846,7 +847,7 @@ BOOL SymbolEngine::decorateName(std::string &name, ULONG64 ModBase,
 
 #ifdef DBGHELP_6_1_APIS
 
-  WCHAR *typeName = 0;
+  WCHAR *typeName = nullptr;
   if (GetTypeInfo(ModBase, TypeIndex, TI_GET_SYMNAME, &typeName)) {
     bool const nested = (name.length() != 0);
     if (nested) {
@@ -947,7 +948,7 @@ BOOL SymbolEngine::enumLocalVariables(DWORD64 codeOffset, DWORD64 frameOffset,
   stackFrame.InstructionOffset = codeOffset;
   stackFrame.FrameOffset = frameOffset;
 
-  BOOL ret = SetContext(&stackFrame, 0);
+  BOOL ret = SetContext(&stackFrame, nullptr);
   // Note: by experiment with SymUnpack must ignore failures from SetContext ...
   EngineCallBack callBack(*this, cb);
   ret = EnumSymbols(0, "*", EngineCallBack::enumSymbolsProc, &callBack);
@@ -968,7 +969,7 @@ BOOL SymbolEngine::dumpSelf(std::string const &miniDumpFile,
 
 #ifdef DBGHELP_6_1_APIS
   HANDLE const hDumpFile = CreateFile(miniDumpFile.c_str(), FILE_WRITE_DATA, 0,
-                                      NULL, CREATE_ALWAYS, 0, 0);
+                                      nullptr, CREATE_ALWAYS, 0, nullptr);
 
   if (hDumpFile != INVALID_HANDLE_VALUE) {
     MINIDUMP_EXCEPTION_INFORMATION ExceptionParam;
@@ -977,7 +978,7 @@ BOOL SymbolEngine::dumpSelf(std::string const &miniDumpFile,
     ExceptionParam.ClientPointers = TRUE;
 
     ret = WriteMiniDump(::GetCurrentProcessId(), hDumpFile, MiniDumpNormal,
-                        &ExceptionParam, 0, 0);
+                        &ExceptionParam, nullptr, nullptr);
 
     CloseHandle(hDumpFile);
   }
@@ -995,7 +996,7 @@ std::string SymbolEngine::getString(PVOID address, BOOL unicode,
     ReadPartialProcessMemory(GetProcess(), address, &chVector[0],
                              sizeof(wchar_t),
                              maxStringLength * sizeof(wchar_t));
-    size_t const wcLen = wcstombs(0, &chVector[0], 0);
+    size_t const wcLen = wcstombs(nullptr, &chVector[0], 0);
     if (wcLen == (size_t)-1) {
       return "invalid string";
     } else {
@@ -1020,7 +1021,7 @@ bool SymbolEngine::isExecutable(DWORD64 address) const {
                                   PAGE_EXECUTE_READWRITE |
                                   PAGE_EXECUTE_WRITECOPY;
 
-  MEMORY_BASIC_INFORMATION mb = {0};
+  MEMORY_BASIC_INFORMATION mb = {nullptr};
   if (VirtualQueryEx(GetProcess(), (PVOID)address, &mb, sizeof(mb))) {
     if ((mb.Protect & (AnyExecute)) != 0) {
       ret = true; // executable code
@@ -1038,7 +1039,7 @@ void fixSymSrv() {
   static bool loaded = false;
   if (!loaded) {
     HMODULE const hSymSrv = ::GetModuleHandle("SymSrv");
-    if (hSymSrv != 0) {
+    if (hSymSrv != nullptr) {
       ::LoadLibrary("SymSrv");
       loaded = true;
     }
@@ -1219,9 +1220,9 @@ std::string getBaseType(DWORD baseType, ULONG64 length) {
 
   };
 
-  for (int i = 0; i < sizeof(baseList) / sizeof(baseList[0]); ++i) {
-    if ((baseType == baseList[i].baseType) && (length == baseList[i].length)) {
-      return baseList[i].name;
+  for (auto &i : baseList) {
+    if ((baseType == i.baseType) && (length == i.length)) {
+      return i.name;
     }
   }
 
@@ -1287,14 +1288,14 @@ BOOL getWow64ThreadContext(HANDLE hProcess, HANDLE hThread,
     ULONG_PTR ThreadInfo[6] = {0};
     if (pNtQueryInformationThread &&
         pNtQueryInformationThread(hThread, 0, &ThreadInfo, sizeof(ThreadInfo),
-                                  0) == 0) {
+                                  nullptr) == 0) {
       PVOID *pTls = (PVOID *)(ThreadInfo[1] + TLS_OFFSET);
-      Wow64_SaveContext saveContext = {0}, *pSaveContext = 0;
+      Wow64_SaveContext saveContext = {0}, *pSaveContext = nullptr;
 
       if (ReadProcessMemory(hProcess, pTls + 1, &pSaveContext,
-                            sizeof(pSaveContext), 0) &&
+                            sizeof(pSaveContext), nullptr) &&
           ReadProcessMemory(hProcess, pSaveContext, &saveContext,
-                            sizeof(saveContext), 0)) {
+                            sizeof(saveContext), nullptr)) {
         *pWowContext = saveContext.context;
         return true;
       }

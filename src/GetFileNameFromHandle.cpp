@@ -42,7 +42,7 @@ IMPLEMENTATION NOTES
 */
 
 static char const szRCSID[] =
-    "$Id: GetFileNameFromHandle.cpp 2200 2021-07-19 23:11:21Z roger $";
+    "$Id: GetFileNameFromHandle.cpp 2467 2024-09-07 21:35:42Z roger $";
 
 #include <windows.h>
 
@@ -108,7 +108,8 @@ std::string GetFileNameFromHandle(HANDLE hFile) {
   }
 
   // Create a file mapping object.
-  HANDLE hFileMap = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 1, NULL);
+  HANDLE hFileMap =
+      CreateFileMapping(hFile, nullptr, PAGE_READONLY, 0, 1, nullptr);
 
   if (hFileMap) {
     // Create a file mapping to get the file name.

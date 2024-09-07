@@ -37,7 +37,7 @@ COPYRIGHT
 #pragma comment(lib, "psapi")
 
 static char const szRCSID[] =
-    "$Id: GetModuleBase.cpp 2458 2024-09-07 17:44:34Z roger $";
+    "$Id: GetModuleBase.cpp 2467 2024-09-07 21:35:42Z roger $";
 
 namespace {
 //////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ void fixSymSrv() {
   static bool loaded = false;
   if (!loaded) {
     HMODULE const hSymSrv = ::GetModuleHandle("SymSrv");
-    if (hSymSrv != 0) {
+    if (hSymSrv != nullptr) {
       ::LoadLibrary("SymSrv");
       loaded = true;
     }
@@ -105,8 +105,8 @@ DWORD64 CALLBACK GetModuleBase(HANDLE hProcess, DWORD64 dwAddress) {
         // We do not need to pass a file handle - trapNtCalls reveals that
         // DbgHelp simply opens the file if we don't provide a handle or
         // duplicates the handle if we do.
-        if (!::SymLoadModule64(hProcess, NULL, szFileName, NULL, baseAddress,
-                               0)) {
+        if (!::SymLoadModule64(hProcess, nullptr, szFileName, nullptr,
+                               baseAddress, 0)) {
           // ATLTRACE("SymLoadModule, failed for %s\n", szFileName);
         }
         fixSymSrv();
@@ -138,7 +138,7 @@ DWORD64 CALLBACK GetModuleBase(HANDLE hProcess, DWORD64 dwAddress) {
 DWORD GetModuleFileNameWrapper(HANDLE hProcess, HMODULE hMod, char *szBuff,
                                DWORD bufLen) {
   DWORD ret = ::GetModuleFileNameEx(hProcess, hMod, szBuff, bufLen);
-  if (ret == 0 && hMod == 0) {
+  if (ret == 0 && hMod == nullptr) {
     DWORD lastError = GetLastError();
     if (lastError == ERROR_PARTIAL_COPY || lastError == ERROR_INVALID_HANDLE) {
       // Use alternate API to get exe name in 64-bit windows.
