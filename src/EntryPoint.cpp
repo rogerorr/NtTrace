@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2455 2024-09-05 22:37:56Z roger $";
+    "$Id: EntryPoint.cpp 2458 2024-09-07 17:44:34Z roger $";
 
 #include "EntryPoint.h"
 
@@ -57,9 +57,9 @@ std::string buffToHex(unsigned char *buffer, size_t length);
 extern "C" {
 // Function to convert NT status codes to normal NT error codes
 #ifdef _M_IX86
-typedef DWORD(NTAPI *PFNRtlNtStatusToDosError)(DWORD);
+using PFNRtlNtStatusToDosError = DWORD(NTAPI *)(DWORD);
 #elif _M_X64
-typedef DWORD64(NTAPI *PFNRtlNtStatusToDosError)(DWORD64);
+using PFNRtlNtStatusToDosError = DWORD64(NTAPI *)(DWORD64);
 #endif // _M_IX86
 }
 
@@ -978,7 +978,7 @@ std::string buffToHex(unsigned char *buffer, size_t length) {
 
 } // namespace
 
-// Process a typedef line (starting after the typedef)
+// Process a typedef line (starting after the 'typedef')
 void processTypedef(std::string lbuf, EntryPoint::Typedefs &typedefs) {
   std::string::size_type space = lbuf.find(' ');
   if (space == std::string::npos) {
@@ -992,6 +992,19 @@ void processTypedef(std::string lbuf, EntryPoint::Typedefs &typedefs) {
   typedefs[lbuf.substr(space + 1)] = lbuf.substr(0, space);
 }
 
+// Process a using declaration (starting after the 'using')
+void processUsing(std::string lbuf, EntryPoint::Typedefs &typedefs) {
+  std::string::size_type equals = lbuf.find(" = ");
+  if (equals == std::string::npos) {
+    std::cerr << "invalid using '" << lbuf << "'" << std::endl;
+    return;
+  }
+  if (lbuf.rfind(';') == lbuf.size() - 1) {
+    lbuf.resize(lbuf.size() - 1);
+  }
+
+  typedefs[lbuf.substr(0, equals)] = lbuf.substr(equals + strlen(" = "));
+}
 //////////////////////////////////////////////////////////////////////////
 //
 // Read set of entry points from a configuration file with lines like:-
@@ -1001,14 +1014,15 @@ void processTypedef(std::string lbuf, EntryPoint::Typedefs &typedefs) {
 //   IN DWORD fred
 // );
 //
-// or (simple) typedefs
+// or (simple) typedefs or using declarations:
 // typedef HANDLE HKL;
+// using NTSTATUS = LONG;
 //
 // static
 bool EntryPoint::readEntryPoints(std::istream &cfgFile,
                                  EntryPointSet &entryPoints, Typedefs &typedefs,
                                  std::string &target) {
-  typedef std::map<std::string, EntryPoint *> FunctionMap;
+  using FunctionMap = std::map<std::string, EntryPoint *>;
   FunctionMap existingFunctions; // For handling duplicate definitions
   std::string sCategory("Other");
   std::string lastTypeName;
@@ -1052,6 +1066,11 @@ bool EntryPoint::readEntryPoints(std::istream &cfgFile,
       if ((lbuf.find(' ') == strlen("typedef")) &&
           (memcmp(&lbuf[0], "typedef", 7) == 0)) {
         processTypedef(lbuf.substr(strlen("typedef") + 1), typedefs);
+        continue;
+      }
+      if ((lbuf.find(' ') == strlen("using")) &&
+          (memcmp(&lbuf[0], "using", 5) == 0)) {
+        processUsing(lbuf.substr(strlen("using") + 1), typedefs);
         continue;
       }
       std::string::size_type idx = lbuf.find('(');

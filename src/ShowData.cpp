@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2455 2024-09-05 22:37:56Z roger $";
+    "$Id: ShowData.cpp 2458 2024-09-07 17:44:34Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -563,7 +563,7 @@ void showPFileNetworkInfo(std::ostream &os, HANDLE hProcess,
 
 //////////////////////////////////////////////////////////////////////////
 void showUserProcessParams(std::ostream &os, HANDLE hProcess,
-                          PRTL_USER_PROCESS_PARAMETERS pUserProcessParams) {
+                           PRTL_USER_PROCESS_PARAMETERS pUserProcessParams) {
   showPointer(os, hProcess, (ULONG_PTR)pUserProcessParams);
   if (pUserProcessParams) {
     os << " [";

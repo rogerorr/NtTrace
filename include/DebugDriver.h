@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2081 $
+    $Revision: 2459 $
 */
 
-// $Id: DebugDriver.h 2081 2021-07-17 17:50:08Z roger $
+// $Id: DebugDriver.h 2459 2024-09-07 17:46:05Z roger $
 
 #ifndef _WINDOWS_
 #include <windows.h>
@@ -148,14 +148,14 @@ public:
 private:
   //////////////////////////////////////////////////////////////////////////
   // Data structure used for handling thread/process id -> handle mapping
-  typedef std::map<DWORD, HANDLE> ThreadMap;
+  using ThreadMap = std::map<DWORD, HANDLE>;
   struct ProcessEntry {
     ProcessEntry() : attached(false) {}
     bool attached;
     HANDLE hProcess;
     ThreadMap threadMap;
   };
-  typedef std::map<DWORD, ProcessEntry> ProcessMap;
+  using ProcessMap = std::map<DWORD, ProcessEntry>;
 
 private:
   ProcessMap processMap;

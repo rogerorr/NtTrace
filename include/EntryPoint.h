@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2455 $
+    $Revision: 2458 $
 */
 
-// $Id: EntryPoint.h 2455 2024-09-05 22:37:56Z roger $
+// $Id: EntryPoint.h 2458 2024-09-07 17:44:34Z roger $
 
 #include <windows.h>
 
@@ -40,7 +40,7 @@ struct NtCall;
 
 //////////////////////////////////////////////////////////////////////////
 // Possible distinct argument types
-typedef enum {
+enum ArgType {
   argULONG_PTR = 0, // also the default
   argULONG,
   argULONGLONG, // two adjacent dwords in 32bit, one qword in 64bit
@@ -63,9 +63,9 @@ typedef enum {
   argPFILE_BASIC_INFORMATION,
   argPFILE_NETWORK_OPEN_INFORMATION,
   argPRTL_USER_PROCESS_PARAMETERS
-} ArgType;
+};
 
-typedef enum {
+enum ArgAttributes {
   argNONE = 0,
   argIN = 1,
   argOUT = 2,
@@ -74,7 +74,7 @@ typedef enum {
   argRESERVED = 16,
   argUNDERSCORE = 32,        // use _In_, _Out_ rather than IN, OUT
   argDOUBLE_UNDERSCORE = 64, // use __in, __out rather than IN, OUT
-} ArgAttributes;
+};
 
 struct Argument {
   Argument()
@@ -86,9 +86,9 @@ struct Argument {
         attributes(attributes), dummy(false) {}
 
 #ifdef _M_IX86
-  typedef DWORD ARG;
+  using ARG = DWORD;
 #elif _M_X64
-  typedef DWORD64 ARG;
+  using ARG = DWORD64;
 #endif
 
   /** Show the argument for the given process with the specified value. */
@@ -106,17 +106,17 @@ struct Argument {
               // 32bit Windows)
 };
 
-typedef enum {
+enum ReturnType {
   retNTSTATUS = 0, // also the default
   retVOID,
   retPVOID,
   retULONG,
   retULONG_PTR,
-} ReturnType;
+};
 
 class EntryPoint {
 public:
-  typedef std::map<std::string, std::string> Typedefs;
+  using Typedefs = std::map<std::string, std::string>;
 
   explicit EntryPoint(std::string const &name, std::string const &category)
       : name(name), category(category), disabled(category[0] == '-'),
@@ -200,7 +200,7 @@ private:
                      unsigned int offset, unsigned char *setssn);
 };
 
-typedef std::set<EntryPoint> EntryPointSet;
+using EntryPointSet = std::set<EntryPoint>;
 
 //////////////////////////////////////////////////////////////////////////
 // Our data structure for an NT call
@@ -211,7 +211,7 @@ struct NtCall {
 
   size_t nArgs; // Number of arguments
 
-  typedef enum { trapContinue, trapReturn, trapReturn0, trapJump } TrapType;
+  enum TrapType { trapContinue, trapReturn, trapReturn0, trapJump };
   TrapType trapType;
   DWORD jumpTarget; // used for trapJump
 };

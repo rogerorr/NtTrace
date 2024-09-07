@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2451 2024-07-26 22:17:17Z roger $";
+    "$Id: SymbolEngine.cpp 2458 2024-09-07 17:44:34Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -1244,19 +1244,20 @@ struct Wow64_SaveContext {
 };
 #pragma pack()
 
-typedef BOOL(WINAPI *pfnWow64GetThreadContext)(HANDLE, WOW64_CONTEXT *);
+using fnWow64GetThreadContext = BOOL WINAPI(HANDLE, WOW64_CONTEXT *);
 
-typedef NTSTATUS(WINAPI *pfnNtQueryInformationThread)(
-    HANDLE ThreadHandle, ULONG ThreadInformationClass, PVOID Buffer,
-    ULONG Length, PULONG ReturnLength);
+using fnNtQueryInformationThread = NTSTATUS WINAPI(HANDLE ThreadHandle,
+                                                   ULONG ThreadInformationClass,
+                                                   PVOID Buffer, ULONG Length,
+                                                   PULONG ReturnLength);
 
 // Helper function to delay load Wow64GetThreadContext or emulate on W2K3
 BOOL getWow64ThreadContext(HANDLE hProcess, HANDLE hThread,
                            CONTEXT const &context, WOW64_CONTEXT *pWowContext) {
   static HMODULE hKernel32 = ::GetModuleHandle("KERNEL32");
-  static pfnWow64GetThreadContext pFn =
-      (pfnWow64GetThreadContext)::GetProcAddress(hKernel32,
-                                                 "Wow64GetThreadContext");
+  static fnWow64GetThreadContext *pFn =
+      (fnWow64GetThreadContext *)::GetProcAddress(hKernel32,
+                                                  "Wow64GetThreadContext");
   if (pFn) {
     // Vista and above
     return pFn(hThread, pWowContext);
@@ -1280,8 +1281,8 @@ BOOL getWow64ThreadContext(HANDLE hProcess, HANDLE hThread,
     return true;
   } else {
     static HMODULE hNtDll = ::GetModuleHandle("NTDLL");
-    static pfnNtQueryInformationThread pNtQueryInformationThread =
-        (pfnNtQueryInformationThread)::GetProcAddress(
+    static fnNtQueryInformationThread *pNtQueryInformationThread =
+        (fnNtQueryInformationThread *)::GetProcAddress(
             hNtDll, "NtQueryInformationThread");
     ULONG_PTR ThreadInfo[6] = {0};
     if (pNtQueryInformationThread &&

@@ -20,10 +20,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2246 $
+    $Revision: 2459 $
 */
 
-// $Id: DbgHelper.inl 2246 2021-09-09 20:32:36Z roger $
+// $Id: DbgHelper.inl 2459 2024-09-07 17:46:05Z roger $
 
 #include <iostream>
 
@@ -183,9 +183,9 @@ inline FARPROC DbgHelper::GetProc(char const *name) {
 /** Get symbol for specific address */
 inline BOOL DbgHelper::SymFromAddr(DWORD64 Address, PDWORD64 Displacement,
                                    PSYMBOL_INFO Symbol) const {
-  typedef BOOL IMAGEAPI SymFromAddr(IN HANDLE hProcess, IN DWORD64 Address,
-                                    OUT PDWORD64 Displacement,
-                                    IN OUT PSYMBOL_INFO Symbol);
+  using SymFromAddr =
+      BOOL IMAGEAPI(IN HANDLE hProcess, IN DWORD64 Address,
+                    OUT PDWORD64 Displacement, IN OUT PSYMBOL_INFO Symbol);
 
   DYN_LOAD(SymFromAddr);
 
@@ -204,7 +204,7 @@ inline BOOL DbgHelper::SymFromAddr(DWORD64 Address, PDWORD64 Displacement,
 
 /** Get symbol for name */
 inline BOOL DbgHelper::SymFromName(PCSTR Name, PSYMBOL_INFO Symbol) const {
-  typedef BOOL IMAGEAPI SymFromName(IN HANDLE hProcess, IN PCSTR Name,
+  using SymFromName = BOOL IMAGEAPI(IN HANDLE hProcess, IN PCSTR Name,
                                     IN OUT PSYMBOL_INFO Symbol);
 
   DYN_LOAD(SymFromName);
@@ -222,9 +222,9 @@ inline BOOL DbgHelper::SymFromName(PCSTR Name, PSYMBOL_INFO Symbol) const {
 inline BOOL DbgHelper::GetTypeInfo(DWORD64 ModBase, ULONG TypeId,
                                    IMAGEHLP_SYMBOL_TYPE_INFO GetType,
                                    PVOID pInfo) const {
-  typedef BOOL IMAGEAPI SymGetTypeInfo(
-      IN HANDLE hProcess, IN DWORD64 ModBase, IN ULONG TypeId,
-      IN IMAGEHLP_SYMBOL_TYPE_INFO GetType, OUT PVOID pInfo);
+  using SymGetTypeInfo =
+      BOOL IMAGEAPI(IN HANDLE hProcess, IN DWORD64 ModBase, IN ULONG TypeId,
+                    IN IMAGEHLP_SYMBOL_TYPE_INFO GetType, OUT PVOID pInfo);
 
   DYN_LOAD(SymGetTypeInfo);
 
@@ -240,9 +240,9 @@ inline BOOL DbgHelper::GetTypeInfo(DWORD64 ModBase, ULONG TypeId,
 /** Get type info from a name. */
 inline BOOL DbgHelper::GetTypeFromName(DWORD64 ModBase, PCTSTR Name,
                                        PSYMBOL_INFO Symbol) const {
-  typedef BOOL IMAGEAPI SymGetTypeFromName(IN HANDLE hProcess,
-                                           IN DWORD64 ModBase, IN PCTSTR Name,
-                                           IN PSYMBOL_INFO Symbol);
+  using SymGetTypeFromName =
+      BOOL IMAGEAPI(IN HANDLE hProcess, IN DWORD64 ModBase, IN PCTSTR Name,
+                    IN PSYMBOL_INFO Symbol);
 
   DYN_LOAD(SymGetTypeFromName);
 
@@ -259,9 +259,9 @@ inline BOOL DbgHelper::GetTypeFromName(DWORD64 ModBase, PCTSTR Name,
  * function. */
 inline BOOL DbgHelper::SetContext(PIMAGEHLP_STACK_FRAME StackFrame,
                                   PIMAGEHLP_CONTEXT Context) const {
-  typedef BOOL IMAGEAPI SymSetContext(HANDLE hProcess,
-                                      PIMAGEHLP_STACK_FRAME StackFrame,
-                                      PIMAGEHLP_CONTEXT Context);
+  using SymSetContext =
+      BOOL IMAGEAPI(HANDLE hProcess, PIMAGEHLP_STACK_FRAME StackFrame,
+                    PIMAGEHLP_CONTEXT Context);
 
   DYN_LOAD(SymSetContext);
 
@@ -279,7 +279,7 @@ inline BOOL
 DbgHelper::EnumSymbols(ULONG64 BaseOfDll, PCSTR Mask,
                        PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
                        PVOID UserContext) const {
-  typedef BOOL IMAGEAPI SymEnumSymbols(
+  using SymEnumSymbols = BOOL IMAGEAPI(
       HANDLE hProcess, ULONG64 BaseOfDll, PCSTR Mask,
       PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, PVOID UserContext);
 
@@ -300,7 +300,7 @@ inline BOOL
 DbgHelper::EnumTypes(ULONG64 BaseOfDll,
                      PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
                      PVOID UserContext) const {
-  typedef BOOL IMAGEAPI SymEnumTypes(
+  using SymEnumTypes = BOOL IMAGEAPI(
       HANDLE hProcess, ULONG64 BaseOfDll,
       PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, PVOID UserContext);
 
@@ -322,7 +322,7 @@ DbgHelper::WriteMiniDump(DWORD processId, HANDLE hFile, MINIDUMP_TYPE DumpType,
                          PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
                          PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,
                          PMINIDUMP_CALLBACK_INFORMATION CallbackParam) {
-  typedef BOOL WINAPI MiniDumpWriteDump(
+  using MiniDumpWriteDump = BOOL WINAPI(
       IN HANDLE hProcess, IN DWORD ProcessId, IN HANDLE hFile,
       IN MINIDUMP_TYPE DumpType,
       IN CONST PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam,
@@ -351,8 +351,8 @@ inline BOOL DbgHelper::IsEnumSymbolsAvailable() const {
 #ifdef DBGHELP_6_2_APIS
 /** Number of inline frames at the given address */
 inline DWORD DbgHelper::AddrIncludeInlineTrace(DWORD64 address) const {
-  typedef DWORD IMAGEAPI SymAddrIncludeInlineTrace(HANDLE hProcess,
-                                                   DWORD64 Address);
+  using SymAddrIncludeInlineTrace =
+      DWORD IMAGEAPI(HANDLE hProcess, DWORD64 Address);
 
   DYN_LOAD(SymAddrIncludeInlineTrace);
 
@@ -369,10 +369,10 @@ inline BOOL DbgHelper::QueryInlineTrace(DWORD64 StartAddress,
                                         DWORD64 StartRetAddress,
                                         DWORD64 CurAddress, LPDWORD CurContext,
                                         LPDWORD CurFrameIndex) const {
-  typedef BOOL IMAGEAPI SymQueryInlineTrace(
-      HANDLE hProcess, DWORD64 StartAddress, DWORD StartContext,
-      DWORD64 StartRetAddress, DWORD64 CurAddress, LPDWORD CurContext,
-      LPDWORD CurFrameIndex);
+  using SymQueryInlineTrace =
+      BOOL IMAGEAPI(HANDLE hProcess, DWORD64 StartAddress, DWORD StartContext,
+                    DWORD64 StartRetAddress, DWORD64 CurAddress,
+                    LPDWORD CurContext, LPDWORD CurFrameIndex);
 
   DYN_LOAD(SymQueryInlineTrace);
 
@@ -386,9 +386,9 @@ inline BOOL DbgHelper::QueryInlineTrace(DWORD64 StartAddress,
 inline BOOL DbgHelper::FromInlineContext(DWORD64 Address, DWORD InlineContext,
                                          PDWORD64 pDisplacement,
                                          PSYMBOL_INFO Symbol) const {
-  typedef BOOL IMAGEAPI SymFromInlineContext(
-      HANDLE hProcess, DWORD64 Address, DWORD InlineContext,
-      PDWORD64 pDisplacement, PSYMBOL_INFO Symbol);
+  using SymFromInlineContext =
+      BOOL IMAGEAPI(HANDLE hProcess, DWORD64 Address, DWORD InlineContext,
+                    PDWORD64 pDisplacement, PSYMBOL_INFO Symbol);
 
   DYN_LOAD(SymFromInlineContext);
 
@@ -403,7 +403,7 @@ inline BOOL DbgHelper::GetLineFromInlineContext(DWORD64 Address,
                                                 DWORD64 ModuleBaseAddress,
                                                 PDWORD pDisplacement,
                                                 PIMAGEHLP_LINE64 Line64) const {
-  typedef BOOL IMAGEAPI SymGetLineFromInlineContext(
+  using SymGetLineFromInlineContext = BOOL IMAGEAPI(
       HANDLE hProcess, DWORD64 Address, DWORD InlineContext,
       DWORD64 ModuleBaseAddress, PDWORD pDisplacement, PIMAGEHLP_LINE64 Line64);
 
@@ -420,10 +420,10 @@ inline BOOL
 DbgHelper::EnumSymbolsEx(ULONG64 BaseOfDll, PCSTR Mask,
                          PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
                          PVOID UserContext, DWORD Options) const {
-  typedef BOOL IMAGEAPI SymEnumSymbolsEx(
-      HANDLE hProcess, ULONG64 BaseOfDll, PCSTR Mask,
-      PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, PVOID UserContext,
-      DWORD Options);
+  using SymEnumSymbolsEx =
+      BOOL IMAGEAPI(HANDLE hProcess, ULONG64 BaseOfDll, PCSTR Mask,
+                    PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
+                    PVOID UserContext, DWORD Options);
 
   DYN_LOAD(SymEnumSymbolsEx);
 
@@ -434,8 +434,8 @@ DbgHelper::EnumSymbolsEx(ULONG64 BaseOfDll, PCSTR Mask,
 
 inline BOOL DbgHelper::SetScopeFromInlineContext(DWORD64 Address,
                                                  DWORD InlineContext) const {
-  typedef BOOL IMAGEAPI SymSetScopeFromInlineContext(
-      HANDLE hProcess, DWORD64 Address, DWORD InlineContext);
+  using SymSetScopeFromInlineContext =
+      BOOL IMAGEAPI(HANDLE hProcess, DWORD64 Address, DWORD InlineContext);
 
   DYN_LOAD(SymSetScopeFromInlineContext);
 

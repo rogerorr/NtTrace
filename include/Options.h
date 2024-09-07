@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2074 $
+    $Revision: 2458 $
 */
 
-// $Id: Options.h 2074 2021-07-17 17:07:41Z roger $
+// $Id: Options.h 2458 2024-09-07 17:44:34Z roger $
 
 #include <string>
 #include <vector>
@@ -139,7 +139,7 @@ public:
   std::string pname() const;
 
   /** Iterator type returned by begin/end */
-  typedef std::vector<std::string>::const_iterator const_iterator;
+  using const_iterator = std::vector<std::string>::const_iterator;
 
   /** Start of non-option arguments */
   const_iterator begin() const;

@@ -28,7 +28,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2439 2024-07-15 08:43:54Z roger $";
+    "$Id: NtTrace.cpp 2462 2024-09-07 18:16:41Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -159,7 +159,7 @@ public:
   bool listCategories();
 
   /** Mapping NtXxx names to offsets within target DLL */
-  typedef std::map<std::string, DWORD> Offsets;
+  using Offsets = std::map<std::string, DWORD>;
 
   /** Set orderly close down on Ctrl+C */
   void setCtrlC();
@@ -182,17 +182,17 @@ private:
 
   void populateOffsets();
 
-  typedef std::map<LPVOID, NtCall> NTCALLS;
+  using NTCALLS = std::map<LPVOID, NtCall>;
   NTCALLS NtCalls;   // Complete list of all the calls we're tracking
   NTCALLS NtPreSave; // Pre save list of all the calls we're tracking
 
-  HMODULE BaseOfNtDll; // base of NTDLL.DLL
+  HMODULE BaseOfNtDll = 0; // base of NTDLL.DLL
 
-  std::string target; // name of target DLL (blank => default)
-  HMODULE TargetDll;  // handle of the target DLL (by default, NTDLL.DLL)
+  std::string target;    // name of target DLL (blank => default)
+  HMODULE TargetDll = 0; // handle of the target DLL (by default, NTDLL.DLL)
 
   std::set<std::string> categories; // If not empty, categories to trace
-  bool inverseFilter;               // If true, exclude when filtered
+  bool inverseFilter = false;       // If true, exclude when filtered
   std::vector<std::string>
       filters; // If not empty, filter for 'active' entry points
 
@@ -798,7 +798,7 @@ void TrapNtDebugger::SetDllBreakpoints(HANDLE hProcess) {
         lastType = it2->first;
         exp << '\n';
       }
-      exp << "typedef " << it2->first << " " << it2->second << ";\n";
+      exp << "using " << it2->second << " = " << it2->first << ";\n";
     }
     if (!sorted.empty()) {
       exp << '\n';
@@ -887,12 +887,12 @@ void setErrorCodes(std::string const &codeFilter) {
   for (std::vector<std::string>::const_iterator it = codes.begin(),
                                                 past = codes.end();
        it != past; ++it) {
-    NTSTATUS code(0);
+    unsigned int code(0);
     char scrap(0);
     if (sscanf(it->c_str(), "%x%c", &code, &scrap) != 1) {
       throw std::runtime_error("Unrecognised error code value '" + *it + "'");
     }
-    errorCodes.insert(code);
+    errorCodes.insert(static_cast<NTSTATUS>(code));
   }
 }
 

@@ -21,21 +21,21 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2342 $
+    $Revision: 2462 $
 */
 
-// $Id: ProcessInfo.h 2342 2022-12-27 13:05:52Z roger $
+// $Id: ProcessInfo.h 2462 2024-09-07 18:16:41Z roger $
 
 #include "NtDllStruct.h"
 
 // Forward references
-struct _PEB;
-typedef _PEB *PPEB;
-struct _PEB_LDR_DATA;
-typedef _PEB_LDR_DATA *PPEB_LDR_DATA;
+struct PEB;
+using PPEB = PEB *;
+struct PEB_LDR_DATA;
+using PPEB_LDR_DATA = PEB_LDR_DATA *;
 
 // From ntddk.h
-typedef enum _PROCESSINFOCLASS {
+enum PROCESSINFOCLASS {
   ProcessBasicInformation,
   ProcessQuotaLimits,
   ProcessIoCounters,
@@ -89,33 +89,33 @@ typedef enum _PROCESSINFOCLASS {
   ProcessConsoleHostProcess,
   ProcessWindowInformation,
   MaxProcessInfoClass ///< MaxProcessInfoClass should always be the last enum
-} PROCESSINFOCLASS;
+};
 
 /**
  * Thread priority
  */
-typedef LONG KPRIORITY;
+using KPRIORITY = LONG;
 
 /**
  * Basic Process Information
  *
  * NtQueryInformationProcess using ProcessBasicInfo
  */
-typedef struct _PROCESS_BASIC_INFORMATION {
+struct PROCESS_BASIC_INFORMATION {
   NTSTATUS ExitStatus;
   PPEB PebBaseAddress;
   ULONG_PTR AffinityMask;
   KPRIORITY BasePriority;
   ULONG_PTR UniqueProcessId;
   ULONG_PTR InheritedFromUniqueProcessId;
-} PROCESS_BASIC_INFORMATION;
+};
 
 /** Pointer to PROCESS_BASIC_INFORMATION */
-typedef PROCESS_BASIC_INFORMATION *PPROCESS_BASIC_INFORMATION;
+using PPROCESS_BASIC_INFORMATION = PROCESS_BASIC_INFORMATION *;
 
 // From
 // http://cvs.sourceforge.net/viewcvs.py/mingw/w32api/include/ddk/ntapi.h?view=markup
-typedef struct _RTL_USER_PROCESS_PARAMETERS {
+struct RTL_USER_PROCESS_PARAMETERS {
   ULONG AllocationSize;
   ULONG Size;
   ULONG Flags;
@@ -144,28 +144,28 @@ typedef struct _RTL_USER_PROCESS_PARAMETERS {
   UNICODE_STRING DesktopInfo;
   UNICODE_STRING ShellInfo;
   UNICODE_STRING RuntimeInfo;
-} RTL_USER_PROCESS_PARAMETERS, *PRTL_USER_PROCESS_PARAMETERS;
+};
+using PRTL_USER_PROCESS_PARAMETERS = RTL_USER_PROCESS_PARAMETERS *;
 
 /** typedef for the call to NtQueryInformationProcess */
-typedef
+using NtQueryInformationProcess =
     // NTOSAPI
-    NTSTATUS NTAPI
-    NtQueryInformationProcess(
-        IN HANDLE ProcessHandle, ///< Handle to the process
-        IN PROCESSINFOCLASS
-            ProcessInformationClass,  ///< Class of information requested
-        OUT PVOID ProcessInformation, ///< Buffer for returned information
-        IN ULONG
-            ProcessInformationLength, ///< Length of ProcessInformation buffer
-        OUT PULONG ReturnLength OPTIONAL); ///< Returned length
+    NTSTATUS
+    NTAPI(IN HANDLE ProcessHandle, ///< Handle to the process
+          IN PROCESSINFOCLASS
+              ProcessInformationClass,  ///< Class of information requested
+          OUT PVOID ProcessInformation, ///< Buffer for returned information
+          IN ULONG
+              ProcessInformationLength, ///< Length of ProcessInformation buffer
+          OUT PULONG ReturnLength OPTIONAL); ///< Returned length
 
 /** typedef for the call to NtSetInformationProcess */
-typedef NTSTATUS NTAPI NtSetInformationProcess(
-    IN HANDLE ProcessHandle, ///< Handle to the process
-    IN PROCESSINFOCLASS
-        ProcessInformationClass,          ///< Class of information requested
-    IN PVOID ProcessInformation OPTIONAL, ///< Buffer for returned information
-    IN ULONG Length); ///< Length of ProcessInformation buffer
+using NtSetInformationProcess = NTSTATUS
+NTAPI(IN HANDLE ProcessHandle, ///< Handle to the process
+      IN PROCESSINFOCLASS
+          ProcessInformationClass,          ///< Class of information requested
+      IN PVOID ProcessInformation OPTIONAL, ///< Buffer for returned information
+      IN ULONG Length); ///< Length of ProcessInformation buffer
 
 /**
  * Process Environment Block
@@ -174,7 +174,7 @@ typedef NTSTATUS NTAPI NtSetInformationProcess(
  * http://cvs.sourceforge.net/viewcvs.py/darwine/wine/include/winternl.h?rev=1.1.1.2
  * Modified for X64
  */
-typedef struct _PEB {
+struct PEB {
   BYTE Reserved1[2]; /*  00 */        ///< Reserved
   BYTE BeingDebugged; /*  02 */       ///< TRUE when process is being debugged
   BYTE Reserved2[1]; /*  03 */        ///< Reserved
@@ -188,20 +188,21 @@ typedef struct _PEB {
   BYTE __pad_1c[236]; /*  1c */  ///< Padding
   PVOID Reserved3[51]; /* 108 */ ///< Reserved
   ULONG SessionId; /* 1d4 */     ///< The current session Id
-} PEB, *PPEB;
+};
+using PPEB = PEB *;
 
 /** Get access to PEB for current process */
 #ifdef _M_X64
-inline _PEB *getCurrentPeb() {
-  _PEB *(*GetCurrentPEB)();
-  GetCurrentPEB = (_PEB * (*)())
+inline PEB *getCurrentPeb() {
+  PEB *(*GetCurrentPEB)();
+  GetCurrentPEB = (PEB * (*)())
       GetProcAddress(GetModuleHandle("ntdll.dll"), "RtlGetCurrentPeb");
   return GetCurrentPEB();
 }
 #else
 #pragma warning(push)
 #pragma warning(disable : 4035) // no return value
-inline _PEB *getCurrentPeb() {
+inline PEB *getCurrentPeb() {
   // 0x30 = offset of PEB in TIB
   _asm mov eax, dword ptr fs : [0x30]
 }

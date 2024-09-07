@@ -37,7 +37,7 @@ COPYRIGHT
 #pragma comment(lib, "psapi")
 
 static char const szRCSID[] =
-    "$Id: GetModuleBase.cpp 2195 2021-07-19 23:00:05Z roger $";
+    "$Id: GetModuleBase.cpp 2458 2024-09-07 17:44:34Z roger $";
 
 namespace {
 //////////////////////////////////////////////////////////
@@ -142,7 +142,7 @@ DWORD GetModuleFileNameWrapper(HANDLE hProcess, HMODULE hMod, char *szBuff,
     DWORD lastError = GetLastError();
     if (lastError == ERROR_PARTIAL_COPY || lastError == ERROR_INVALID_HANDLE) {
       // Use alternate API to get exe name in 64-bit windows.
-      typedef BOOL(WINAPI * pfnQueryFullProcessImageName)(
+      using pfnQueryFullProcessImageName = BOOL(WINAPI *)(
           /*__in*/ HANDLE hProcess,
           /*__in*/ DWORD dwFlags,
           /*__out*/ LPCSTR lpExeName,
@@ -157,7 +157,7 @@ DWORD GetModuleFileNameWrapper(HANDLE hProcess, HMODULE hMod, char *szBuff,
         ret = bufLen;
       } else {
         // Windows 2003 only has this one: which returns paths in device form
-        typedef DWORD(WINAPI * pfnGetProcessImageFileName)(
+        using pfnGetProcessImageFileName = DWORD(WINAPI *)(
             IN HANDLE hProcess, OUT LPTSTR lpImageFileName, IN DWORD nSize);
 
         static pfnGetProcessImageFileName pGetProcessImageFileName =
