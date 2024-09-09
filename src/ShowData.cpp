@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2467 2024-09-07 21:35:42Z roger $";
+    "$Id: ShowData.cpp 2470 2024-09-09 22:07:15Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -47,6 +47,13 @@ namespace {
 template <typename T>
 BOOL readHelper(HANDLE hProcess, LPVOID remoteAddress, T &theValue) {
   return ReadProcessMemory(hProcess, remoteAddress, &theValue, sizeof(T),
+                           nullptr);
+}
+
+/** Read an object of type 'T' at remoteAddress in the specified process */
+template <typename T>
+BOOL readHelper(HANDLE hProcess, ULONG_PTR remoteAddress, T &theValue) {
+  return ReadProcessMemory(hProcess, reinterpret_cast<LPVOID>(remoteAddress), &theValue, sizeof(T),
                            nullptr);
 }
 
@@ -310,7 +317,7 @@ void showPHandle(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal) {
   showPointer(os, hProcess, (ULONG_PTR)argVal);
   if (argVal) {
     ULONG_PTR handle = 0;
-    (void)readHelper(hProcess, (LPVOID)argVal, handle);
+    (void)readHelper(hProcess, argVal, handle);
 
     os << " [";
     showDword(os, handle);
@@ -323,7 +330,7 @@ void showPByte(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal) {
   showPointer(os, hProcess, argVal);
   if (argVal) {
     BYTE value = 0;
-    (void)readHelper(hProcess, (LPVOID)argVal, value);
+    (void)readHelper(hProcess, argVal, value);
 
     os << " [";
     showDword(os, value);
@@ -336,7 +343,7 @@ void showPUshort(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal) {
   showPointer(os, hProcess, argVal);
   if (argVal) {
     USHORT value = 0;
-    (void)readHelper(hProcess, (LPVOID)argVal, value);
+    (void)readHelper(hProcess, argVal, value);
 
     os << " [";
     showDword(os, value);
@@ -349,7 +356,7 @@ void showPUlong(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal) {
   showPointer(os, hProcess, argVal);
   if (argVal) {
     ULONG value = 0;
-    (void)readHelper(hProcess, (LPVOID)argVal, value);
+    (void)readHelper(hProcess, argVal, value);
 
     os << " [";
     showDword(os, value);

@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2458 $
+    $Revision: 2471 $
 */
 
-// $Id: EntryPoint.h 2458 2024-09-07 17:44:34Z roger $
+// $Id: EntryPoint.h 2471 2024-09-09 22:13:54Z roger $
 
 #include <windows.h>
 
@@ -205,15 +205,13 @@ using EntryPointSet = std::set<EntryPoint>;
 //////////////////////////////////////////////////////////////////////////
 // Our data structure for an NT call
 struct NtCall {
-  NtCall() : entryPoint(0), nArgs(0) {}
+  EntryPoint *entryPoint{}; // Pointer into EntryPointMap
 
-  EntryPoint *entryPoint; // Pointer into EntryPointMap
-
-  size_t nArgs; // Number of arguments
+  size_t nArgs{}; // Number of arguments
 
   enum TrapType { trapContinue, trapReturn, trapReturn0, trapJump };
-  TrapType trapType;
-  DWORD jumpTarget; // used for trapJump
+  TrapType trapType{};
+  DWORD jumpTarget{}; // used for trapJump
 };
 
 #endif // ENTRYPOINT_H_

@@ -27,7 +27,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: Enumerations.cpp 2467 2024-09-07 21:35:42Z roger $";
+    "$Id: Enumerations.cpp 2469 2024-09-09 21:59:49Z roger $";
 
 #include "Enumerations.h"
 
@@ -236,7 +236,12 @@ enum FILE_INFORMATION_CLASS {
   FileLinkInformationExBypassAccessCheck = 73,
   FileStorageReserveIdInformation = 74,
   FileCaseSensitiveInformationForceAccessCheck = 75,
-  FileMaximumInformation = 76,
+  FileKnownFolderInformation = 76,
+  FileStatBasicInformation = 77,
+  FileId64ExtdDirectoryInformation = 78,
+  FileId64ExtdBothDirectoryInformation = 79,
+  FileIdAllExtdDirectoryInformation = 80,
+  FileIdAllExtdBothDirectoryInformation = 81,
 };
 
 EnumMap FILE_INFORMATION_CLASS_MAP[] = {
@@ -315,7 +320,12 @@ EnumMap FILE_INFORMATION_CLASS_MAP[] = {
     DEF(FileLinkInformationExBypassAccessCheck),
     DEF(FileStorageReserveIdInformation),
     DEF(FileCaseSensitiveInformationForceAccessCheck),
-    DEF(FileMaximumInformation),
+    DEF(FileKnownFolderInformation),
+    DEF(FileStatBasicInformation),
+    DEF(FileId64ExtdDirectoryInformation),
+    DEF(FileId64ExtdBothDirectoryInformation),
+    DEF(FileIdAllExtdDirectoryInformation),
+    DEF(FileIdAllExtdBothDirectoryInformation),
     {0, nullptr}};
 
 enum FSINFOCLASS {
@@ -333,7 +343,7 @@ enum FSINFOCLASS {
   FsDataCopyInformation = 12,
   FsMetadataSizeInformation = 13,
   FsFullSizeInformationEx = 14,
-  FileFsMaximumInformation = 15,
+  FsGuidInformation = 15,
 };
 
 EnumMap FS_INFORMATION_CLASS_MAP[] = {
@@ -344,7 +354,7 @@ EnumMap FS_INFORMATION_CLASS_MAP[] = {
     DEF(FsDriverPathInformation),   DEF(FsVolumeFlagsInformation),
     DEF(FsSectorSizeInformation),   DEF(FsDataCopyInformation),
     DEF(FsMetadataSizeInformation), DEF(FsFullSizeInformationEx),
-    DEF(FileFsMaximumInformation),  {0, nullptr}};
+    DEF(FsGuidInformation),  {0, nullptr}};
 
 enum HARDERROR_RESPONSE_OPTION {
   OptionAbortRetryIgnore = 0,
@@ -446,6 +456,8 @@ enum JOBOBJECTINFOCLASS {
   JobObjectSiloSystemRoot = 45,
   JobObjectEnergyTrackingState = 46,
   JobObjectThreadImpersonationInformation = 47,
+  JobObjectIoPriorityLimit = 48,
+  JobObjectPagePriorityLimit = 49,
 };
 
 EnumMap JOB_INFORMATION_CLASS_MAP[] = {
@@ -496,6 +508,8 @@ EnumMap JOB_INFORMATION_CLASS_MAP[] = {
     DEF(JobObjectSiloSystemRoot),
     DEF(JobObjectEnergyTrackingState),
     DEF(JobObjectThreadImpersonationInformation),
+    DEF(JobObjectIoPriorityLimit),
+    DEF(JobObjectPagePriorityLimit),
     {0, nullptr}};
 
 enum KEY_INFORMATION_CLASS {
@@ -681,6 +695,8 @@ enum MEMORY_INFORMATION_CLASS {
   MemoryEnclaveImageInformation = 9,
   MemoryBasicInformationCapped = 10,
   MemoryPhysicalContiguityInformation = 11,
+  MemoryBadInformation = 12,
+  MemoryBadInformationAllProcesses = 13,
 };
 
 EnumMap MEMORY_INFORMATION_CLASS_MAP[] = {
@@ -696,6 +712,8 @@ EnumMap MEMORY_INFORMATION_CLASS_MAP[] = {
     DEF(MemoryEnclaveImageInformation),
     DEF(MemoryBasicInformationCapped),
     DEF(MemoryPhysicalContiguityInformation),
+    DEF(MemoryBadInformation),
+    DEF(MemoryBadInformationAllProcesses),
     {0, nullptr}};
 
 enum PARTITION_INFORMATION_CLASS {
@@ -708,7 +726,11 @@ enum PARTITION_INFORMATION_CLASS {
   SystemMemoryPartitionSetAttributes = 6,
   SystemMemoryPartitionNodeInformation = 7,
   SystemMemoryPartitionCreateLargePages = 8,
-  SystemMemoryPartitionMax = 9,
+  SystemMemoryPartitionDedicatedMemoryInformation = 9,
+  SystemMemoryPartitionOpenDedicatedMemory = 10,
+  SystemMemoryPartitionMemoryChargeAttributes = 11,
+  SystemMemoryPartitionClearAttributes = 12,
+  SystemMemoryPartitionSetMemoryThresholds = 13,
 };
 
 EnumMap MEMORY_PARTITION_INFORMATION_CLASS_MAP[] = {
@@ -721,7 +743,11 @@ EnumMap MEMORY_PARTITION_INFORMATION_CLASS_MAP[] = {
     DEF(SystemMemoryPartitionSetAttributes),
     DEF(SystemMemoryPartitionNodeInformation),
     DEF(SystemMemoryPartitionCreateLargePages),
-    DEF(SystemMemoryPartitionMax),
+    DEF(SystemMemoryPartitionDedicatedMemoryInformation),
+    DEF(SystemMemoryPartitionOpenDedicatedMemory),
+    DEF(SystemMemoryPartitionMemoryChargeAttributes),
+    DEF(SystemMemoryPartitionClearAttributes),
+    DEF(SystemMemoryPartitionSetMemoryThresholds),
     {0, nullptr}};
 
 enum MUTANT_INFORMATION_CLASS {
@@ -1123,7 +1149,16 @@ enum PROCESSINFOCLASS {
   ProcessFreeFiberShadowStackAllocation = 99,
   ProcessAltSystemCallInformation = 100,
   ProcessDynamicEHContinuationTargets = 101,
-  MaxProcessInfoClass = 102,
+  ProcessDynamicEnforcedCetCompatibleRanges = 102,
+  ProcessCreateStateChange = 103,
+  ProcessApplyStateChange = 104,
+  ProcessEnableOptionalXStateFeatures = 105,
+  ProcessAltPrefetchParam = 106,
+  ProcessAssignCpuPartitions = 107,
+  ProcessPriorityClassEx = 108,
+  ProcessMembershipInformation = 109,
+  ProcessEffectiveIoPriority = 110,
+  ProcessEffectivePagePriority = 111,
 };
 
 EnumMap PROCESSINFOCLASS_MAP[] = {
@@ -1231,7 +1266,16 @@ EnumMap PROCESSINFOCLASS_MAP[] = {
     DEF(ProcessFreeFiberShadowStackAllocation),
     DEF(ProcessAltSystemCallInformation),
     DEF(ProcessDynamicEHContinuationTargets),
-
+    DEF(ProcessDynamicEnforcedCetCompatibleRanges),
+    DEF(ProcessCreateStateChange),
+    DEF(ProcessApplyStateChange),
+    DEF(ProcessEnableOptionalXStateFeatures),
+    DEF(ProcessAltPrefetchParam),
+    DEF(ProcessAssignCpuPartitions),
+    DEF(ProcessPriorityClassEx),
+    DEF(ProcessMembershipInformation),
+    DEF(ProcessEffectiveIoPriority),
+    DEF(ProcessEffectivePagePriority),
     {0, nullptr}};
 
 enum QUEUE_USER_APC_FLAGS {
@@ -1645,7 +1689,19 @@ enum SYSTEM_INFORMATION_CLASS {
   SystemPoolLimitInformation = 223,
   SystemCodeIntegrityAddDynamicStore = 224,
   SystemCodeIntegrityClearDynamicStores = 225,
-  MaxSystemInfoClass = 226,
+  SystemDifPoolTrackingInformation = 226,
+  SystemPoolZeroingInformation = 227,
+  SystemDpcWatchdogInformation = 228,
+  SystemDpcWatchdogInformation2 = 229,
+  SystemSupportedProcessorArchitectures2 = 230,
+  SystemSingleProcessorRelationshipInformation = 231,
+  SystemXfgCheckFailureInformation = 232,
+  SystemIommuStateInformation = 233,
+  SystemHypervisorMinrootInformation = 234,
+  SystemHypervisorBootPagesInformation = 235,
+  SystemPointerAuthInformation = 236,
+  SystemSecureKernelDebuggerInformation = 237,
+  SystemOriginalImageFeatureInformation = 238,
 };
 
 EnumMap SYSTEM_INFORMATION_CLASS_MAP[] = {
@@ -1874,6 +1930,19 @@ EnumMap SYSTEM_INFORMATION_CLASS_MAP[] = {
     DEF(SystemPoolLimitInformation),
     DEF(SystemCodeIntegrityAddDynamicStore),
     DEF(SystemCodeIntegrityClearDynamicStores),
+    DEF(SystemDifPoolTrackingInformation),
+    DEF(SystemPoolZeroingInformation),
+    DEF(SystemDpcWatchdogInformation),
+    DEF(SystemDpcWatchdogInformation2),
+    DEF(SystemSupportedProcessorArchitectures2),
+    DEF(SystemSingleProcessorRelationshipInformation),
+    DEF(SystemXfgCheckFailureInformation),
+    DEF(SystemIommuStateInformation),
+    DEF(SystemHypervisorMinrootInformation),
+    DEF(SystemHypervisorBootPagesInformation),
+    DEF(SystemPointerAuthInformation),
+    DEF(SystemSecureKernelDebuggerInformation),
+    DEF(SystemOriginalImageFeatureInformation),
     {0, nullptr}};
 
 enum THREADINFOCLASS {
@@ -1928,7 +1997,11 @@ enum THREADINFOCLASS {
   ThreadManageWritesToExecutableMemory = 48,
   ThreadPowerThrottlingState = 49,
   ThreadWorkloadClass = 50,
-  MaxThreadInfoClass = 51,
+  ThreadCreateStateChange = 51,
+  ThreadApplyStateChange = 52,
+  ThreadStrongerBadHandleChecks = 53,
+  ThreadEffectiveIoPriority = 54,
+  ThreadEffectivePagePriority = 55,
 };
 
 EnumMap THREADINFOCLASS_MAP[] = {DEF(ThreadBasicInformation),
@@ -1982,6 +2055,11 @@ EnumMap THREADINFOCLASS_MAP[] = {DEF(ThreadBasicInformation),
                                  DEF(ThreadManageWritesToExecutableMemory),
                                  DEF(ThreadPowerThrottlingState),
                                  DEF(ThreadWorkloadClass),
+								 DEF(ThreadCreateStateChange),
+								 DEF(ThreadApplyStateChange),
+								 DEF(ThreadStrongerBadHandleChecks),
+								 DEF(ThreadEffectiveIoPriority),
+								 DEF(ThreadEffectivePagePriority),
                                  {0, nullptr}};
 
 enum TIMER_INFORMATION_CLASS {
@@ -2150,12 +2228,14 @@ enum WAIT_TYPE {
   WaitAny = 1,
   WaitNotification = 2,
   WaitDequeue = 3,
+  WaitDpc = 4,
 };
 
 EnumMap WAIT_TYPE_MAP[] = {DEF(WaitAll),
                            DEF(WaitAny),
                            DEF(WaitNotification),
                            DEF(WaitDequeue),
+						   DEF(WaitDpc),
                            {0, nullptr}};
 
 enum WORKERFACTORYINFOCLASS {
