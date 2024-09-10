@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2470 2024-09-09 22:07:15Z roger $";
+    "$Id: ShowData.cpp 2473 2024-09-10 21:10:07Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -53,8 +53,8 @@ BOOL readHelper(HANDLE hProcess, LPVOID remoteAddress, T &theValue) {
 /** Read an object of type 'T' at remoteAddress in the specified process */
 template <typename T>
 BOOL readHelper(HANDLE hProcess, ULONG_PTR remoteAddress, T &theValue) {
-  return ReadProcessMemory(hProcess, reinterpret_cast<LPVOID>(remoteAddress), &theValue, sizeof(T),
-                           nullptr);
+  return ReadProcessMemory(hProcess, reinterpret_cast<LPVOID>(remoteAddress),
+                           &theValue, sizeof(T), nullptr);
 }
 
 void ensurePopulated();

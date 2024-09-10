@@ -27,7 +27,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: Enumerations.cpp 2469 2024-09-09 21:59:49Z roger $";
+    "$Id: Enumerations.cpp 2473 2024-09-10 21:10:07Z roger $";
 
 #include "Enumerations.h"
 
@@ -354,7 +354,7 @@ EnumMap FS_INFORMATION_CLASS_MAP[] = {
     DEF(FsDriverPathInformation),   DEF(FsVolumeFlagsInformation),
     DEF(FsSectorSizeInformation),   DEF(FsDataCopyInformation),
     DEF(FsMetadataSizeInformation), DEF(FsFullSizeInformationEx),
-    DEF(FsGuidInformation),  {0, nullptr}};
+    DEF(FsGuidInformation),         {0, nullptr}};
 
 enum HARDERROR_RESPONSE_OPTION {
   OptionAbortRetryIgnore = 0,
@@ -2055,11 +2055,11 @@ EnumMap THREADINFOCLASS_MAP[] = {DEF(ThreadBasicInformation),
                                  DEF(ThreadManageWritesToExecutableMemory),
                                  DEF(ThreadPowerThrottlingState),
                                  DEF(ThreadWorkloadClass),
-								 DEF(ThreadCreateStateChange),
-								 DEF(ThreadApplyStateChange),
-								 DEF(ThreadStrongerBadHandleChecks),
-								 DEF(ThreadEffectiveIoPriority),
-								 DEF(ThreadEffectivePagePriority),
+                                 DEF(ThreadCreateStateChange),
+                                 DEF(ThreadApplyStateChange),
+                                 DEF(ThreadStrongerBadHandleChecks),
+                                 DEF(ThreadEffectiveIoPriority),
+                                 DEF(ThreadEffectivePagePriority),
                                  {0, nullptr}};
 
 enum TIMER_INFORMATION_CLASS {
@@ -2231,12 +2231,9 @@ enum WAIT_TYPE {
   WaitDpc = 4,
 };
 
-EnumMap WAIT_TYPE_MAP[] = {DEF(WaitAll),
-                           DEF(WaitAny),
-                           DEF(WaitNotification),
-                           DEF(WaitDequeue),
-						   DEF(WaitDpc),
-                           {0, nullptr}};
+EnumMap WAIT_TYPE_MAP[] = {DEF(WaitAll),          DEF(WaitAny),
+                           DEF(WaitNotification), DEF(WaitDequeue),
+                           DEF(WaitDpc),          {0, nullptr}};
 
 enum WORKERFACTORYINFOCLASS {
   WorkerFactoryTimeout = 0,
