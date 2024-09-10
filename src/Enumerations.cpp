@@ -1,6 +1,6 @@
 /*
 NAME
-    Enuerations.cpp
+    Enumerations.cpp
 
 DESCRIPTION
     Class to define NT native enumerations for use by ShowData
@@ -27,7 +27,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: Enumerations.cpp 2473 2024-09-10 21:10:07Z roger $";
+    "$Id: Enumerations.cpp 2477 2024-09-10 21:41:13Z roger $";
 
 #include "Enumerations.h"
 

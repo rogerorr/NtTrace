@@ -28,7 +28,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2473 2024-09-10 21:10:07Z roger $";
+    "$Id: NtTrace.cpp 2478 2024-09-10 22:02:28Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -524,8 +524,12 @@ void TrapNtDebugger::OnException(DWORD processId, DWORD threadId,
   } else if (Exception.ExceptionRecord.ExceptionCode == STATUS_INVALID_HANDLE) {
     // CloseHandle raises this exception when a process is being debugged
     header(processId, threadId);
-    os << "Attempted close of an invalid handle" << std::endl;
-    *pContinueFlag = DBG_CONTINUE;
+	if (Exception.dwFirstChance) {
+      os << "Exception raised by attempted close of an invalid handle" << std::endl;
+	} else {
+      os << "Ignoring unhandled exception from close of an invalid handle" << std::endl;
+      *pContinueFlag = DBG_CONTINUE;
+	}
     if (bStackTrace)
       EntryPoint::stackTrace(os, hProcess, hThread);
   } else if (Exception.ExceptionRecord.ExceptionCode == MSVC_EXCEPTION) {
