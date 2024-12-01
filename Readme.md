@@ -17,12 +17,24 @@ See also http://rogerorr.github.io/NtTrace/
 
 # Build instructions
 
-You will need either or both of the 32-bit and 64-bit version of NtTrace, whichever matches your target application(s)
-From a windows command prompt:
+You will need either or both of the 64-bit and 32-bit version of NtTrace, whichever matches your target application(s)
+
+- cd to this top-level directory
+- Run `scripts\build-vs-x64.bat` or `scripts\build-vs-x86.bat` to build the 64-bit or 32-bit version, respectively.
+
+or 
+
+- Start "x64 Native Tools Command Prompt for VS2022" (64-bit) or "Developer Command Prompt for VS2022" (32-bit)
+- cd to this top-level directory
+- run `nmake /f NtTrace.mak`
+
+or
+
+- Start a windows command prompt
 - cd to this top-level directory
 - Set up the target VC environment
--- Eg "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
--- or "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+-- Eg "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+-- or "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
 - run `nmake /f NtTrace.mak`
 
 # Running NtTrace
