@@ -33,8 +33,8 @@ or
 - Start a windows command prompt
 - cd to this top-level directory
 - Set up the target VC environment
--- Eg "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
--- or "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
+ - Eg "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+ - or "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" x86
 - run `nmake /f NtTrace.mak`
 
 # Running NtTrace
@@ -115,5 +115,5 @@ Each function is assigned to a category, and filtering can be done by function n
 By default NtTrace traces on return from the system call, but the `-pre` option can be used to trace before the call as well.
 This can be useful if, for example, the same structure is used for a request and a response buffer.
 
---
-$Id: Readme.md 1817 2019-03-18 22:48:56Z Roger $
+<hr/>
+$Id: Readme.md 2487 2024-12-01 23:15:47Z roger $
