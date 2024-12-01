@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2467 2024-09-07 21:35:42Z roger $";
+    "$Id: SymbolEngine.cpp 2480 2024-09-28 19:32:14Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -180,7 +180,7 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
         eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
                        sizeof(data));
         opf << " = " << data;
-      } else if ((pSymInfo->Size == 8)) {
+      } else if (pSymInfo->Size == 8) {
         LONGLONG data;
         eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
                        sizeof(data));
@@ -221,9 +221,7 @@ struct SymbolEngine::Impl {
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
-SymbolEngine::SymbolEngine(HANDLE hProcess)
-    : showLines(true), showParams(false), showVariables(false),
-      maxStackDepth(-1), skipCount(0), maxSehDepth(0), pImpl(new Impl) {
+SymbolEngine::SymbolEngine(HANDLE hProcess) : pImpl(new Impl) {
   static bool inited = false;
   if (!inited) {
     DWORD dwOpts = SymGetOptions();
@@ -950,6 +948,7 @@ BOOL SymbolEngine::enumLocalVariables(DWORD64 codeOffset, DWORD64 frameOffset,
 
   BOOL ret = SetContext(&stackFrame, nullptr);
   // Note: by experiment with SymUnpack must ignore failures from SetContext ...
+  (void)ret;
   EngineCallBack callBack(*this, cb);
   ret = EnumSymbols(0, "*", EngineCallBack::enumSymbolsProc, &callBack);
   return ret;

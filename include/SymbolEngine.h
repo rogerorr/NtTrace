@@ -22,10 +22,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2427 $
+    $Revision: 2480 $
 */
 
-// $Id: SymbolEngine.h 2427 2024-06-16 15:33:16Z roger $
+// $Id: SymbolEngine.h 2480 2024-09-28 19:32:14Z roger $
 
 #include <iosfwd>
 #include <string>
@@ -156,12 +156,12 @@ private:
   SymbolEngine(SymbolEngine const &);
   SymbolEngine &operator=(SymbolEngine const &);
 
-  bool showLines;     // true to show lines
-  bool showParams;    // true to show parameters
-  bool showVariables; // true to show variables
-  int maxStackDepth;  // max stack depth to show, -1 for all
-  int skipCount;      // stack frames to skip
-  int maxSehDepth;    // max SEH stack depth to show
+  bool showLines{true};      // true to show lines
+  bool showParams{false};    // true to show parameters
+  bool showVariables{false}; // true to show variables
+  int maxStackDepth{-1};     // max stack depth to show, -1 for all
+  int skipCount{0};          // stack frames to skip
+  int maxSehDepth{0};        // max SEH stack depth to show
 
   struct Impl;
   Impl *pImpl;

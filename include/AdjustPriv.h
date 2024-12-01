@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2074 $
+    $Revision: 2480 $
 */
 
-// $Id: AdjustPriv.h 2074 2021-07-17 17:07:41Z roger $
+// $Id: AdjustPriv.h 2480 2024-09-28 19:32:14Z roger $
 
 namespace or2 {
 
@@ -55,7 +55,7 @@ BOOL inline EnableNamedPriv(
     return FALSE;
   }
 
-  if (!LookupPrivilegeValue((LPSTR)NULL, lpName, &privValue)) {
+  if (!LookupPrivilegeValue((LPSTR) nullptr, lpName, &privValue)) {
     std::cerr << "LookupPrivilegeValue failed with: " << GetLastError()
               << std::endl;
     return FALSE;
@@ -69,7 +69,7 @@ BOOL inline EnableNamedPriv(
   tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
   AdjustTokenPrivileges(hToken, FALSE, &tkp, sizeof(TOKEN_PRIVILEGES),
-                        (PTOKEN_PRIVILEGES)NULL, (PDWORD)NULL);
+                        (PTOKEN_PRIVILEGES) nullptr, (PDWORD) nullptr);
 
   //
   // The return value of AdjustTokenPrivileges couldn't be tested on older NT

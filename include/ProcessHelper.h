@@ -22,10 +22,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2250 $
+    $Revision: 2480 $
 */
 
-// $Id: ProcessHelper.h 2250 2021-09-10 20:33:26Z roger $
+// $Id: ProcessHelper.h 2480 2024-09-28 19:32:14Z roger $
 
 // clang-format off
 #include <windows.h> // for CreateProcess
@@ -38,7 +38,7 @@
 #include <vector>
 
 #include "Options.h"
-#include "readInt.h"
+#include "ReadInt.h"
 
 namespace or2 {
 
@@ -55,14 +55,14 @@ inline int CreateProcessHelper(
     Options::const_iterator end, ///< rest of iteration are arguments
     DWORD create_options = 0,    ///< options for CreateProcess
     PROCESS_INFORMATION *pProcessInformation =
-        0) ///< returned process information on success
+        nullptr) ///< returned process information on success
 {
   std::string executable = *it;
 
   // Search for possible executable matching the program name
   char szFullName[MAX_PATH];
-  if (0 != SearchPath(NULL, executable.c_str(), ".exe", sizeof(szFullName),
-                      szFullName, 0))
+  if (0 != SearchPath(nullptr, executable.c_str(), ".exe", sizeof(szFullName),
+                      szFullName, nullptr))
     executable = szFullName;
 
   std::string cmdLine;
@@ -89,12 +89,12 @@ inline int CreateProcessHelper(
   if (!CreateProcess(
           const_cast<char *>(executable.c_str()), // name of executable module
           const_cast<char *>(cmdLine.c_str()),    // command line string
-          0,                                      // SD
-          0,                                      // SD
+          nullptr,                                // SD
+          nullptr,                                // SD
           true,                                   // handle inheritance option
           create_options,                         // creation flags
-          0,                                      // new environment block
-          0,                                      // current directory name
+          nullptr,                                // new environment block
+          nullptr,                                // current directory name
           &startupInfo,                           // startup information
           &ProcessInformation                     // process information
           )) {
@@ -125,14 +125,14 @@ inline int CreateProcessAsUserHelper(
     Options::const_iterator end, ///< rest of iteration are arguments
     DWORD create_options = 0,    ///< options for CreateProcess
     PROCESS_INFORMATION *pProcessInformation =
-        0) ///< returned process information on success
+        nullptr) ///< returned process information on success
 {
   std::string executable = *it;
 
   // Search for possible executable matching the program name
   char szFullName[MAX_PATH];
-  if (0 != SearchPath(NULL, executable.c_str(), ".exe", sizeof(szFullName),
-                      szFullName, 0))
+  if (0 != SearchPath(nullptr, executable.c_str(), ".exe", sizeof(szFullName),
+                      szFullName, nullptr))
     executable = szFullName;
 
   std::string cmdLine;
@@ -160,12 +160,12 @@ inline int CreateProcessAsUserHelper(
           hToken,
           const_cast<char *>(executable.c_str()), // name of executable module
           const_cast<char *>(cmdLine.c_str()),    // command line string
-          0,                                      // SD
-          0,                                      // SD
+          nullptr,                                // SD
+          nullptr,                                // SD
           true,                                   // handle inheritance option
           create_options,                         // creation flags
-          0,                                      // new environment block
-          0,                                      // current directory name
+          nullptr,                                // new environment block
+          nullptr,                                // current directory name
           &startupInfo,                           // startup information
           &ProcessInformation                     // process information
           )) {
@@ -187,14 +187,14 @@ inline int CreateProcessAsUserHelper(
  *
  * @return a vector of all matching process IDs
  */
-inline std::vector<DWORD>
-FindProcesses(const char *pattern = 0 ///< pattern to match for process name
+inline std::vector<DWORD> FindProcesses(
+    const char *pattern = nullptr ///< pattern to match for process name
 ) {
   std::vector<DWORD> ret;
 
   int pid(0);
 
-  if ((pattern != 0) && (readInt(pattern, pid))) {
+  if ((pattern != nullptr) && (readInt(pattern, pid))) {
     ret.push_back((DWORD)pid);
     return ret;
   }
@@ -208,7 +208,7 @@ FindProcesses(const char *pattern = 0 ///< pattern to match for process name
   // Calculate how many process identifiers were returned.
   DWORD const cProcesses = cbNeeded / sizeof(DWORD);
 
-  std::string lowerPattern(pattern == 0 ? "" : pattern);
+  std::string lowerPattern(pattern == nullptr ? "" : pattern);
   // avoid C4244 warning from tolower
   struct lcase {
     char operator()(char ch) { return static_cast<char>(tolower(ch)); }
@@ -228,7 +228,7 @@ FindProcesses(const char *pattern = 0 ///< pattern to match for process name
 
       // Get the full path to the module's file.
 
-      if (GetModuleBaseName(hProcess, 0, szModName, sizeof(szModName))
+      if (GetModuleBaseName(hProcess, nullptr, szModName, sizeof(szModName))
 #ifdef GetProcessImageFileName
           || GetProcessImageFileName(hProcess, szModName, sizeof(szModName))
 #endif // GetProcessImageFileName

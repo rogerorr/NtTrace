@@ -22,10 +22,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2088 $
+    $Revision: 2480 $
 */
 
-// $Id: ReadInt.h 2088 2021-07-18 14:05:43Z roger $
+// $Id: ReadInt.h 2480 2024-09-28 19:32:14Z roger $
 
 #include <cstdlib>   // for strtol
 #include <string>    // for string
@@ -45,7 +45,7 @@ inline bool readInt(std::string const &value, ///< value to convert
                     int &result) ///< returned result if successful conversion,
                                  ///< otherwise partial result
 {
-  char *delim = 0;
+  char *delim = nullptr;
 
   if ((value.length() >= 2) && (value[0] == '0') &&
       (value[1] == 'x' || value[1] == 'X')) {
@@ -70,7 +70,7 @@ readInt(std::string const &value, ///< value to convert
         unsigned int &result)     ///< returned result if successful conversion,
                                   ///< otherwise partial result
 {
-  char *delim = 0;
+  char *delim = nullptr;
 
   if ((value.length() >= 2) && (value[0] == '0') &&
       (value[1] == 'x' || value[1] == 'X')) {
@@ -95,7 +95,7 @@ inline bool readInt(std::string const &value, ///< value to convert
                     LONGLONG &result)         ///< returned result if successful
                                       ///< conversion, otherwise partial result
 {
-  char *delim = 0;
+  char *delim = nullptr;
 
   if ((value.length() >= 2) && (value[0] == '0') &&
       (value[1] == 'x' || value[1] == 'X')) {

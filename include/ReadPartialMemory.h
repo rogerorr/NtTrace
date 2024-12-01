@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2074 $
+    $Revision: 2480 $
 */
 
-// $Id: ReadPartialMemory.h 2074 2021-07-17 17:07:41Z roger $
+// $Id: ReadPartialMemory.h 2480 2024-09-28 19:32:14Z roger $
 
 #include <Windows.h>
 
@@ -49,7 +49,7 @@ ReadPartialProcessMemory(HANDLE hProcess, ///< Handle to process to read (needs
 {
   SIZE_T length = maxSize;
   while (length >= minSize) {
-    if (ReadProcessMemory(hProcess, address, buffer, length, 0)) {
+    if (ReadProcessMemory(hProcess, address, buffer, length, nullptr)) {
       return length;
     }
     length--;

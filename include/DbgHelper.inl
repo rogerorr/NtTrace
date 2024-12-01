@@ -20,10 +20,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2459 $
+    $Revision: 2480 $
 */
 
-// $Id: DbgHelper.inl 2459 2024-09-07 17:46:05Z roger $
+// $Id: DbgHelper.inl 2480 2024-09-28 19:32:14Z roger $
 
 #include <iostream>
 
@@ -83,12 +83,12 @@ inline std::ostream &operator<<(std::ostream &os, enum SymTagEnum const value) {
     DEF(SymTagCoffGroup),
 #endif // _MSC_VER
     DEF(SymTagMax),
-    {0, 0}
+    {0, nullptr}
   };
 
 #undef DEF
 
-  for (int idx = 0; enumValues[idx].name != 0; ++idx) {
+  for (int idx = 0; enumValues[idx].name != nullptr; ++idx) {
     if (enumValues[idx].value == value) {
       return os << enumValues[idx].name;
     }
@@ -102,14 +102,14 @@ inline std::ostream &operator<<(std::ostream &os, enum SymTagEnum const value) {
 namespace or2 {
 
 /** Constructor */
-inline DbgHelper::DbgHelper() : m_hProcess(0) {}
+inline DbgHelper::DbgHelper() {}
 
 /** Destructor */
 inline DbgHelper::~DbgHelper() { Cleanup(); }
 
 /** Initialise (only called once) */
 inline BOOL DbgHelper::Initialise(HANDLE hProcess) {
-  BOOL bRet = ::SymInitialize(hProcess, 0, false);
+  BOOL bRet = ::SymInitialize(hProcess, nullptr, false);
   if (bRet) {
     m_hProcess = hProcess;
   }
@@ -121,7 +121,7 @@ inline BOOL DbgHelper::Cleanup() {
   BOOL bRet = false;
   if (m_hProcess) {
     bRet = ::SymCleanup(m_hProcess);
-    m_hProcess = 0;
+    m_hProcess = nullptr;
   }
 
   return bRet;
@@ -174,7 +174,7 @@ inline FARPROC DbgHelper::GetProc(char const *name) {
   if (VirtualQuery(&::SymInitialize, &mbi, sizeof(mbi))) {
     return ::GetProcAddress((HMODULE)mbi.AllocationBase, name);
   }
-  return 0;
+  return nullptr;
 }
 
 #define DYN_LOAD(SYMBOL)                                                       \
@@ -343,7 +343,7 @@ DbgHelper::WriteMiniDump(DWORD processId, HANDLE hFile, MINIDUMP_TYPE DumpType,
 /** Test whether EnumSymbols API is available */
 inline BOOL DbgHelper::IsEnumSymbolsAvailable() const {
   // Run a test which won't produce any callbacks
-  return EnumSymbols(0, 0, 0, 0);
+  return EnumSymbols(0, nullptr, nullptr, nullptr);
 }
 
 #endif // DBGHELP_6_1_APIS

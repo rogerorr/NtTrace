@@ -29,10 +29,10 @@ namespace or2 {
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2205 $
+    $Revision: 2480 $
 */
 
-// $Id: displayError.inl 2205 2021-07-20 15:24:55Z roger $
+// $Id: displayError.inl 2480 2024-09-28 19:32:14Z roger $
 
 inline displayError::displayError() : hresult(GetLastError()) {}
 
@@ -44,13 +44,13 @@ inline void displayError::printOn(std::ostream &os) const {
     return;
   }
 
-  LPTSTR pszMsg = 0;
+  LPTSTR pszMsg = nullptr;
 
   FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
                     FORMAT_MESSAGE_IGNORE_INSERTS,
-                0, hresult, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (LPTSTR)&pszMsg, 0, NULL);
-  if (pszMsg != 0) {
+                nullptr, hresult, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                (LPTSTR)&pszMsg, 0, nullptr);
+  if (pszMsg != nullptr) {
     size_t nLen = strlen(pszMsg);
     if (nLen > 1 && pszMsg[nLen - 1] == '\n') {
       pszMsg[--nLen] = 0;

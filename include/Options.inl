@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2205 $
+    $Revision: 2480 $
 */
 
-// $Id: Options.inl 2205 2021-07-20 15:24:55Z roger $
+// $Id: Options.inl 2480 2024-09-28 19:32:14Z roger $
 
 #include <iomanip>
 #include <iostream>
@@ -50,7 +50,7 @@ struct Options::Data {
     std::string helpString;
   };
 
-  Data() : argCountMin(-1), argCountMax(-1) {}
+  Data() {}
 
   void set(std::string const &option, void *pValue, OptionType eType,
            std::string const &helpString) {
@@ -60,8 +60,8 @@ struct Options::Data {
   std::string rcsId;             // copy of RCS ID for printing version info
   std::string pName;             // program name
   std::vector<std::string> args; // additional arguments
-  int argCountMin;
-  int argCountMax;
+  int argCountMin{-1};
+  int argCountMax{-1};
   std::string argHelp;
   std::vector<OptionInfo> options; // option information
 };
@@ -154,63 +154,61 @@ inline bool Options::process(
       break;
 
     bool bFound = false;
-    for (std::vector<Data::OptionInfo>::const_iterator it =
-             pData->options.begin();
-         it != pData->options.end(); ++it) {
-      if (it->option == pArg) {
+    for (const auto &option : pData->options) {
+      if (option.option == pArg) {
         bFound = true;
-        if (it->eType != Data::eBool) {
+        if (option.eType != Data::eBool) {
           if (argNum == argc)
             pArg = "";
           else
             pArg = argv[argNum++];
         }
 
-        switch (it->eType) {
+        switch (option.eType) {
         case Data::eBool:
-          *((bool *)(it->pValue)) = true;
+          *((bool *)(option.pValue)) = true;
           break;
         case Data::eInt: {
-          if (sscanf(pArg, "%i", ((int *)(it->pValue))) != 1) {
+          if (sscanf(pArg, "%i", ((int *)(option.pValue))) != 1) {
             std::cerr << "Invalid numeric value '" << pArg << "' found for "
-                      << it->option << std::endl;
+                      << option.option << std::endl;
             bRet = false;
           }
         } break;
         case Data::eUInt: {
-          if (sscanf(pArg, "%u", ((unsigned int *)(it->pValue))) != 1) {
+          if (sscanf(pArg, "%u", ((unsigned int *)(option.pValue))) != 1) {
             std::cerr << "Invalid numeric value '" << pArg << "' found for "
-                      << it->option << std::endl;
+                      << option.option << std::endl;
             bRet = false;
           }
         } break;
         case Data::eLong: {
-          if (sscanf(pArg, "%li", ((long *)(it->pValue))) != 1) {
+          if (sscanf(pArg, "%li", ((long *)(option.pValue))) != 1) {
             std::cerr << "Invalid numeric value '" << pArg << "' found for "
-                      << it->option << std::endl;
+                      << option.option << std::endl;
             bRet = false;
           }
         } break;
         case Data::eULong: {
-          if (sscanf(pArg, "%lu", ((unsigned long *)(it->pValue))) != 1) {
+          if (sscanf(pArg, "%lu", ((unsigned long *)(option.pValue))) != 1) {
             std::cerr << "Invalid numeric value '" << pArg << "' found for "
-                      << it->option << std::endl;
+                      << option.option << std::endl;
             bRet = false;
           }
         } break;
         case Data::eDouble: {
-          if (sscanf(pArg, "%lf", ((double *)(it->pValue))) != 1) {
+          if (sscanf(pArg, "%lf", ((double *)(option.pValue))) != 1) {
             std::cerr << "Invalid numeric value '" << pArg << "' found for "
-                      << it->option << std::endl;
+                      << option.option << std::endl;
             bRet = false;
           }
         } break;
         case Data::eString:
-          *((std::string *)(it->pValue)) = pArg;
+          *((std::string *)(option.pValue)) = pArg;
           break;
         default:
-          std::cerr << "Ignored option " << it->option << ", type " << it->eType
-                    << std::endl;
+          std::cerr << "Ignored option " << option.option << ", type "
+                    << option.eType << std::endl;
           bRet = false;
           break;
         }
@@ -224,11 +222,9 @@ inline bool Options::process(
         std::cerr << pData->rcsId;
       } else if ((arg == "h") || (arg == "?") || (arg == "help")) {
         std::cerr << "Syntax: " << pData->pName;
-        for (std::vector<Data::OptionInfo>::const_iterator it =
-                 pData->options.begin();
-             it != pData->options.end(); ++it) {
-          std::cerr << " [-" << it->option;
-          switch (it->eType) {
+        for (const auto &option : pData->options) {
+          std::cerr << " [-" << option.option;
+          switch (option.eType) {
           case Data::eBool:
             break;
           case Data::eInt:
@@ -253,52 +249,48 @@ inline bool Options::process(
           std::cerr << std::endl << "Options:" << std::endl;
           size_t maxWidth = 0;
           {
-            for (std::vector<Data::OptionInfo>::const_iterator it =
-                     pData->options.begin();
-                 it != pData->options.end(); ++it) {
-              if (it->option.length() > maxWidth)
-                maxWidth = it->option.length();
+            for (const auto &option : pData->options) {
+              if (option.option.length() > maxWidth)
+                maxWidth = option.option.length();
             }
           }
-          for (std::vector<Data::OptionInfo>::const_iterator it =
-                   pData->options.begin();
-               it != pData->options.end(); ++it) {
-            std::cerr << "  -" << it->option;
-            if (it->helpString.length()) {
+          for (const auto &option : pData->options) {
+            std::cerr << "  -" << option.option;
+            if (option.helpString.length()) {
               std::streamsize const width(static_cast<std::streamsize>(
-                  maxWidth + 1 - it->option.length()));
-              std::cerr << std::setw(width) << " " << it->helpString;
+                  maxWidth + 1 - option.option.length()));
+              std::cerr << std::setw(width) << " " << option.helpString;
             }
-            switch (it->eType) {
+            switch (option.eType) {
             case Data::eBool:
               break;
             case Data::eInt: {
-              int def = *((int *)(it->pValue));
+              int def = *((int *)(option.pValue));
               if (def)
                 std::cerr << " (default: " << def << ")";
             } break;
             case Data::eUInt: {
-              unsigned int def = *((unsigned int *)(it->pValue));
+              unsigned int def = *((unsigned int *)(option.pValue));
               if (def)
                 std::cerr << " (default: " << def << ")";
             } break;
             case Data::eLong: {
-              long def = *((long *)(it->pValue));
+              long def = *((long *)(option.pValue));
               if (def)
                 std::cerr << " (default: " << def << ")";
             } break;
             case Data::eULong: {
-              unsigned long def = *((unsigned long *)(it->pValue));
+              unsigned long def = *((unsigned long *)(option.pValue));
               if (def)
                 std::cerr << " (default: " << def << ")";
             } break;
             case Data::eDouble: {
-              double def = *((double *)(it->pValue));
+              double def = *((double *)(option.pValue));
               if (def)
                 std::cerr << " (default: " << def << ")";
             } break;
             case Data::eString: {
-              std::string def = *((std::string *)(it->pValue));
+              std::string def = *((std::string *)(option.pValue));
               if (def.length())
                 std::cerr << " (default: " << def << ")";
             } break;
