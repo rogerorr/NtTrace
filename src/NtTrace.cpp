@@ -28,7 +28,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2485 2024-12-01 22:23:46Z roger $";
+    "$Id: NtTrace.cpp 2488 2024-12-02 23:27:17Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -308,7 +308,18 @@ bool TrapNtDebugger::initialise() {
     char chExeName[MAX_PATH + 1] = "";
     GetModuleFileName(nullptr, chExeName, sizeof(chExeName));
     char *pDelim = strrchr(chExeName, '.');
-    configFile = std::string(chExeName, pDelim + 1 - chExeName) + "cfg";
+    size_t namelen = pDelim - chExeName;
+// Remove optional architectural suffix from executable name
+#ifdef _M_IX86
+    static const std::string suffix = "86";
+#else
+    static const std::string suffix = "64";
+#endif // _M_IX86
+    if (namelen > suffix.size() && memcmp(chExeName + namelen - suffix.size(),
+                                          suffix.c_str(), suffix.size()) == 0) {
+      namelen -= suffix.size();
+    }
+    configFile = std::string(chExeName, namelen) + ".cfg";
   }
   std::ifstream cfgFile(configFile.c_str());
   if (cfgFile) {
@@ -931,7 +942,8 @@ int main(int argc, char **argv) {
   options.set("nonames", &bNoNames, "Don't name arguments");
   options.set("nodlls", &bNoDlls, "Don't process DLL load/unload");
   options.set("noexcept", &bNoExcept, "Don't process exceptions");
-  options.set("only", &bOnly, "Only debug the first process, don't debug child processes");
+  options.set("only", &bOnly,
+              "Only debug the first process, don't debug child processes");
   options.set("out", &outputFile, "Output file");
   options.set("pre", &bPreTrace, "Trace pre-call as well as post-call");
   options.set("stack", &bStackTrace, "show stack trace");
@@ -1028,8 +1040,7 @@ int main(int argc, char **argv) {
     PROCESS_INFORMATION ProcessInformation;
     int ret = CreateProcessHelper(
         options.begin(), options.end(),
-        bOnly ? DEBUG_ONLY_THIS_PROCESS : DEBUG_PROCESS,
-        &ProcessInformation);
+        bOnly ? DEBUG_ONLY_THIS_PROCESS : DEBUG_PROCESS, &ProcessInformation);
 
     if (ret != 0) {
       std::cerr << "CreateProcess failed with " << displayError();
