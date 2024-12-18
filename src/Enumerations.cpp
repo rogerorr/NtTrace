@@ -27,13 +27,12 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: Enumerations.cpp 2477 2024-09-10 21:41:13Z roger $";
+    "$Id: Enumerations.cpp 2491 2024-12-17 23:55:56Z roger $";
 
 #include "Enumerations.h"
 
 namespace Enumerations {
-#define DEF(X)                                                                 \
-  { (unsigned long)X, #X }
+#define DEF(X) {(unsigned long)X, #X}
 
 enum ALPC_MESSAGE_INFORMATION_CLASS {
   AlpcMessageSidInformation = 0,
@@ -2278,8 +2277,7 @@ EnumMap WORKERFACTORYINFOCLASS_MAP[] = {DEF(WorkerFactoryTimeout),
 
 ////////////////////////////////////////////////////////////////////
 
-#define DEF(X)                                                                 \
-  { #X, X##_MAP }
+#define DEF(X) {#X, X##_MAP}
 
 /** Provide a mapping from an enumeration name to a zero-terminated array of
  * EnumMap entries */
