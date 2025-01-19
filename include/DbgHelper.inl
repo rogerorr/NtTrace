@@ -20,10 +20,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2480 $
+    $Revision: 2513 $
 */
 
-// $Id: DbgHelper.inl 2480 2024-09-28 19:32:14Z roger $
+// $Id: DbgHelper.inl 2513 2025-01-18 16:01:37Z roger $
 
 #include <iostream>
 
@@ -37,54 +37,52 @@ inline std::ostream &operator<<(std::ostream &os, enum SymTagEnum const value) {
   static struct {
     int value;
     char const *name;
-  } enumValues[] = {
-    DEF(SymTagNull),
-    DEF(SymTagExe),
-    DEF(SymTagCompiland),
-    DEF(SymTagCompilandDetails),
-    DEF(SymTagCompilandEnv),
-    DEF(SymTagFunction),
-    DEF(SymTagBlock),
-    DEF(SymTagData),
-    DEF(SymTagAnnotation),
-    DEF(SymTagLabel),
-    DEF(SymTagPublicSymbol),
-    DEF(SymTagUDT),
-    DEF(SymTagEnum),
-    DEF(SymTagFunctionType),
-    DEF(SymTagPointerType),
-    DEF(SymTagArrayType),
-    DEF(SymTagBaseType),
-    DEF(SymTagTypedef),
-    DEF(SymTagBaseClass),
-    DEF(SymTagFriend),
-    DEF(SymTagFunctionArgType),
-    DEF(SymTagFuncDebugStart),
-    DEF(SymTagFuncDebugEnd),
-    DEF(SymTagUsingNamespace),
-    DEF(SymTagVTableShape),
-    DEF(SymTagVTable),
-    DEF(SymTagCustom),
-    DEF(SymTagThunk),
-    DEF(SymTagCustomType),
-    DEF(SymTagManagedType),
-    DEF(SymTagDimension),
-    DEF(SymTagCallSite),
-    DEF(SymTagInlineSite),
-    DEF(SymTagBaseInterface),
-    DEF(SymTagVectorType),
-    DEF(SymTagMatrixType),
-    DEF(SymTagHLSLType),
+  } enumValues[] = {DEF(SymTagNull),
+                    DEF(SymTagExe),
+                    DEF(SymTagCompiland),
+                    DEF(SymTagCompilandDetails),
+                    DEF(SymTagCompilandEnv),
+                    DEF(SymTagFunction),
+                    DEF(SymTagBlock),
+                    DEF(SymTagData),
+                    DEF(SymTagAnnotation),
+                    DEF(SymTagLabel),
+                    DEF(SymTagPublicSymbol),
+                    DEF(SymTagUDT),
+                    DEF(SymTagEnum),
+                    DEF(SymTagFunctionType),
+                    DEF(SymTagPointerType),
+                    DEF(SymTagArrayType),
+                    DEF(SymTagBaseType),
+                    DEF(SymTagTypedef),
+                    DEF(SymTagBaseClass),
+                    DEF(SymTagFriend),
+                    DEF(SymTagFunctionArgType),
+                    DEF(SymTagFuncDebugStart),
+                    DEF(SymTagFuncDebugEnd),
+                    DEF(SymTagUsingNamespace),
+                    DEF(SymTagVTableShape),
+                    DEF(SymTagVTable),
+                    DEF(SymTagCustom),
+                    DEF(SymTagThunk),
+                    DEF(SymTagCustomType),
+                    DEF(SymTagManagedType),
+                    DEF(SymTagDimension),
+                    DEF(SymTagCallSite),
+                    DEF(SymTagInlineSite),
+                    DEF(SymTagBaseInterface),
+                    DEF(SymTagVectorType),
+                    DEF(SymTagMatrixType),
+                    DEF(SymTagHLSLType),
 #if (_MSC_VER >= 1900)
-    DEF(SymTagCaller),
-    DEF(SymTagCallee),
-    DEF(SymTagExport),
-    DEF(SymTagHeapAllocationSite),
-    DEF(SymTagCoffGroup),
+                    DEF(SymTagCaller),
+                    DEF(SymTagCallee),
+                    DEF(SymTagExport),
+                    DEF(SymTagHeapAllocationSite),
+                    DEF(SymTagCoffGroup),
 #endif // _MSC_VER
-    DEF(SymTagMax),
-    {0, nullptr}
-  };
+                    DEF(SymTagMax),
+                    {0, nullptr}};
 
 #undef DEF
 
@@ -184,8 +182,8 @@ inline FARPROC DbgHelper::GetProc(char const *name) {
 inline BOOL DbgHelper::SymFromAddr(DWORD64 Address, PDWORD64 Displacement,
                                    PSYMBOL_INFO Symbol) const {
   using SymFromAddr =
-      BOOL IMAGEAPI(IN HANDLE hProcess, IN DWORD64 Address,
-                    OUT PDWORD64 Displacement, IN OUT PSYMBOL_INFO Symbol);
+      BOOL WINAPI(IN HANDLE hProcess, IN DWORD64 Address,
+                  OUT PDWORD64 Displacement, IN OUT PSYMBOL_INFO Symbol);
 
   DYN_LOAD(SymFromAddr);
 
@@ -204,8 +202,8 @@ inline BOOL DbgHelper::SymFromAddr(DWORD64 Address, PDWORD64 Displacement,
 
 /** Get symbol for name */
 inline BOOL DbgHelper::SymFromName(PCSTR Name, PSYMBOL_INFO Symbol) const {
-  using SymFromName = BOOL IMAGEAPI(IN HANDLE hProcess, IN PCSTR Name,
-                                    IN OUT PSYMBOL_INFO Symbol);
+  using SymFromName = BOOL WINAPI(IN HANDLE hProcess, IN PCSTR Name,
+                                  IN OUT PSYMBOL_INFO Symbol);
 
   DYN_LOAD(SymFromName);
 
@@ -223,8 +221,8 @@ inline BOOL DbgHelper::GetTypeInfo(DWORD64 ModBase, ULONG TypeId,
                                    IMAGEHLP_SYMBOL_TYPE_INFO GetType,
                                    PVOID pInfo) const {
   using SymGetTypeInfo =
-      BOOL IMAGEAPI(IN HANDLE hProcess, IN DWORD64 ModBase, IN ULONG TypeId,
-                    IN IMAGEHLP_SYMBOL_TYPE_INFO GetType, OUT PVOID pInfo);
+      BOOL WINAPI(IN HANDLE hProcess, IN DWORD64 ModBase, IN ULONG TypeId,
+                  IN IMAGEHLP_SYMBOL_TYPE_INFO GetType, OUT PVOID pInfo);
 
   DYN_LOAD(SymGetTypeInfo);
 
@@ -241,8 +239,8 @@ inline BOOL DbgHelper::GetTypeInfo(DWORD64 ModBase, ULONG TypeId,
 inline BOOL DbgHelper::GetTypeFromName(DWORD64 ModBase, PCTSTR Name,
                                        PSYMBOL_INFO Symbol) const {
   using SymGetTypeFromName =
-      BOOL IMAGEAPI(IN HANDLE hProcess, IN DWORD64 ModBase, IN PCTSTR Name,
-                    IN PSYMBOL_INFO Symbol);
+      BOOL WINAPI(IN HANDLE hProcess, IN DWORD64 ModBase, IN PCTSTR Name,
+                  IN PSYMBOL_INFO Symbol);
 
   DYN_LOAD(SymGetTypeFromName);
 
@@ -260,8 +258,8 @@ inline BOOL DbgHelper::GetTypeFromName(DWORD64 ModBase, PCTSTR Name,
 inline BOOL DbgHelper::SetContext(PIMAGEHLP_STACK_FRAME StackFrame,
                                   PIMAGEHLP_CONTEXT Context) const {
   using SymSetContext =
-      BOOL IMAGEAPI(HANDLE hProcess, PIMAGEHLP_STACK_FRAME StackFrame,
-                    PIMAGEHLP_CONTEXT Context);
+      BOOL WINAPI(HANDLE hProcess, PIMAGEHLP_STACK_FRAME StackFrame,
+                  PIMAGEHLP_CONTEXT Context);
 
   DYN_LOAD(SymSetContext);
 
@@ -279,7 +277,7 @@ inline BOOL
 DbgHelper::EnumSymbols(ULONG64 BaseOfDll, PCSTR Mask,
                        PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
                        PVOID UserContext) const {
-  using SymEnumSymbols = BOOL IMAGEAPI(
+  using SymEnumSymbols = BOOL WINAPI(
       HANDLE hProcess, ULONG64 BaseOfDll, PCSTR Mask,
       PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, PVOID UserContext);
 
@@ -300,7 +298,7 @@ inline BOOL
 DbgHelper::EnumTypes(ULONG64 BaseOfDll,
                      PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
                      PVOID UserContext) const {
-  using SymEnumTypes = BOOL IMAGEAPI(
+  using SymEnumTypes = BOOL WINAPI(
       HANDLE hProcess, ULONG64 BaseOfDll,
       PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, PVOID UserContext);
 
@@ -352,7 +350,7 @@ inline BOOL DbgHelper::IsEnumSymbolsAvailable() const {
 /** Number of inline frames at the given address */
 inline DWORD DbgHelper::AddrIncludeInlineTrace(DWORD64 address) const {
   using SymAddrIncludeInlineTrace =
-      DWORD IMAGEAPI(HANDLE hProcess, DWORD64 Address);
+      DWORD WINAPI(HANDLE hProcess, DWORD64 Address);
 
   DYN_LOAD(SymAddrIncludeInlineTrace);
 
@@ -370,9 +368,9 @@ inline BOOL DbgHelper::QueryInlineTrace(DWORD64 StartAddress,
                                         DWORD64 CurAddress, LPDWORD CurContext,
                                         LPDWORD CurFrameIndex) const {
   using SymQueryInlineTrace =
-      BOOL IMAGEAPI(HANDLE hProcess, DWORD64 StartAddress, DWORD StartContext,
-                    DWORD64 StartRetAddress, DWORD64 CurAddress,
-                    LPDWORD CurContext, LPDWORD CurFrameIndex);
+      BOOL WINAPI(HANDLE hProcess, DWORD64 StartAddress, DWORD StartContext,
+                  DWORD64 StartRetAddress, DWORD64 CurAddress,
+                  LPDWORD CurContext, LPDWORD CurFrameIndex);
 
   DYN_LOAD(SymQueryInlineTrace);
 
@@ -387,8 +385,8 @@ inline BOOL DbgHelper::FromInlineContext(DWORD64 Address, DWORD InlineContext,
                                          PDWORD64 pDisplacement,
                                          PSYMBOL_INFO Symbol) const {
   using SymFromInlineContext =
-      BOOL IMAGEAPI(HANDLE hProcess, DWORD64 Address, DWORD InlineContext,
-                    PDWORD64 pDisplacement, PSYMBOL_INFO Symbol);
+      BOOL WINAPI(HANDLE hProcess, DWORD64 Address, DWORD InlineContext,
+                  PDWORD64 pDisplacement, PSYMBOL_INFO Symbol);
 
   DYN_LOAD(SymFromInlineContext);
 
@@ -403,7 +401,7 @@ inline BOOL DbgHelper::GetLineFromInlineContext(DWORD64 Address,
                                                 DWORD64 ModuleBaseAddress,
                                                 PDWORD pDisplacement,
                                                 PIMAGEHLP_LINE64 Line64) const {
-  using SymGetLineFromInlineContext = BOOL IMAGEAPI(
+  using SymGetLineFromInlineContext = BOOL WINAPI(
       HANDLE hProcess, DWORD64 Address, DWORD InlineContext,
       DWORD64 ModuleBaseAddress, PDWORD pDisplacement, PIMAGEHLP_LINE64 Line64);
 
@@ -421,9 +419,9 @@ DbgHelper::EnumSymbolsEx(ULONG64 BaseOfDll, PCSTR Mask,
                          PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
                          PVOID UserContext, DWORD Options) const {
   using SymEnumSymbolsEx =
-      BOOL IMAGEAPI(HANDLE hProcess, ULONG64 BaseOfDll, PCSTR Mask,
-                    PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
-                    PVOID UserContext, DWORD Options);
+      BOOL WINAPI(HANDLE hProcess, ULONG64 BaseOfDll, PCSTR Mask,
+                  PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
+                  PVOID UserContext, DWORD Options);
 
   DYN_LOAD(SymEnumSymbolsEx);
 
@@ -435,7 +433,7 @@ DbgHelper::EnumSymbolsEx(ULONG64 BaseOfDll, PCSTR Mask,
 inline BOOL DbgHelper::SetScopeFromInlineContext(DWORD64 Address,
                                                  DWORD InlineContext) const {
   using SymSetScopeFromInlineContext =
-      BOOL IMAGEAPI(HANDLE hProcess, DWORD64 Address, DWORD InlineContext);
+      BOOL WINAPI(HANDLE hProcess, DWORD64 Address, DWORD InlineContext);
 
   DYN_LOAD(SymSetScopeFromInlineContext);
 

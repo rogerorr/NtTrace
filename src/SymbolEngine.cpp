@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2480 2024-09-28 19:32:14Z roger $";
+    "$Id: SymbolEngine.cpp 2509 2025-01-18 15:01:38Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -636,7 +636,7 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
 // static
 #ifdef _M_IX86
 BOOL __declspec(naked)
-    SymbolEngine::GetCurrentThreadContext(CONTEXT *pContext) {
+SymbolEngine::GetCurrentThreadContext(CONTEXT *pContext) {
   DWORD regIp, regSp, regBp;
   BOOL rc;
 
