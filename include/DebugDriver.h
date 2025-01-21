@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2459 $
+    $Revision: 2543 $
 */
 
-// $Id: DebugDriver.h 2459 2024-09-07 17:46:05Z roger $
+// $Id: DebugDriver.h 2543 2025-01-21 23:38:03Z roger $
 
 #ifndef _WINDOWS_
 #include <windows.h>
@@ -97,38 +97,40 @@ class DebuggerAdapter : public Debugger {
 public:
   // callbacks on events
   /** Exception occurred */
-  virtual void OnException(HANDLE hProcess, HANDLE hThread, DWORD processId,
-                           DWORD threadId,
-                           EXCEPTION_DEBUG_INFO const &DebugEvent,
-                           DWORD *pContinueExecution) {}
+  void OnException(DWORD processId, DWORD threadId, HANDLE hProcess,
+                   HANDLE hThread, EXCEPTION_DEBUG_INFO const &DebugEvent,
+                   DWORD *pContinueExecution) override {}
 
   /** Callback on thread creation */
-  virtual void OnCreateThread(DWORD threadId,
-                              CREATE_THREAD_DEBUG_INFO const &CreateThread) {}
+  void OnCreateThread(DWORD processId, DWORD threadId,
+                      CREATE_THREAD_DEBUG_INFO const &CreateThread) override {}
 
   /** Callback on process creation */
-  virtual void
+  void
   OnCreateProcess(DWORD processId, DWORD threadId,
-                  CREATE_PROCESS_DEBUG_INFO const &CreateProcessInfo) {}
+                  CREATE_PROCESS_DEBUG_INFO const &CreateProcessInfo) override {
+  }
 
   /** Callback on thread exit */
-  virtual void OnExitThread(DWORD threadId,
-                            EXIT_THREAD_DEBUG_INFO const &ExitThread) {}
+  void OnExitThread(DWORD processId, DWORD threadId,
+                    EXIT_THREAD_DEBUG_INFO const &ExitThread) override {}
 
   /** Callback on process exit */
-  virtual void OnExitProcess(DWORD processId,
-                             EXIT_PROCESS_DEBUG_INFO const &ExitProcess) {}
+  void OnExitProcess(DWORD processId, DWORD threadId,
+                     EXIT_PROCESS_DEBUG_INFO const &ExitProcess) override {}
 
   /** Callback on loading DLL */
-  virtual void OnLoadDll(HANDLE hProcess, LOAD_DLL_DEBUG_INFO const &LoadDll) {}
+  void OnLoadDll(DWORD processId, DWORD threadId, HANDLE hProcess,
+                 LOAD_DLL_DEBUG_INFO const &LoadDll) override {}
 
   /** Callback on unloading DLL */
-  virtual void OnUnloadDll(UNLOAD_DLL_DEBUG_INFO const &UnloadDll) {}
+  void OnUnloadDll(DWORD processId, DWORD threadId,
+                   UNLOAD_DLL_DEBUG_INFO const &UnloadDll) override {}
 
   /** Callback on outputting a debug string */
-  virtual void
-  OnOutputDebugString(HANDLE hProcess,
-                      OUTPUT_DEBUG_STRING_INFO const &DebugString) {}
+  void
+  OnOutputDebugString(DWORD processId, DWORD threadId, HANDLE hProcess,
+                      OUTPUT_DEBUG_STRING_INFO const &DebugString) override {}
 
 #pragma warning(pop)
 };

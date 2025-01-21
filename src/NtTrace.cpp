@@ -28,7 +28,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2488 2024-12-02 23:27:17Z roger $";
+    "$Id: NtTrace.cpp 2543 2025-01-21 23:38:03Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -89,27 +89,26 @@ public:
   TrapNtDebugger(std::ostream &os) : os(os) {}
 
   // callbacks on events
-  virtual void OnException(DWORD processId, DWORD threadId, HANDLE hProcess,
-                           HANDLE hThread,
-                           EXCEPTION_DEBUG_INFO const &DebugEvent,
-                           DWORD *pContinueExecution);
-  virtual void OnCreateThread(DWORD processId, DWORD threadId,
-                              CREATE_THREAD_DEBUG_INFO const &CreateThread);
-  virtual void
+  void OnException(DWORD processId, DWORD threadId, HANDLE hProcess,
+                   HANDLE hThread, EXCEPTION_DEBUG_INFO const &DebugEvent,
+                   DWORD *pContinueExecution) override;
+  void OnCreateThread(DWORD processId, DWORD threadId,
+                      CREATE_THREAD_DEBUG_INFO const &CreateThread) override;
+  void
   OnCreateProcess(DWORD processId, DWORD threadId,
-                  CREATE_PROCESS_DEBUG_INFO const &CreateProcessInfo);
-  virtual void OnExitThread(DWORD processId, DWORD threadId,
-                            EXIT_THREAD_DEBUG_INFO const &ExitThread);
-  virtual void OnExitProcess(DWORD processId, DWORD threadId,
-                             EXIT_PROCESS_DEBUG_INFO const &ExitProcess);
-  virtual void OnLoadDll(DWORD processId, DWORD threadId, HANDLE hProcess,
-                         LOAD_DLL_DEBUG_INFO const &LoadDll);
-  virtual void OnUnloadDll(DWORD processId, DWORD threadId,
-                           UNLOAD_DLL_DEBUG_INFO const &UnloadDll);
-  virtual void OnOutputDebugString(DWORD processId, DWORD threadId,
-                                   HANDLE hProcess,
-                                   OUTPUT_DEBUG_STRING_INFO const &DebugString);
-  virtual bool Active() { return bActive; }
+                  CREATE_PROCESS_DEBUG_INFO const &CreateProcessInfo) override;
+  void OnExitThread(DWORD processId, DWORD threadId,
+                    EXIT_THREAD_DEBUG_INFO const &ExitThread) override;
+  void OnExitProcess(DWORD processId, DWORD threadId,
+                     EXIT_PROCESS_DEBUG_INFO const &ExitProcess) override;
+  void OnLoadDll(DWORD processId, DWORD threadId, HANDLE hProcess,
+                 LOAD_DLL_DEBUG_INFO const &LoadDll) override;
+  void OnUnloadDll(DWORD processId, DWORD threadId,
+                   UNLOAD_DLL_DEBUG_INFO const &UnloadDll) override;
+  void
+  OnOutputDebugString(DWORD processId, DWORD threadId, HANDLE hProcess,
+                      OUTPUT_DEBUG_STRING_INFO const &DebugString) override;
+  bool Active() override { return bActive; }
 
   /**
    * Set the 'log dlls' flag.
