@@ -20,10 +20,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2513 $
+    $Revision: 2541 $
 */
 
-// $Id: DbgHelper.inl 2513 2025-01-18 16:01:37Z roger $
+// $Id: DbgHelper.inl 2541 2025-01-21 23:00:17Z roger $
 
 #include <iostream>
 
@@ -74,13 +74,11 @@ inline std::ostream &operator<<(std::ostream &os, enum SymTagEnum const value) {
                     DEF(SymTagVectorType),
                     DEF(SymTagMatrixType),
                     DEF(SymTagHLSLType),
-#if (_MSC_VER >= 1900)
                     DEF(SymTagCaller),
                     DEF(SymTagCallee),
                     DEF(SymTagExport),
                     DEF(SymTagHeapAllocationSite),
                     DEF(SymTagCoffGroup),
-#endif // _MSC_VER
                     DEF(SymTagMax),
                     {0, nullptr}};
 

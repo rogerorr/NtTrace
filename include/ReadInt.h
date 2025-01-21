@@ -22,10 +22,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2480 $
+    $Revision: 2541 $
 */
 
-// $Id: ReadInt.h 2480 2024-09-28 19:32:14Z roger $
+// $Id: ReadInt.h 2541 2025-01-21 23:00:17Z roger $
 
 #include <cstdlib>   // for strtol
 #include <string>    // for string
@@ -82,7 +82,6 @@ readInt(std::string const &value, ///< value to convert
   return *delim == '\0';
 }
 
-#if _MSC_VER >= 1500
 /** Convert a string into a long long integer.
  *
  * Allows string to start with 0x to imply hexadecimal values.
@@ -106,7 +105,6 @@ inline bool readInt(std::string const &value, ///< value to convert
 
   return *delim == '\0';
 }
-#endif // _MSC_VER >= 1500
 
 } // namespace or2
 

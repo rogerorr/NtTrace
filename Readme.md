@@ -44,7 +44,7 @@ NtTrace is designed to run from the command line.
 It can be used to execute a program, with arguments if needed.
 For example:
 <br>
-`NtTrace -filter File cmd`
+`NtTrace -filter File cmd /c echo hello`
 
 or to attach to an existing process by PID or, using the -a option, by name.
 For example:
@@ -76,7 +76,7 @@ The version of the DLL installed with the OS tends to
 take precedence over a newer version that may be downloaded.
 
 If you find you require a newer version than the one installed in the system directory you
-can simply copy of the latest `DbgHelp.dll` to the same directory that `NtTrace.exe` is in.
+can simply copy of the later `DbgHelp.dll` the same directory that `NtTrace.exe` is in.
 (You will also need to copy `SymSrv.dll` and `SrcSrv.dll`)
 
 ## How it works
@@ -93,7 +93,8 @@ However this also means the tool will not catch:
  * kernel calls made by device drivers on behalf of an application
  * any direct use of the int 2e, syscall, or sysenter mechanism
 
-NtTrace also traces into child processes of the initial process started, the -pid option will add the process Id to each output line.
+NtTrace also, by default, traces into child processes of the initial process started, the `-pid` option will add the process Id to each output line
+to help identify which process made which calls. The `-only` option suppresses tracing of child processes.
 
 It also deals with multi-threaded applications (and the -tid option will help identify which thread is making each call).
 However note that, since the Windows debug interface is event based, if multiple threads all make calls simultaneously
@@ -108,7 +109,7 @@ The configuration for the native calls is held in NtTrace.cfg and this file is p
 Note that different versions of Windows support different sets of calls.
 
 Some of the Native functions are officially documented by Microsoft but many are undocumented.
-The complete list was arrived at by a combination of detective work on the functions and from web sites, such as ReactOS.
+The (_nearly_) complete list was arrived at by a combination of detective work on the functions and from web sites, such as ReactOS.
 
 Each function is assigned to a category, and filtering can be done by function name (partial match) and function category.
 
@@ -116,4 +117,4 @@ By default NtTrace traces on return from the system call, but the `-pre` option 
 This can be useful if, for example, the same structure is used for a request and a response buffer.
 
 <hr/>
-$Id: Readme.md 2487 2024-12-01 23:15:47Z roger $
+$Id: Readme.md 2542 2025-01-21 23:15:34Z roger $
