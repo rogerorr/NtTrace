@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2568 2025-02-23 22:40:22Z roger $";
+    "$Id: EntryPoint.cpp 2569 2025-02-23 23:54:18Z roger $";
 
 #include "EntryPoint.h"
 
@@ -741,6 +741,7 @@ void EntryPoint::setArgument(int argNum, std::string const &argType,
       {argACCESS_MASK, "PROCESS_ACCESS_MASK"},
       {argACCESS_MASK, "SECTION_ACCESS_MASK"},
       {argACCESS_MASK, "SEMAPHORE_ACCESS_MASK"},
+      {argACCESS_MASK, "TIMER_ACCESS_MASK"},
       {argACCESS_MASK, "THREAD_ACCESS_MASK"},
       {argACCESS_MASK, "TOKEN_ACCESS_MASK"},
 

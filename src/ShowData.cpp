@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2568 2025-02-23 22:40:22Z roger $";
+    "$Id: ShowData.cpp 2569 2025-02-23 23:54:18Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -442,6 +442,9 @@ void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal, con
 	  ADD_MASK(KEY_ENUMERATE_SUB_KEYS);
 	  ADD_MASK(KEY_CREATE_LINK);
 	  ADD_MASK(KEY_NOTIFY);
+	  ADD_MASK(KEY_WOW64_32KEY);
+      ADD_MASK(KEY_WOW64_64KEY);
+      ADD_MASK(KEY_WOW64_RES);
   }
   else if (maskName == "MUTANT_ACCESS_MASK")
   {
@@ -496,6 +499,12 @@ void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal, con
       ADD_MASK(THREAD_SET_LIMITED_INFORMATION);
       ADD_MASK(THREAD_QUERY_LIMITED_INFORMATION);
       ADD_MASK(THREAD_RESUME);
+  }
+  else if (maskName == "TIMER_ACCESS_MASK")
+  {
+      ADD_DEFN(TIMER_ALL_ACCESS);
+      ADD_MASK(TIMER_QUERY_STATE);
+      ADD_MASK(TIMER_MODIFY_STATE);
   }
   else if (maskName == "TOKEN_ACCESS_MASK")
   {
