@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2565 2025-02-23 15:59:02Z roger $";
+    "$Id: EntryPoint.cpp 2567 2025-02-23 17:38:11Z roger $";
 
 #include "EntryPoint.h"
 
@@ -50,6 +50,8 @@ void printStackTrace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
                      CONTEXT const &Context);
 std::string buffToHex(unsigned char *buffer, size_t length);
 
+#pragma warning(push)
+#pragma warning(disable: 4592) // symbol will be dynamically initialized
 const std::map<std::string, ArgAttributes> sal_attributes = {
     {"_In_", argIN},
     {"__in", argIN},
@@ -77,6 +79,7 @@ const std::map<std::string, ArgAttributes> sal_attributes = {
     {"_Reserved_", argRESERVED},
     {"__reserved", argRESERVED},
 };
+#pragma warning(pop)
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
