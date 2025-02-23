@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2471 $
+    $Revision: 2565 $
 */
 
-// $Id: EntryPoint.h 2471 2024-09-09 22:13:54Z roger $
+// $Id: EntryPoint.h 2565 2025-02-23 15:59:02Z roger $
 
 #include <windows.h>
 
@@ -72,8 +72,6 @@ enum ArgAttributes {
   argOPTIONAL = 4,
   argCONST = 8,
   argRESERVED = 16,
-  argUNDERSCORE = 32,        // use _In_, _Out_ rather than IN, OUT
-  argDOUBLE_UNDERSCORE = 64, // use __in, __out rather than IN, OUT
 };
 
 struct Argument {

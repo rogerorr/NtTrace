@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2467 2024-09-07 21:35:42Z roger $";
+    "$Id: EntryPoint.cpp 2565 2025-02-23 15:59:02Z roger $";
 
 #include "EntryPoint.h"
 
@@ -49,6 +49,34 @@ namespace {
 void printStackTrace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
                      CONTEXT const &Context);
 std::string buffToHex(unsigned char *buffer, size_t length);
+
+const std::map<std::string, ArgAttributes> sal_attributes = {
+    {"_In_", argIN},
+    {"__in", argIN},
+    {"IN", argIN},
+
+    {"_In_opt_", ArgAttributes(argIN | argOPTIONAL)},
+    {"__in_opt", ArgAttributes(argIN | argOPTIONAL)},
+
+    {"_Out_", argOUT},
+    {"__out", argOUT},
+    {"OUT", argOUT},
+
+    {"_Out_opt_", ArgAttributes(argOUT | argOPTIONAL)},
+    {"__out_opt", ArgAttributes(argOUT | argOPTIONAL)},
+
+    {"_Inout_", ArgAttributes(argIN | argOUT)},
+    {"__inout", ArgAttributes(argIN | argOUT)},
+
+    {"_Inout_opt_", ArgAttributes(argIN | argOUT | argOPTIONAL)},
+    {"__inout_opt", ArgAttributes(argIN | argOUT | argOPTIONAL)},
+
+    {"const", argCONST},
+    {"CONST", argCONST},
+
+    {"_Reserved_", argRESERVED},
+    {"__reserved", argRESERVED},
+};
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -262,7 +290,7 @@ void Argument::showArgument(std::ostream &os, HANDLE hProcess, ARG argVal,
     break;
 
   case argACCESS_MASK:
-    showAccessMask(os, hProcess, argVal);
+    showAccessMask(os, hProcess, (ULONG)argVal);
     break;
 
   case argPCLIENT_ID:
@@ -658,6 +686,7 @@ void EntryPoint::setArgument(int argNum, std::string const &argType,
       {argENUM, "FILE_INFORMATION_CLASS"},
       {argENUM, "FS_INFORMATION_CLASS"},
       {argENUM, "HARDERROR_RESPONSE_OPTION"},
+      {argENUM, "HOT_PATCH_INFORMATION_CLASS"},
       {argENUM, "IO_SESSION_STATE"},
       {argENUM, "IORING_CREATE_REQUIRED_FLAGS"},
       {argENUM, "JOB_INFORMATION_CLASS"},
@@ -1011,7 +1040,7 @@ void processUsing(std::string lbuf, EntryPoint::Typedefs &typedefs) {
 // NTSTATUS
 // NTAPI
 // NtXxx(
-//   IN DWORD fred
+//   _In_ DWORD fred
 // );
 //
 // or (simple) typedefs or using declarations:
@@ -1125,29 +1154,11 @@ bool EntryPoint::readEntryPoints(std::istream &cfgFile,
 
       do {
         is >> typeName;
-        if (typeName == "IN" || typeName == "__in" || typeName == "_In_")
-          attributes |= argIN;
-        else if (typeName == "__in_opt" || typeName == "_In_opt_")
-          attributes |= argIN | argOPTIONAL;
-        else if (typeName == "OUT" || typeName == "__out" ||
-                 typeName == "_Out_")
-          attributes |= argOUT;
-        else if (typeName == "__out_opt" || typeName == "_Out_opt_")
-          attributes |= argOUT | argOPTIONAL;
-        else if (typeName == "__inout" || typeName == "_Inout_")
-          attributes |= argIN | argOUT;
-        else if (typeName == "__inout_opt" || typeName == "_Inout_opt_")
-          attributes |= argIN | argOUT | argOPTIONAL;
-        else if (typeName == "const" || typeName == "CONST")
-          attributes |= argCONST;
-        else if (typeName == "__reserved" || typeName == "_Reserved_")
-          attributes |= argRESERVED;
-        else
+        const auto it = sal_attributes.find(typeName);
+        if (it != sal_attributes.end()) {
+          attributes |= it->second;
+        } else
           break;
-        if (typeName[0] == '_' && typeName[1] == '_')
-          attributes |= argDOUBLE_UNDERSCORE;
-        else if (typeName[0] == '_')
-          attributes |= argUNDERSCORE;
       } while (is);
       if (bEnded &&
           (typeName.length() == 0 || (argNum == 0 && typeName == "VOID"))) {
@@ -1208,45 +1219,20 @@ void EntryPoint::writeExport(std::ostream &os) const {
       continue;
     }
     os << "    ";
-    if (argument.attributes & argDOUBLE_UNDERSCORE) {
-      std::string const opt(argument.attributes & argOPTIONAL ? "_opt" : "");
-      if (argument.attributes & argRESERVED)
-        os << "__reserved ";
-      if ((argument.attributes & (argIN | argOUT)) == (argIN | argOUT))
-        os << "__inout" << opt << ' ';
-      else if (argument.attributes & argIN)
-        os << "__in" << opt << ' ';
-      else if (argument.attributes & argOUT)
-        os << "__out" << opt << ' ';
-      if (argument.attributes & argCONST)
-        os << "const ";
-      os << argument.argTypeName << " " << argument.name;
-    } else if (argument.attributes & argUNDERSCORE) {
-      std::string const opt(argument.attributes & argOPTIONAL ? "opt_" : "");
-      if (argument.attributes & argRESERVED)
-        os << "_Reserved_ ";
-      if ((argument.attributes & (argIN | argOUT)) == (argIN | argOUT))
-        os << "_Inout_" << opt << ' ';
-      else if (argument.attributes & argIN)
-        os << "_In_" << opt << ' ';
-      else if (argument.attributes & argOUT)
-        os << "_Out_" << opt << ' ';
-      if (argument.attributes & argCONST)
-        os << "const ";
-      os << argument.argTypeName << " " << argument.name;
-    } else
 
-    {
-      if (argument.attributes & argIN)
-        os << "IN ";
-      if (argument.attributes & argOUT)
-        os << "OUT ";
-      if (argument.attributes & argCONST)
-        os << "CONST ";
-      os << argument.argTypeName << " " << argument.name;
-      if (argument.attributes & argOPTIONAL)
-        os << " OPTIONAL";
-    }
+    std::string const opt(argument.attributes & argOPTIONAL ? "opt_" : "");
+    if (argument.attributes & argRESERVED)
+      os << "_Reserved_ ";
+    if ((argument.attributes & (argIN | argOUT)) == (argIN | argOUT))
+      os << "_Inout_" << opt << ' ';
+    else if (argument.attributes & argIN)
+      os << "_In_" << opt << ' ';
+    else if (argument.attributes & argOUT)
+      os << "_Out_" << opt << ' ';
+    if (argument.attributes & argCONST)
+      os << "const ";
+    os << argument.argTypeName << " " << argument.name;
+
     if (i != end - 1)
       os << ",";
     os << "\n";
