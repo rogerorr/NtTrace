@@ -31,7 +31,7 @@ NtTrace uses the debugging interface on Windows to intercept the returns from th
 C:> NtTrace -filter File cmd
 Process 2428 starting at 4AD0B814 with command line "cmd"
 Loaded DLL at 77F40000 ntdll.dll
-NtOpenFile(FileHandle=0x12fb38 [0x14], DesiredAccess=SYNCHRONIZE|0x20, ObjectAttributes="\??\C:\WWW\NtTrace\", IoStatusBlock=0x0012FAE4 [0/1], ShareAccess=3, OpenOptions=0x21) => 0
+NtOpenFile(FileHandle=0x12fb38 [0x14], DesiredAccess==FILE_EXECUTE|SYNCHRONIZE, ObjectAttributes="\??\C:\WWW\NtTrace\", IoStatusBlock=0x0012FAE4 [0/1], ShareAccess=3, OpenOptions=0x21) => 0
 NtQueryVolumeInformationFile(FileHandle=0x14, IoStatusBlock=0x0012FAE4 [0/8], FsInformation=0x12faf4, Length=8, FsInformationClass=4 [FileFsDeviceInformation]) => 0
 NtFsControlFile(FileHandle=0x14, Event=0, UserApcRoutine=null, UserApcContext=null, UserIoStatus=0x0012F754 [0/0], FsControlCode=0x00090028, InputBuffer=null, InputBufferLength=0, OutputBuffer=null, OutputBufferLength=0) => 0
 NtQueryAttributesFile(ObjectAttributes="\??\C:\WINDOWS\system32\cmd.exe.Local", Attributes=0x0012FADC [0]) => 0xc0000034<br> [2 'The system cannot find the file specified.']
@@ -98,6 +98,14 @@ Build the appropriate binary (32-bit or 64-bit) for your target program.
 <p>
 (See Readme.txt for full details. Currently supports building with Visual Studio versions 2015 - 2022)
 <p>
+
+<hr>
+Version 2543 - 23-02-2025<br>
+Recent changes:
+<ul>
+<li>Enhanced display of ACCESS_MASK values
+<li>Rationalise SAL processing
+</ul>
 
 <hr>
 Version 2485 - 01-Dec-2024<br>
