@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2566 2025-02-23 17:30:38Z roger $";
+    "$Id: ShowData.cpp 2568 2025-02-23 22:40:22Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -365,7 +365,7 @@ void showPUlong(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal) {
 }
 
 //////////////////////////////////////////////////////////////////////////
-void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal) {
+void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal, const std::string &maskName) {
   // Deal with easy case first!
   if (argVal == 0) {
     os << "0";
@@ -380,24 +380,138 @@ void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal) {
     argVal = 0;                                                                \
   }
 
-  // File system combined masks
-  ADD_DEFN(FILE_ALL_ACCESS);
-  ADD_DEFN(FILE_GENERIC_READ);
-  ADD_DEFN(FILE_GENERIC_WRITE);
-  ADD_DEFN(FILE_GENERIC_EXECUTE);
-
-  // Registry combined masks
-  ADD_DEFN(KEY_ALL_ACCESS);
-  ADD_DEFN(KEY_READ);
-  ADD_DEFN(KEY_WRITE);
-  ADD_DEFN(KEY_EXECUTE);
-
-#undef ADD_DEFN
-
 #define ADD_MASK(X)                                                            \
   if ((argVal & X) == X) {                                                     \
     mask << "|" #X;                                                            \
     argVal &= ~X;                                                              \
+  }
+
+  if (maskName == "DIRECTORY_ACCESS_MASK")
+  {
+      ADD_MASK(FILE_LIST_DIRECTORY);
+      ADD_MASK(FILE_ADD_FILE);
+      ADD_MASK(FILE_ADD_SUBDIRECTORY);
+      ADD_MASK(FILE_READ_EA);
+      ADD_MASK(FILE_WRITE_EA);
+      ADD_MASK(FILE_TRAVERSE);
+      ADD_MASK(FILE_DELETE_CHILD);
+  }
+  else if (maskName == "EVENT_ACCESS_MASK")
+  {
+	 ADD_DEFN(EVENT_ALL_ACCESS);
+	 ADD_MASK(MUTANT_QUERY_STATE);
+     ADD_MASK(EVENT_MODIFY_STATE);
+  }
+  else if (maskName == "FILE_ACCESS_MASK")
+  {
+    // File system combined masks
+    ADD_DEFN(FILE_ALL_ACCESS);
+    ADD_DEFN(FILE_GENERIC_READ);
+    ADD_DEFN(FILE_GENERIC_WRITE);
+    ADD_DEFN(FILE_GENERIC_EXECUTE);
+    ADD_MASK(FILE_READ_DATA);
+    ADD_MASK(FILE_WRITE_DATA);
+    ADD_MASK(FILE_APPEND_DATA);
+    ADD_MASK(FILE_READ_EA);
+    ADD_MASK(FILE_WRITE_EA);
+    ADD_MASK(FILE_EXECUTE);
+    ADD_MASK(FILE_DELETE_CHILD);
+    ADD_MASK(FILE_READ_ATTRIBUTES);
+    ADD_MASK(FILE_WRITE_ATTRIBUTES);
+  }
+  else if (maskName == "JOB_ACCESS_MASK")
+  {
+      ADD_DEFN(JOB_OBJECT_ALL_ACCESS);
+      ADD_MASK(JOB_OBJECT_ASSIGN_PROCESS);
+      ADD_MASK(JOB_OBJECT_SET_ATTRIBUTES);
+      ADD_MASK(JOB_OBJECT_QUERY);
+      ADD_MASK(JOB_OBJECT_TERMINATE);
+      ADD_MASK(JOB_OBJECT_SET_SECURITY_ATTRIBUTES);
+      ADD_MASK(JOB_OBJECT_IMPERSONATE);
+  }
+  else if (maskName == "KEY_ACCESS_MASK")
+  {
+      // Registry combined masks
+      ADD_DEFN(KEY_ALL_ACCESS);
+      ADD_DEFN(KEY_READ);
+      ADD_DEFN(KEY_WRITE);
+      ADD_DEFN(KEY_EXECUTE);
+	  ADD_MASK(KEY_QUERY_VALUE);
+	  ADD_MASK(KEY_SET_VALUE);
+	  ADD_MASK(KEY_CREATE_SUB_KEY);
+	  ADD_MASK(KEY_ENUMERATE_SUB_KEYS);
+	  ADD_MASK(KEY_CREATE_LINK);
+	  ADD_MASK(KEY_NOTIFY);
+  }
+  else if (maskName == "MUTANT_ACCESS_MASK")
+  {
+	  ADD_DEFN(MUTANT_ALL_ACCESS);
+	  ADD_MASK(MUTANT_QUERY_STATE);
+  }
+  else if (maskName == "PROCESS_ACCESS_MASK")
+  {
+      ADD_DEFN(PROCESS_ALL_ACCESS);
+      ADD_MASK(PROCESS_TERMINATE);
+      ADD_MASK(PROCESS_CREATE_THREAD);
+      ADD_MASK(PROCESS_SET_SESSIONID);
+      ADD_MASK(PROCESS_VM_OPERATION);
+      ADD_MASK(PROCESS_VM_READ);
+      ADD_MASK(PROCESS_VM_WRITE);
+      ADD_MASK(PROCESS_DUP_HANDLE);
+      ADD_MASK(PROCESS_CREATE_PROCESS);
+      ADD_MASK(PROCESS_SET_QUOTA);
+      ADD_MASK(PROCESS_SET_INFORMATION);
+      ADD_MASK(PROCESS_QUERY_INFORMATION);
+      ADD_MASK(PROCESS_SUSPEND_RESUME);
+      ADD_MASK(PROCESS_QUERY_LIMITED_INFORMATION);
+      ADD_MASK(PROCESS_SET_LIMITED_INFORMATION);
+  }
+  else if (maskName == "SECTION_ACCESS_MASK")
+  {
+    ADD_DEFN(SECTION_ALL_ACCESS);
+    ADD_MASK(SECTION_EXTEND_SIZE);
+    ADD_MASK(SECTION_MAP_EXECUTE);
+    ADD_MASK(SECTION_MAP_READ);
+    ADD_MASK(SECTION_MAP_WRITE);
+    ADD_MASK(SECTION_QUERY);
+  }
+  else if (maskName == "SEMAPHORE_ACCESS_MASK")
+  {
+	  ADD_DEFN(SEMAPHORE_ALL_ACCESS);
+	  ADD_MASK(SEMAPHORE_MODIFY_STATE);
+	  ADD_MASK(MUTANT_QUERY_STATE);
+  }
+  else if (maskName == "THREAD_ACCESS_MASK")
+  {
+      ADD_DEFN(THREAD_ALL_ACCESS);
+      ADD_MASK(THREAD_TERMINATE);
+      ADD_MASK(THREAD_SUSPEND_RESUME);
+      ADD_MASK(THREAD_GET_CONTEXT);
+      ADD_MASK(THREAD_SET_CONTEXT);
+      ADD_MASK(THREAD_QUERY_INFORMATION);
+      ADD_MASK(THREAD_SET_INFORMATION);
+      ADD_MASK(THREAD_SET_THREAD_TOKEN);
+      ADD_MASK(THREAD_IMPERSONATE);
+      ADD_MASK(THREAD_DIRECT_IMPERSONATION);
+      ADD_MASK(THREAD_SET_LIMITED_INFORMATION);
+      ADD_MASK(THREAD_QUERY_LIMITED_INFORMATION);
+      ADD_MASK(THREAD_RESUME);
+  }
+  else if (maskName == "TOKEN_ACCESS_MASK")
+  {
+	  ADD_DEFN(TOKEN_ALL_ACCESS);
+	  ADD_DEFN(TOKEN_READ);
+	  ADD_DEFN(TOKEN_WRITE);
+	  ADD_DEFN(TOKEN_EXECUTE);
+	  ADD_MASK(TOKEN_ASSIGN_PRIMARY);
+	  ADD_MASK(TOKEN_DUPLICATE);
+	  ADD_MASK(TOKEN_IMPERSONATE);
+	  ADD_MASK(TOKEN_QUERY);
+	  ADD_MASK(TOKEN_QUERY_SOURCE);
+	  ADD_MASK(TOKEN_ADJUST_PRIVILEGES);
+	  ADD_MASK(TOKEN_ADJUST_GROUPS);
+	  ADD_MASK(TOKEN_ADJUST_DEFAULT);
+	  ADD_MASK(TOKEN_ADJUST_SESSIONID);
   }
 
   //  The following are masks for the predefined standard access types
@@ -422,6 +536,7 @@ void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal) {
   ADD_MASK(GENERIC_EXECUTE);
   ADD_MASK(GENERIC_ALL);
 
+#undef ADD_DEFN
 #undef ADD_MASK
 
   // Specific rights

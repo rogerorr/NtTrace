@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2455 $
+    $Revision: 2568 $
 */
 
-// $Id: ShowData.h 2455 2024-09-05 22:37:56Z roger $
+// $Id: ShowData.h 2568 2025-02-23 22:40:22Z roger $
 
 #include <ostream>
 #include <windows.h>
@@ -87,7 +87,7 @@ void showPUshort(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal);
 void showPUlong(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal);
 
 /** show an access mask from the debuggee */
-void showAccessMask(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal);
+void showAccessMask(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal, const std::string &maskName);
 
 /** show a client ID from the debuggee */
 void showPClientId(std::ostream &os, HANDLE hProcess, PCLIENT_ID pClientId);

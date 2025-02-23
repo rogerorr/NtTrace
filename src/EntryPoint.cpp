@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2567 2025-02-23 17:38:11Z roger $";
+    "$Id: EntryPoint.cpp 2568 2025-02-23 22:40:22Z roger $";
 
 #include "EntryPoint.h"
 
@@ -293,7 +293,7 @@ void Argument::showArgument(std::ostream &os, HANDLE hProcess, ARG argVal,
     break;
 
   case argACCESS_MASK:
-    showAccessMask(os, hProcess, (ULONG)argVal);
+    showAccessMask(os, hProcess, (ULONG)argVal, argTypeName);
     break;
 
   case argPCLIENT_ID:
@@ -732,6 +732,17 @@ void EntryPoint::setArgument(int argNum, std::string const &argType,
       {argBOOLEAN, "BOOL"},
 
       {argACCESS_MASK, "ACCESS_MASK"},
+      {argACCESS_MASK, "DIRECTORY_ACCESS_MASK"},
+      {argACCESS_MASK, "EVENT_ACCESS_MASK"},
+      {argACCESS_MASK, "FILE_ACCESS_MASK"},
+      {argACCESS_MASK, "JOB_ACCESS_MASK"},
+      {argACCESS_MASK, "KEY_ACCESS_MASK"},
+      {argACCESS_MASK, "MUTANT_ACCESS_MASK"},
+      {argACCESS_MASK, "PROCESS_ACCESS_MASK"},
+      {argACCESS_MASK, "SECTION_ACCESS_MASK"},
+      {argACCESS_MASK, "SEMAPHORE_ACCESS_MASK"},
+      {argACCESS_MASK, "THREAD_ACCESS_MASK"},
+      {argACCESS_MASK, "TOKEN_ACCESS_MASK"},
 
       {argPOINTER, "PVOID"},
       {argPOINTER, "PSTR"},
