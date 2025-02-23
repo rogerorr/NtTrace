@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2473 2024-09-10 21:10:07Z roger $";
+    "$Id: ShowData.cpp 2566 2025-02-23 17:30:38Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -402,6 +402,8 @@ void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal) {
 
   //  The following are masks for the predefined standard access types
 
+  ADD_MASK(STANDARD_RIGHTS_ALL);
+  ADD_MASK(STANDARD_RIGHTS_REQUIRED);
   ADD_MASK(DELETE);
   ADD_MASK(READ_CONTROL);
   ADD_MASK(WRITE_DAC);
