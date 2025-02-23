@@ -27,7 +27,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: Enumerations.cpp 2491 2024-12-17 23:55:56Z roger $";
+    "$Id: Enumerations.cpp 2557 2025-02-22 17:36:41Z roger $";
 
 #include "Enumerations.h"
 
@@ -378,6 +378,36 @@ EnumMap HARDERROR_RESPONSE_OPTION_MAP[] = {DEF(OptionAbortRetryIgnore),
                                            DEF(OptionCancelTryContinue),
                                            {0, nullptr}};
 
+enum HOT_PATCH_INFORMATION_CLASS {
+  ManageHotPatchLoadPatch = 0,
+  ManageHotPatchUnloadPatch = 1,
+  ManageHotPatchQueryPatches = 2,
+  ManageHotPatchLoadPatchForUser = 3,
+  ManageHotPatchUnloadPatchForUser = 4,
+  ManageHotPatchQueryPatchesForUser = 5,
+  ManageHotPatchQueryActivePatches = 6,
+  ManageHotPatchApplyImagePatch = 7,
+  ManageHotPatchQuerySinglePatch = 8,
+  ManageHotPatchCheckEnabled = 9,
+  ManageHotPatchCreatePatchSection = 10,
+  ManageHotPatchMax = 11,
+};
+
+EnumMap HOT_PATCH_INFORMATION_CLASS_MAP[] = {
+    DEF(ManageHotPatchLoadPatch),
+    DEF(ManageHotPatchUnloadPatch),
+    DEF(ManageHotPatchQueryPatches),
+    DEF(ManageHotPatchLoadPatchForUser),
+    DEF(ManageHotPatchUnloadPatchForUser),
+    DEF(ManageHotPatchQueryPatchesForUser),
+    DEF(ManageHotPatchQueryActivePatches),
+    DEF(ManageHotPatchApplyImagePatch),
+    DEF(ManageHotPatchQuerySinglePatch),
+    DEF(ManageHotPatchCheckEnabled),
+    DEF(ManageHotPatchCreatePatchSection),
+    DEF(ManageHotPatchMax),
+    {0, nullptr}};
+
 enum IO_SESSION_STATE {
   IoSessionStateCreated = 1,
   IoSessionStateInitialized = 2,
@@ -696,6 +726,7 @@ enum MEMORY_INFORMATION_CLASS {
   MemoryPhysicalContiguityInformation = 11,
   MemoryBadInformation = 12,
   MemoryBadInformationAllProcesses = 13,
+  MemoryImageExtensionInformation = 14, // Since 24H2
 };
 
 EnumMap MEMORY_INFORMATION_CLASS_MAP[] = {
@@ -2294,6 +2325,7 @@ struct AllEnum allEnums[] = {DEF(ALPC_MESSAGE_INFORMATION_CLASS),
                              DEF(FILE_INFORMATION_CLASS),
                              DEF(FS_INFORMATION_CLASS),
                              DEF(HARDERROR_RESPONSE_OPTION),
+                             DEF(HOT_PATCH_INFORMATION_CLASS),
                              DEF(IO_SESSION_STATE),
                              DEF(IORING_CREATE_REQUIRED_FLAGS),
                              DEF(JOB_INFORMATION_CLASS),
