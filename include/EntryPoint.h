@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2565 $
+    $Revision: 2572 $
 */
 
-// $Id: EntryPoint.h 2565 2025-02-23 15:59:02Z roger $
+// $Id: EntryPoint.h 2572 2025-02-25 20:12:16Z roger $
 
 #include <windows.h>
 
@@ -48,6 +48,7 @@ enum ArgType {
   argMASK,
   argBOOLEAN,
   argBYTE,
+  argHANDLE,
   argPOINTER,
   argPOBJECT_ATTRIBUTES,
   argPUNICODE_STRING,

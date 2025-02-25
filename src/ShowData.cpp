@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2569 2025-02-23 23:54:18Z roger $";
+    "$Id: ShowData.cpp 2573 2025-02-25 20:43:38Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -190,6 +190,12 @@ void showMask(std::ostream &os, ULONG_PTR value, std::string const &enumName) {
 }
 
 //////////////////////////////////////////////////////////////////////////
+/** show a handle from the debuggee */
+void showHandle(std::ostream &os, HANDLE handle) {
+  showDword(os, reinterpret_cast<ULONG_PTR>(handle));
+}
+
+//////////////////////////////////////////////////////////////////////////
 // Show a module name from the debuggee
 bool showName(std::ostream &os, HANDLE hProcess, LPVOID lpImageName,
               bool bUnicode) {
@@ -275,13 +281,13 @@ void showCommandLine(std::ostream &os, HANDLE hProcess) {
 
 //////////////////////////////////////////////////////////////////////////
 void showObjectAttributes(std::ostream &os, HANDLE hProcess,
-                          LPVOID pObjectAttributes) {
+                          POBJECT_ATTRIBUTES pObjectAttributes) {
   OBJECT_ATTRIBUTES objectAttributes = {0};
 
   (void)readHelper(hProcess, pObjectAttributes, objectAttributes);
 
   if (objectAttributes.RootDirectory) {
-    showDword(os, (ULONG_PTR)objectAttributes.RootDirectory);
+    showHandle(os, objectAttributes.RootDirectory);
     os << ':';
   }
   showUnicodeString(os, hProcess, objectAttributes.ObjectName);
@@ -312,15 +318,19 @@ void showPointer(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal) {
   }
 }
 
+void showPointer(std::ostream &os, HANDLE hProcess, const void *argVal) {
+  return showPointer(os, hProcess, reinterpret_cast<ULONG_PTR>(argVal));
+}
+
 //////////////////////////////////////////////////////////////////////////
 void showPHandle(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal) {
-  showPointer(os, hProcess, (ULONG_PTR)argVal);
+  showPointer(os, hProcess, argVal);
   if (argVal) {
-    ULONG_PTR handle = 0;
+    HANDLE handle = 0;
     (void)readHelper(hProcess, argVal, handle);
 
     os << " [";
-    showDword(os, handle);
+    showHandle(os, handle);
     os << "]";
   }
 }
@@ -365,7 +375,8 @@ void showPUlong(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal) {
 }
 
 //////////////////////////////////////////////////////////////////////////
-void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal, const std::string &maskName) {
+void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ACCESS_MASK argVal,
+                    const std::string &maskName) {
   // Deal with easy case first!
   if (argVal == 0) {
     os << "0";
@@ -374,41 +385,30 @@ void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal, con
 
   std::ostringstream mask;
 
-#define ADD_DEFN(X)                                                            \
-  if (argVal == X) {                                                           \
-    mask << "|" #X;                                                            \
-    argVal = 0;                                                                \
-  }
-
 #define ADD_MASK(X)                                                            \
   if ((argVal & X) == X) {                                                     \
     mask << "|" #X;                                                            \
     argVal &= ~X;                                                              \
   }
 
-  if (maskName == "DIRECTORY_ACCESS_MASK")
-  {
-      ADD_MASK(FILE_LIST_DIRECTORY);
-      ADD_MASK(FILE_ADD_FILE);
-      ADD_MASK(FILE_ADD_SUBDIRECTORY);
-      ADD_MASK(FILE_READ_EA);
-      ADD_MASK(FILE_WRITE_EA);
-      ADD_MASK(FILE_TRAVERSE);
-      ADD_MASK(FILE_DELETE_CHILD);
-  }
-  else if (maskName == "EVENT_ACCESS_MASK")
-  {
-	 ADD_DEFN(EVENT_ALL_ACCESS);
-	 ADD_MASK(MUTANT_QUERY_STATE);
-     ADD_MASK(EVENT_MODIFY_STATE);
-  }
-  else if (maskName == "FILE_ACCESS_MASK")
-  {
+  if (maskName == "DIRECTORY_ACCESS_MASK") {
+    ADD_MASK(FILE_LIST_DIRECTORY);
+    ADD_MASK(FILE_ADD_FILE);
+    ADD_MASK(FILE_ADD_SUBDIRECTORY);
+    ADD_MASK(FILE_READ_EA);
+    ADD_MASK(FILE_WRITE_EA);
+    ADD_MASK(FILE_TRAVERSE);
+    ADD_MASK(FILE_DELETE_CHILD);
+  } else if (maskName == "EVENT_ACCESS_MASK") {
+    ADD_MASK(EVENT_ALL_ACCESS);
+    ADD_MASK(MUTANT_QUERY_STATE);
+    ADD_MASK(EVENT_MODIFY_STATE);
+  } else if (maskName == "FILE_ACCESS_MASK") {
     // File system combined masks
-    ADD_DEFN(FILE_ALL_ACCESS);
-    ADD_DEFN(FILE_GENERIC_READ);
-    ADD_DEFN(FILE_GENERIC_WRITE);
-    ADD_DEFN(FILE_GENERIC_EXECUTE);
+    ADD_MASK(FILE_ALL_ACCESS);
+    ADD_MASK(FILE_GENERIC_READ);
+    ADD_MASK(FILE_GENERIC_WRITE);
+    ADD_MASK(FILE_GENERIC_EXECUTE);
     ADD_MASK(FILE_READ_DATA);
     ADD_MASK(FILE_WRITE_DATA);
     ADD_MASK(FILE_APPEND_DATA);
@@ -418,109 +418,91 @@ void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal, con
     ADD_MASK(FILE_DELETE_CHILD);
     ADD_MASK(FILE_READ_ATTRIBUTES);
     ADD_MASK(FILE_WRITE_ATTRIBUTES);
-  }
-  else if (maskName == "JOB_ACCESS_MASK")
-  {
-      ADD_DEFN(JOB_OBJECT_ALL_ACCESS);
-      ADD_MASK(JOB_OBJECT_ASSIGN_PROCESS);
-      ADD_MASK(JOB_OBJECT_SET_ATTRIBUTES);
-      ADD_MASK(JOB_OBJECT_QUERY);
-      ADD_MASK(JOB_OBJECT_TERMINATE);
-      ADD_MASK(JOB_OBJECT_SET_SECURITY_ATTRIBUTES);
-      ADD_MASK(JOB_OBJECT_IMPERSONATE);
-  }
-  else if (maskName == "KEY_ACCESS_MASK")
-  {
-      // Registry combined masks
-      ADD_DEFN(KEY_ALL_ACCESS);
-      ADD_DEFN(KEY_READ);
-      ADD_DEFN(KEY_WRITE);
-      ADD_DEFN(KEY_EXECUTE);
-	  ADD_MASK(KEY_QUERY_VALUE);
-	  ADD_MASK(KEY_SET_VALUE);
-	  ADD_MASK(KEY_CREATE_SUB_KEY);
-	  ADD_MASK(KEY_ENUMERATE_SUB_KEYS);
-	  ADD_MASK(KEY_CREATE_LINK);
-	  ADD_MASK(KEY_NOTIFY);
-	  ADD_MASK(KEY_WOW64_32KEY);
-      ADD_MASK(KEY_WOW64_64KEY);
-      ADD_MASK(KEY_WOW64_RES);
-  }
-  else if (maskName == "MUTANT_ACCESS_MASK")
-  {
-	  ADD_DEFN(MUTANT_ALL_ACCESS);
-	  ADD_MASK(MUTANT_QUERY_STATE);
-  }
-  else if (maskName == "PROCESS_ACCESS_MASK")
-  {
-      ADD_DEFN(PROCESS_ALL_ACCESS);
-      ADD_MASK(PROCESS_TERMINATE);
-      ADD_MASK(PROCESS_CREATE_THREAD);
-      ADD_MASK(PROCESS_SET_SESSIONID);
-      ADD_MASK(PROCESS_VM_OPERATION);
-      ADD_MASK(PROCESS_VM_READ);
-      ADD_MASK(PROCESS_VM_WRITE);
-      ADD_MASK(PROCESS_DUP_HANDLE);
-      ADD_MASK(PROCESS_CREATE_PROCESS);
-      ADD_MASK(PROCESS_SET_QUOTA);
-      ADD_MASK(PROCESS_SET_INFORMATION);
-      ADD_MASK(PROCESS_QUERY_INFORMATION);
-      ADD_MASK(PROCESS_SUSPEND_RESUME);
-      ADD_MASK(PROCESS_QUERY_LIMITED_INFORMATION);
-      ADD_MASK(PROCESS_SET_LIMITED_INFORMATION);
-  }
-  else if (maskName == "SECTION_ACCESS_MASK")
-  {
-    ADD_DEFN(SECTION_ALL_ACCESS);
+  } else if (maskName == "JOB_ACCESS_MASK") {
+    ADD_MASK(JOB_OBJECT_ALL_ACCESS);
+    ADD_MASK(JOB_OBJECT_ASSIGN_PROCESS);
+    ADD_MASK(JOB_OBJECT_SET_ATTRIBUTES);
+    ADD_MASK(JOB_OBJECT_QUERY);
+    ADD_MASK(JOB_OBJECT_TERMINATE);
+    ADD_MASK(JOB_OBJECT_SET_SECURITY_ATTRIBUTES);
+    ADD_MASK(JOB_OBJECT_IMPERSONATE);
+  } else if (maskName == "KEY_ACCESS_MASK") {
+    // Registry combined masks
+    ADD_MASK(KEY_ALL_ACCESS);
+    ADD_MASK(KEY_READ);
+    ADD_MASK(KEY_WRITE);
+    ADD_MASK(KEY_EXECUTE);
+    ADD_MASK(KEY_QUERY_VALUE);
+    ADD_MASK(KEY_SET_VALUE);
+    ADD_MASK(KEY_CREATE_SUB_KEY);
+    ADD_MASK(KEY_ENUMERATE_SUB_KEYS);
+    ADD_MASK(KEY_CREATE_LINK);
+    ADD_MASK(KEY_NOTIFY);
+    ADD_MASK(KEY_WOW64_32KEY);
+    ADD_MASK(KEY_WOW64_64KEY);
+    ADD_MASK(KEY_WOW64_RES);
+  } else if (maskName == "MUTANT_ACCESS_MASK") {
+    ADD_MASK(MUTANT_ALL_ACCESS);
+    ADD_MASK(MUTANT_QUERY_STATE);
+  } else if (maskName == "PROCESS_ACCESS_MASK") {
+    ADD_MASK(PROCESS_ALL_ACCESS);
+    ADD_MASK(PROCESS_TERMINATE);
+    ADD_MASK(PROCESS_CREATE_THREAD);
+    ADD_MASK(PROCESS_SET_SESSIONID);
+    ADD_MASK(PROCESS_VM_OPERATION);
+    ADD_MASK(PROCESS_VM_READ);
+    ADD_MASK(PROCESS_VM_WRITE);
+    ADD_MASK(PROCESS_DUP_HANDLE);
+    ADD_MASK(PROCESS_CREATE_PROCESS);
+    ADD_MASK(PROCESS_SET_QUOTA);
+    ADD_MASK(PROCESS_SET_INFORMATION);
+    ADD_MASK(PROCESS_QUERY_INFORMATION);
+    ADD_MASK(PROCESS_SUSPEND_RESUME);
+    ADD_MASK(PROCESS_QUERY_LIMITED_INFORMATION);
+    ADD_MASK(PROCESS_SET_LIMITED_INFORMATION);
+  } else if (maskName == "SECTION_ACCESS_MASK") {
+    ADD_MASK(SECTION_ALL_ACCESS);
     ADD_MASK(SECTION_EXTEND_SIZE);
     ADD_MASK(SECTION_MAP_EXECUTE);
     ADD_MASK(SECTION_MAP_READ);
     ADD_MASK(SECTION_MAP_WRITE);
     ADD_MASK(SECTION_QUERY);
-  }
-  else if (maskName == "SEMAPHORE_ACCESS_MASK")
-  {
-	  ADD_DEFN(SEMAPHORE_ALL_ACCESS);
-	  ADD_MASK(SEMAPHORE_MODIFY_STATE);
-	  ADD_MASK(MUTANT_QUERY_STATE);
-  }
-  else if (maskName == "THREAD_ACCESS_MASK")
-  {
-      ADD_DEFN(THREAD_ALL_ACCESS);
-      ADD_MASK(THREAD_TERMINATE);
-      ADD_MASK(THREAD_SUSPEND_RESUME);
-      ADD_MASK(THREAD_GET_CONTEXT);
-      ADD_MASK(THREAD_SET_CONTEXT);
-      ADD_MASK(THREAD_QUERY_INFORMATION);
-      ADD_MASK(THREAD_SET_INFORMATION);
-      ADD_MASK(THREAD_SET_THREAD_TOKEN);
-      ADD_MASK(THREAD_IMPERSONATE);
-      ADD_MASK(THREAD_DIRECT_IMPERSONATION);
-      ADD_MASK(THREAD_SET_LIMITED_INFORMATION);
-      ADD_MASK(THREAD_QUERY_LIMITED_INFORMATION);
-      ADD_MASK(THREAD_RESUME);
-  }
-  else if (maskName == "TIMER_ACCESS_MASK")
-  {
-      ADD_DEFN(TIMER_ALL_ACCESS);
-      ADD_MASK(TIMER_QUERY_STATE);
-      ADD_MASK(TIMER_MODIFY_STATE);
-  }
-  else if (maskName == "TOKEN_ACCESS_MASK")
-  {
-	  ADD_DEFN(TOKEN_ALL_ACCESS);
-	  ADD_DEFN(TOKEN_READ);
-	  ADD_DEFN(TOKEN_WRITE);
-	  ADD_DEFN(TOKEN_EXECUTE);
-	  ADD_MASK(TOKEN_ASSIGN_PRIMARY);
-	  ADD_MASK(TOKEN_DUPLICATE);
-	  ADD_MASK(TOKEN_IMPERSONATE);
-	  ADD_MASK(TOKEN_QUERY);
-	  ADD_MASK(TOKEN_QUERY_SOURCE);
-	  ADD_MASK(TOKEN_ADJUST_PRIVILEGES);
-	  ADD_MASK(TOKEN_ADJUST_GROUPS);
-	  ADD_MASK(TOKEN_ADJUST_DEFAULT);
-	  ADD_MASK(TOKEN_ADJUST_SESSIONID);
+  } else if (maskName == "SEMAPHORE_ACCESS_MASK") {
+    ADD_MASK(SEMAPHORE_ALL_ACCESS);
+    ADD_MASK(SEMAPHORE_MODIFY_STATE);
+    ADD_MASK(MUTANT_QUERY_STATE);
+  } else if (maskName == "THREAD_ACCESS_MASK") {
+    ADD_MASK(THREAD_ALL_ACCESS);
+    ADD_MASK(THREAD_TERMINATE);
+    ADD_MASK(THREAD_SUSPEND_RESUME);
+    ADD_MASK(THREAD_GET_CONTEXT);
+    ADD_MASK(THREAD_SET_CONTEXT);
+    ADD_MASK(THREAD_QUERY_INFORMATION);
+    ADD_MASK(THREAD_SET_INFORMATION);
+    ADD_MASK(THREAD_SET_THREAD_TOKEN);
+    ADD_MASK(THREAD_IMPERSONATE);
+    ADD_MASK(THREAD_DIRECT_IMPERSONATION);
+    ADD_MASK(THREAD_SET_LIMITED_INFORMATION);
+    ADD_MASK(THREAD_QUERY_LIMITED_INFORMATION);
+    ADD_MASK(THREAD_RESUME);
+  } else if (maskName == "TIMER_ACCESS_MASK") {
+    ADD_MASK(TIMER_ALL_ACCESS);
+    ADD_MASK(TIMER_QUERY_STATE);
+    ADD_MASK(TIMER_MODIFY_STATE);
+  } else if (maskName == "TOKEN_ACCESS_MASK") {
+    ADD_MASK(TOKEN_ALL_ACCESS);
+    ADD_MASK(TOKEN_READ);
+    ADD_MASK(TOKEN_WRITE);
+    ADD_MASK(TOKEN_EXECUTE);
+    ADD_MASK(TOKEN_ASSIGN_PRIMARY);
+    ADD_MASK(TOKEN_DUPLICATE);
+    ADD_MASK(TOKEN_IMPERSONATE);
+    ADD_MASK(TOKEN_QUERY);
+    ADD_MASK(TOKEN_QUERY_SOURCE);
+    ADD_MASK(TOKEN_ADJUST_PRIVILEGES);
+    ADD_MASK(TOKEN_ADJUST_GROUPS);
+    ADD_MASK(TOKEN_ADJUST_DEFAULT);
+    ADD_MASK(TOKEN_ADJUST_SESSIONID);
   }
 
   //  The following are masks for the predefined standard access types
@@ -545,7 +527,6 @@ void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal, con
   ADD_MASK(GENERIC_EXECUTE);
   ADD_MASK(GENERIC_ALL);
 
-#undef ADD_DEFN
 #undef ADD_MASK
 
   // Specific rights
@@ -558,15 +539,15 @@ void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ULONG_PTR argVal, con
 
 //////////////////////////////////////////////////////////////////////////
 void showPClientId(std::ostream &os, HANDLE hProcess, PCLIENT_ID pClientId) {
-  showPointer(os, hProcess, (ULONG_PTR)pClientId);
+  showPointer(os, hProcess, pClientId);
   if (pClientId) {
     CLIENT_ID clientId = {nullptr};
     (void)readHelper(hProcess, pClientId, clientId);
 
     os << " [";
-    showDword(os, reinterpret_cast<ULONG_PTR>(clientId.UniqueProcess));
+    showHandle(os, clientId.UniqueProcess);
     os << "/";
-    showDword(os, reinterpret_cast<ULONG_PTR>(clientId.UniqueThread));
+    showHandle(os, clientId.UniqueThread);
     os << "]";
   }
 }
@@ -574,7 +555,7 @@ void showPClientId(std::ostream &os, HANDLE hProcess, PCLIENT_ID pClientId) {
 //////////////////////////////////////////////////////////////////////////
 void showPIoStatus(std::ostream &os, HANDLE hProcess,
                    PIO_STATUS_BLOCK pIoStatusBlock) {
-  showPointer(os, hProcess, (ULONG_PTR)pIoStatusBlock);
+  showPointer(os, hProcess, pIoStatusBlock);
   if (pIoStatusBlock) {
     IO_STATUS_BLOCK IoStatusBlock = {0};
     readHelper(hProcess, pIoStatusBlock, IoStatusBlock);
@@ -590,7 +571,7 @@ void showPIoStatus(std::ostream &os, HANDLE hProcess,
 //////////////////////////////////////////////////////////////////////////
 void showPLargeInteger(std::ostream &os, HANDLE hProcess,
                        PLARGE_INTEGER pLargeInteger) {
-  showPointer(os, hProcess, (ULONG_PTR)pLargeInteger);
+  showPointer(os, hProcess, pLargeInteger);
   if (pLargeInteger) {
     LARGE_INTEGER largeInteger = {0};
     readHelper(hProcess, pLargeInteger, largeInteger);
@@ -605,7 +586,7 @@ void showPLargeInteger(std::ostream &os, HANDLE hProcess,
 // Display an LPC message
 void showPLpcMessage(std::ostream &os, HANDLE hProcess,
                      PLPC_MESSAGE pLpcMessage) {
-  showPointer(os, hProcess, (ULONG_PTR)pLpcMessage);
+  showPointer(os, hProcess, pLpcMessage);
   if (pLpcMessage) {
     LPC_MESSAGE message;
     readHelper(hProcess, pLpcMessage, message);
@@ -663,7 +644,7 @@ void showFileAttributes(std::ostream &os, ULONG argVal) {
 // NtQueryInformationFile ...
 void showPFileBasicInfo(std::ostream &os, HANDLE hProcess,
                         PFILE_BASIC_INFORMATION pFileBasicInfo) {
-  showPointer(os, hProcess, (ULONG_PTR)pFileBasicInfo);
+  showPointer(os, hProcess, pFileBasicInfo);
   if (pFileBasicInfo) {
     FILE_BASIC_INFORMATION fileBasicInfo = {0};
     readHelper(hProcess, pFileBasicInfo, fileBasicInfo);
@@ -677,7 +658,7 @@ void showPFileBasicInfo(std::ostream &os, HANDLE hProcess,
 //////////////////////////////////////////////////////////////////////////
 void showPFileNetworkInfo(std::ostream &os, HANDLE hProcess,
                           PFILE_NETWORK_OPEN_INFORMATION pFileNetworkInfo) {
-  showPointer(os, hProcess, (ULONG_PTR)pFileNetworkInfo);
+  showPointer(os, hProcess, pFileNetworkInfo);
   if (pFileNetworkInfo) {
     FILE_NETWORK_OPEN_INFORMATION fileNetworkInfo = {0};
     readHelper(hProcess, pFileNetworkInfo, fileNetworkInfo);
@@ -698,7 +679,7 @@ void showPFileNetworkInfo(std::ostream &os, HANDLE hProcess,
 //////////////////////////////////////////////////////////////////////////
 void showUserProcessParams(std::ostream &os, HANDLE hProcess,
                            PRTL_USER_PROCESS_PARAMETERS pUserProcessParams) {
-  showPointer(os, hProcess, (ULONG_PTR)pUserProcessParams);
+  showPointer(os, hProcess, pUserProcessParams);
   if (pUserProcessParams) {
     os << " [";
     showUnicodeString(os, hProcess, &pUserProcessParams->ImagePathName);

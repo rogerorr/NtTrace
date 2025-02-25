@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2569 2025-02-23 23:54:18Z roger $";
+    "$Id: EntryPoint.cpp 2573 2025-02-25 20:43:38Z roger $";
 
 #include "EntryPoint.h"
 
@@ -51,7 +51,7 @@ void printStackTrace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
 std::string buffToHex(unsigned char *buffer, size_t length);
 
 #pragma warning(push)
-#pragma warning(disable: 4592) // symbol will be dynamically initialized
+#pragma warning(disable : 4592) // symbol will be dynamically initialized
 const std::map<std::string, ArgAttributes> sal_attributes = {
     {"_In_", argIN},
     {"__in", argIN},
@@ -231,6 +231,7 @@ void Argument::showArgument(std::ostream &os, HANDLE hProcess, ARG argVal,
     case argMASK:
     case argBOOLEAN:
     case argACCESS_MASK:
+    case argHANDLE:
       break;
     default:
       showPointer(os, hProcess, argVal);
@@ -245,23 +246,27 @@ void Argument::showArgument(std::ostream &os, HANDLE hProcess, ARG argVal,
     break;
 
   case argULONG:
-    showDword(os, (ULONG)argVal);
+    showDword(os, static_cast<ULONG>(argVal));
     break;
 
   case argENUM:
-    showEnum(os, (ULONG)argVal, argTypeName);
+    showEnum(os, static_cast<ULONG>(argVal), argTypeName);
     break;
 
   case argMASK:
-    showMask(os, (ULONG)argVal, argTypeName);
+    showMask(os, static_cast<ULONG>(argVal), argTypeName);
     break;
 
   case argBOOLEAN:
-    showBoolean(os, (BOOLEAN)argVal);
+    showBoolean(os, static_cast<BOOLEAN>(argVal));
     break;
 
   case argBYTE:
-    showDword(os, (BYTE)argVal);
+    showDword(os, static_cast<BYTE>(argVal));
+    break;
+
+  case argHANDLE:
+    showHandle(os, reinterpret_cast<HANDLE>(argVal));
     break;
 
   case argPOINTER:
@@ -269,11 +274,12 @@ void Argument::showArgument(std::ostream &os, HANDLE hProcess, ARG argVal,
     break;
 
   case argPOBJECT_ATTRIBUTES:
-    showObjectAttributes(os, hProcess, (LPVOID)argVal);
+    showObjectAttributes(os, hProcess,
+                         reinterpret_cast<POBJECT_ATTRIBUTES>(argVal));
     break;
 
   case argPUNICODE_STRING:
-    showUnicodeString(os, hProcess, (PUNICODE_STRING)argVal);
+    showUnicodeString(os, hProcess, reinterpret_cast<PUNICODE_STRING>(argVal));
     break;
 
   case argPHANDLE:
@@ -293,35 +299,38 @@ void Argument::showArgument(std::ostream &os, HANDLE hProcess, ARG argVal,
     break;
 
   case argACCESS_MASK:
-    showAccessMask(os, hProcess, (ULONG)argVal, argTypeName);
+    showAccessMask(os, hProcess, static_cast<ACCESS_MASK>(argVal), argTypeName);
     break;
 
   case argPCLIENT_ID:
-    showPClientId(os, hProcess, (PCLIENT_ID)argVal);
+    showPClientId(os, hProcess, reinterpret_cast<PCLIENT_ID>(argVal));
     break;
 
   case argPIO_STATUS_BLOCK:
-    showPIoStatus(os, hProcess, (PIO_STATUS_BLOCK)argVal);
+    showPIoStatus(os, hProcess, reinterpret_cast<PIO_STATUS_BLOCK>(argVal));
     break;
 
   case argPLARGE_INTEGER:
-    showPLargeInteger(os, hProcess, (PLARGE_INTEGER)argVal);
+    showPLargeInteger(os, hProcess, reinterpret_cast<PLARGE_INTEGER>(argVal));
     break;
 
   case argPLPC_MESSAGE:
-    showPLpcMessage(os, hProcess, (PLPC_MESSAGE)argVal);
+    showPLpcMessage(os, hProcess, reinterpret_cast<PLPC_MESSAGE>(argVal));
     break;
 
   case argPFILE_BASIC_INFORMATION:
-    showPFileBasicInfo(os, hProcess, (PFILE_BASIC_INFORMATION)argVal);
+    showPFileBasicInfo(os, hProcess,
+                       reinterpret_cast<PFILE_BASIC_INFORMATION>(argVal));
     break;
 
   case argPFILE_NETWORK_OPEN_INFORMATION:
-    showPFileNetworkInfo(os, hProcess, (PFILE_NETWORK_OPEN_INFORMATION)argVal);
+    showPFileNetworkInfo(
+        os, hProcess, reinterpret_cast<PFILE_NETWORK_OPEN_INFORMATION>(argVal));
     break;
 
   case argPRTL_USER_PROCESS_PARAMETERS:
-    showUserProcessParams(os, hProcess, (PRTL_USER_PROCESS_PARAMETERS)argVal);
+    showUserProcessParams(
+        os, hProcess, reinterpret_cast<PRTL_USER_PROCESS_PARAMETERS>(argVal));
     break;
   }
 }
@@ -744,6 +753,8 @@ void EntryPoint::setArgument(int argNum, std::string const &argType,
       {argACCESS_MASK, "TIMER_ACCESS_MASK"},
       {argACCESS_MASK, "THREAD_ACCESS_MASK"},
       {argACCESS_MASK, "TOKEN_ACCESS_MASK"},
+
+      {argHANDLE, "HANDLE"},
 
       {argPOINTER, "PVOID"},
       {argPOINTER, "PSTR"},

@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2568 $
+    $Revision: 2573 $
 */
 
-// $Id: ShowData.h 2568 2025-02-23 22:40:22Z roger $
+// $Id: ShowData.h 2573 2025-02-25 20:43:38Z roger $
 
 #include <ostream>
 #include <windows.h>
@@ -44,6 +44,9 @@ void showBoolean(std::ostream &os, BOOLEAN value);
 /** Show an enumeration name, if available */
 void showEnum(std::ostream &os, ULONG_PTR value, std::string const &enumName);
 
+/** show a handle from the debuggee */
+void showHandle(std::ostream &os, HANDLE handle);
+
 /** Show an mask enumeration name, if available */
 void showMask(std::ostream &os, ULONG_PTR value, std::string const &enumName);
 
@@ -61,11 +64,12 @@ bool showName(std::ostream &os, HANDLE hProcess, LPVOID lpImageName,
 bool showString(std::ostream &os, HANDLE hProcess, LPVOID lpString,
                 bool bUnicode, WORD nStringLength);
 
-/** Show the commnand line from the target process */
+/** Show the command line from the target process */
 void showCommandLine(std::ostream &os, HANDLE hProcess);
 
 /** show Object Attrributes from the debuggee */
-void showObjectAttributes(std::ostream &os, HANDLE hProcess, LPVOID pvoid);
+void showObjectAttributes(std::ostream &os, HANDLE hProcess,
+                          POBJECT_ATTRIBUTES pObjectAttributes);
 
 /** show an Unicode string from the debuggee */
 void showUnicodeString(std::ostream &os, HANDLE hProcess,
@@ -87,7 +91,8 @@ void showPUshort(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal);
 void showPUlong(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal);
 
 /** show an access mask from the debuggee */
-void showAccessMask(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal, const std::string &maskName);
+void showAccessMask(std::ostream &os, HANDLE hProcess, ACCESS_MASK argVal,
+                    const std::string &maskName);
 
 /** show a client ID from the debuggee */
 void showPClientId(std::ostream &os, HANDLE hProcess, PCLIENT_ID pClientId);
