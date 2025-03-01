@@ -28,7 +28,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2543 2025-01-21 23:38:03Z roger $";
+    "$Id: NtTrace.cpp 2595 2025-03-01 20:25:48Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -197,7 +197,7 @@ private:
 
   std::set<DWORD> initialised_processes;
 
-  void OnBreakpoint(DWORD processId, DWORD threadId, HANDLE hProcess,
+  bool OnBreakpoint(DWORD processId, DWORD threadId, HANDLE hProcess,
                     HANDLE hThread, LPVOID exceptionAddress);
 
   void SetDllBreakpoints(HANDLE hProcess);
@@ -423,80 +423,75 @@ void TrapNtDebugger::header(DWORD processId, DWORD threadId) {
 //////////////////////////////////////////////////////////////////////////
 // The heart of NtTrace: if this is one of our added breakpoint exceptions
 // then trace the arguments and return code for the entry point.
-void TrapNtDebugger::OnBreakpoint(DWORD processId, DWORD threadId,
+bool TrapNtDebugger::OnBreakpoint(DWORD processId, DWORD threadId,
                                   HANDLE hProcess, HANDLE hThread,
                                   PVOID exceptionAddress) {
   CONTEXT Context;
   Context.ContextFlags = CONTEXT_FULL;
   if (!GetThreadContext(hThread, &Context)) {
     std::cerr << "Can't get thread context: " << displayError() << std::endl;
-  } else {
-    NTCALLS::const_iterator it = NtPreSave.find(exceptionAddress);
-    if (it != NtPreSave.end()) {
-      it->second.entryPoint->doPreSave(hProcess, hThread, Context);
-      if (bPreTrace) {
-        header(processId, threadId);
-
-        it->second.entryPoint->trace(os, hProcess, hThread, Context, bNames,
-                                     bStackTrace, true);
-      }
-      return;
-    }
-    it = NtCalls.find(exceptionAddress);
-    if (it == NtCalls.end()) {
-      header(processId, threadId);
-      if (initialised_processes.insert(processId).second) {
-        os << "Initial breakpoint" << std::endl;
-      } else {
-        os << "Breakpoint at " << exceptionAddress << std::endl;
-      }
-    } else {
-#ifdef _M_IX86
-      NTSTATUS rc = Context.Eax;
-#elif _M_X64
-      NTSTATUS rc = NTSTATUS(Context.Rax);
-#endif
-      if (bErrorsOnly && NT_SUCCESS(rc)) {
-        // don't trace
-      } else if (errorCodes.empty() || (errorCodes.count(rc) > 0)) {
-        header(processId, threadId);
-
-        it->second.entryPoint->trace(os, hProcess, hThread, Context, bNames,
-                                     bStackTrace, false);
-      }
-
-      if (it->second.trapType == NtCall::trapReturn ||
-          it->second.trapType == NtCall::trapReturn0) {
-        // Fake a return 'n'
-#ifdef _M_IX86
-        DWORD eip = 0;
-        ReadProcessMemory(hProcess, (LPVOID)(Context.Esp), &eip, sizeof(eip),
-                          0);
-
-        Context.Eip = eip;
-        Context.Esp += sizeof(eip) + it->second.nArgs * sizeof(DWORD);
-#elif _M_X64
-        DWORD64 rip = 0;
-        ReadProcessMemory(hProcess, (LPVOID)(Context.Rsp), &rip, sizeof(rip),
-                          nullptr);
-
-        Context.Rip = rip;
-        Context.Rsp += sizeof(rip) + it->second.nArgs * sizeof(DWORD);
-#endif // _M_IX86
-      } else if (it->second.trapType == NtCall::trapJump) {
-        // Fake a jump
-#ifdef _M_IX86
-        Context.Eip = it->second.jumpTarget;
-#elif _M_X64
-        Context.Rip = it->second.jumpTarget;
-#endif // _M_IX86
-      }
-      Context.ContextFlags = CONTEXT_CONTROL;
-      if (!SetThreadContext(hThread, &Context)) {
-        os << "Can't set thread context: " << displayError() << std::endl;
-      }
-    }
+    return false; // We couldn't handle this breakpoint
   }
+
+  NTCALLS::const_iterator it = NtPreSave.find(exceptionAddress);
+  if (it != NtPreSave.end()) {
+    it->second.entryPoint->doPreSave(hProcess, hThread, Context);
+    if (bPreTrace) {
+      header(processId, threadId);
+
+      it->second.entryPoint->trace(os, hProcess, hThread, Context, bNames,
+                                   bStackTrace, true);
+    }
+    return true; // Breakpoint handled
+  }
+  it = NtCalls.find(exceptionAddress);
+  if (it != NtCalls.end()) {
+#ifdef _M_IX86
+    NTSTATUS rc = Context.Eax;
+#elif _M_X64
+    NTSTATUS rc = NTSTATUS(Context.Rax);
+#endif
+    if (bErrorsOnly && NT_SUCCESS(rc)) {
+      // don't trace
+    } else if (errorCodes.empty() || (errorCodes.count(rc) > 0)) {
+      header(processId, threadId);
+
+      it->second.entryPoint->trace(os, hProcess, hThread, Context, bNames,
+                                   bStackTrace, false);
+    }
+
+    if (it->second.trapType == NtCall::trapReturn ||
+        it->second.trapType == NtCall::trapReturn0) {
+      // Fake a return 'n'
+#ifdef _M_IX86
+      DWORD eip = 0;
+      ReadProcessMemory(hProcess, (LPVOID)(Context.Esp), &eip, sizeof(eip), 0);
+
+      Context.Eip = eip;
+      Context.Esp += sizeof(eip) + it->second.nArgs * sizeof(DWORD);
+#elif _M_X64
+      DWORD64 rip = 0;
+      ReadProcessMemory(hProcess, (LPVOID)(Context.Rsp), &rip, sizeof(rip),
+                        nullptr);
+
+      Context.Rip = rip;
+      Context.Rsp += sizeof(rip) + it->second.nArgs * sizeof(DWORD);
+#endif // _M_IX86
+    } else if (it->second.trapType == NtCall::trapJump) {
+      // Fake a jump
+#ifdef _M_IX86
+      Context.Eip = it->second.jumpTarget;
+#elif _M_X64
+      Context.Rip = it->second.jumpTarget;
+#endif // _M_IX86
+    }
+    Context.ContextFlags = CONTEXT_CONTROL;
+    if (!SetThreadContext(hThread, &Context)) {
+      os << "Can't set thread context: " << displayError() << std::endl;
+    }
+    return true; // Breakpoint handled
+  }
+  return false; // Not an NtTrace breakpoint
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -505,9 +500,20 @@ void TrapNtDebugger::OnException(DWORD processId, DWORD threadId,
                                  EXCEPTION_DEBUG_INFO const &Exception,
                                  DWORD *pContinueFlag) {
   if (Exception.ExceptionRecord.ExceptionCode == STATUS_BREAKPOINT) {
-    *pContinueFlag = DBG_CONTINUE;
-    OnBreakpoint(processId, threadId, hProcess, hThread,
-                 Exception.ExceptionRecord.ExceptionAddress);
+    if (OnBreakpoint(processId, threadId, hProcess, hThread,
+                     Exception.ExceptionRecord.ExceptionAddress)) {
+      *pContinueFlag = DBG_CONTINUE;
+    } else {
+      // Not an NtTrace breakpoint
+      header(processId, threadId);
+      if (initialised_processes.insert(processId).second) {
+        os << "Initial breakpoint" << std::endl;
+      } else {
+        os << "Breakpoint at " << Exception.ExceptionRecord.ExceptionAddress
+           << " (" << (Exception.dwFirstChance ? "first" : "last") << " chance)"
+           << std::endl;
+      }
+    }
   } else if (bNoExcept) {
     // ignore...
   }

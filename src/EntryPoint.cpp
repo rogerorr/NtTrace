@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2583 2025-03-01 13:05:35Z roger $";
+    "$Id: EntryPoint.cpp 2587 2025-03-01 17:20:32Z roger $";
 
 #include "EntryPoint.h"
 
@@ -953,10 +953,10 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
       if (i)
         os << ", ";
       if ((argument.attributes & argRESERVED) && (argVal == 0)) {
-          // An empty reserved argument
-          os << '0';
-          continue;
-        }
+        // An empty reserved argument
+        os << '0';
+        continue;
+      }
       if (bNames && !argument.name.empty())
         os << argument.name << "=";
       bool const dup = !args.insert(argVal).second;
