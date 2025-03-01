@@ -27,7 +27,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: Enumerations.cpp 2557 2025-02-22 17:36:41Z roger $";
+    "$Id: Enumerations.cpp 2576 2025-02-28 11:03:32Z roger $";
 
 #include "Enumerations.h"
 
@@ -98,6 +98,22 @@ enum AUDIT_EVENT_TYPE {
 EnumMap AUDIT_EVENT_TYPE_MAP[] = {DEF(AuditEventObjectAccess),
                                   DEF(AuditEventDirectoryServiceAccess),
                                   {0, nullptr}};
+
+enum CPU_PARTITION_QUERY_INFORMATION_CLASS {
+  CpuPartitionQueryCpus = 0,
+  CpuPartitionQueryMax = 1,
+};
+
+EnumMap CPU_PARTITION_QUERY_INFORMATION_CLASS_MAP[] = {
+    DEF(CpuPartitionQueryCpus), DEF(CpuPartitionQueryMax), {0, nullptr}};
+
+enum CPU_PARTITION_SET_INFORMATION_CLASS {
+  CpuPartitionSetMoveCpus = 0,
+  CpuPartitionSetMax = 1,
+};
+
+EnumMap CPU_PARTITION_SET_INFORMATION_CLASS_MAP[] = {
+    DEF(CpuPartitionSetMoveCpus), DEF(CpuPartitionSetMax), {0, nullptr}};
 
 enum DEBUGOBJECTINFOCLASS { // (not found in pdb files)
   DebugObjectKillOnExit = 1,
@@ -2316,6 +2332,8 @@ struct AllEnum allEnums[] = {DEF(ALPC_MESSAGE_INFORMATION_CLASS),
                              DEF(ALPC_PORT_INFORMATION_CLASS),
                              DEF(ATOM_INFORMATION_CLASS),
                              DEF(AUDIT_EVENT_TYPE),
+                             DEF(CPU_PARTITION_QUERY_INFORMATION_CLASS),
+                             DEF(CPU_PARTITION_SET_INFORMATION_CLASS),
                              DEF(DEBUGOBJECTINFOCLASS),
                              DEF(DEVICE_POWER_STATE),
                              DEF(DIRECTORY_NOTIFY_INFORMATION_CLASS),

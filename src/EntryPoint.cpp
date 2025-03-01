@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2573 2025-02-25 20:43:38Z roger $";
+    "$Id: EntryPoint.cpp 2583 2025-03-01 13:05:35Z roger $";
 
 #include "EntryPoint.h"
 
@@ -689,6 +689,8 @@ void EntryPoint::setArgument(int argNum, std::string const &argType,
       {argENUM, "ALPC_PORT_INFORMATION_CLASS"},
       {argENUM, "ATOM_INFORMATION_CLASS"},
       {argENUM, "AUDIT_EVENT_TYPE"},
+      {argENUM, "CPU_PARTITION_QUERY_INFORMATION_CLASS"},
+      {argENUM, "CPU_PARTITION_SET_INFORMATION_CLASS"},
       {argENUM, "DEBUGOBJECTINFOCLASS"},
       {argENUM, "DEVICE_POWER_STATE"},
       {argENUM, "DIRECTORY_NOTIFY_INFORMATION_CLASS"},
@@ -950,6 +952,11 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
       Argument const &argument = getArgument(i);
       if (i)
         os << ", ";
+      if ((argument.attributes & argRESERVED) && (argVal == 0)) {
+          // An empty reserved argument
+          os << '0';
+          continue;
+        }
       if (bNames && !argument.name.empty())
         os << argument.name << "=";
       bool const dup = !args.insert(argVal).second;
