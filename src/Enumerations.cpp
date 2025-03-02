@@ -7,7 +7,7 @@ DESCRIPTION
 
 NOTES
     Many of the values are obtainable from ole32.dll, for example using:
-    sed -n "s/.*enum /udt /p" Enumerations.cpp | symexplorer ole32.dll
+    sed -n "s/^enum /udt /p" Enumerations.cpp | symexplorer ole32.dll
 
 COPYRIGHT
     Copyright (C) 2011, 2019 by Roger Orr <rogero@howzatt.co.uk>
@@ -27,7 +27,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: Enumerations.cpp 2576 2025-02-28 11:03:32Z roger $";
+    "$Id: Enumerations.cpp 2603 2025-03-02 16:27:41Z roger $";
 
 #include "Enumerations.h"
 
@@ -141,11 +141,15 @@ EnumMap DEVICE_POWER_STATE_MAP[] = {DEF(PowerDeviceUnspecified),
 enum DIRECTORY_NOTIFY_INFORMATION_CLASS {
   DirectoryNotifyInformation = 1,
   DirectoryNotifyExtendedInformation = 2,
+  DirectoryNotifyFullInformation = 3,
+  DirectoryNotifyMaximumInformation = 4,
 };
 
 EnumMap DIRECTORY_NOTIFY_INFORMATION_CLASS_MAP[] = {
     DEF(DirectoryNotifyInformation),
     DEF(DirectoryNotifyExtendedInformation),
+    DEF(DirectoryNotifyFullInformation),
+    DEF(DirectoryNotifyMaximumInformation),
     {0, nullptr}};
 
 enum ENLISTMENT_INFORMATION_CLASS {
@@ -257,6 +261,9 @@ enum FILE_INFORMATION_CLASS {
   FileId64ExtdBothDirectoryInformation = 79,
   FileIdAllExtdDirectoryInformation = 80,
   FileIdAllExtdBothDirectoryInformation = 81,
+  FileStreamReservationInformation = 82,
+  FileMupProviderInfo = 83,
+  FileMaximumInformation = 84,
 };
 
 EnumMap FILE_INFORMATION_CLASS_MAP[] = {
@@ -341,6 +348,8 @@ EnumMap FILE_INFORMATION_CLASS_MAP[] = {
     DEF(FileId64ExtdBothDirectoryInformation),
     DEF(FileIdAllExtdDirectoryInformation),
     DEF(FileIdAllExtdBothDirectoryInformation),
+    DEF(FileStreamReservationInformation),
+    DEF(FileMupProviderInfo),
     {0, nullptr}};
 
 enum FSINFOCLASS {
@@ -503,6 +512,9 @@ enum JOBOBJECTINFOCLASS {
   JobObjectThreadImpersonationInformation = 47,
   JobObjectIoPriorityLimit = 48,
   JobObjectPagePriorityLimit = 49,
+  JobObjectServerSiloDiagnosticInformation = 50,
+  JobObjectNetworkAccountingInformation = 51,
+  MaxJobObjectInfoClass = 52,
 };
 
 EnumMap JOB_INFORMATION_CLASS_MAP[] = {
@@ -555,6 +567,8 @@ EnumMap JOB_INFORMATION_CLASS_MAP[] = {
     DEF(JobObjectThreadImpersonationInformation),
     DEF(JobObjectIoPriorityLimit),
     DEF(JobObjectPagePriorityLimit),
+    DEF(JobObjectServerSiloDiagnosticInformation),
+    DEF(JobObjectNetworkAccountingInformation),
     {0, nullptr}};
 
 enum KEY_INFORMATION_CLASS {
@@ -777,6 +791,8 @@ enum PARTITION_INFORMATION_CLASS {
   SystemMemoryPartitionMemoryChargeAttributes = 11,
   SystemMemoryPartitionClearAttributes = 12,
   SystemMemoryPartitionSetMemoryThresholds = 13,
+  SystemMemoryPartitionMemoryListCommand = 14,
+  SystemMemoryPartitionMax = 15,
 };
 
 EnumMap MEMORY_PARTITION_INFORMATION_CLASS_MAP[] = {
@@ -794,6 +810,7 @@ EnumMap MEMORY_PARTITION_INFORMATION_CLASS_MAP[] = {
     DEF(SystemMemoryPartitionMemoryChargeAttributes),
     DEF(SystemMemoryPartitionClearAttributes),
     DEF(SystemMemoryPartitionSetMemoryThresholds),
+    DEF(SystemMemoryPartitionMemoryListCommand),
     {0, nullptr}};
 
 enum MUTANT_INFORMATION_CLASS {
@@ -988,7 +1005,9 @@ enum POWER_INFORMATION_LEVEL {
   EnergyTrackerQuery = 93,
   UpdateBlackBoxRecorder = 94,
   SessionAllowExternalDmaDevices = 95,
-  PowerInformationLevelMaximum = 96,
+  SendSuspendResumeNotification = 96,
+  BlackBoxRecorderDirectAccessBuffer = 97,
+  PowerInformationLevelMaximum = 98,
 };
 
 EnumMap POWER_INFORMATION_LEVEL_MAP[] = {
@@ -1088,6 +1107,8 @@ EnumMap POWER_INFORMATION_LEVEL_MAP[] = {
     DEF(EnergyTrackerQuery),
     DEF(UpdateBlackBoxRecorder),
     DEF(SessionAllowExternalDmaDevices),
+    DEF(SendSuspendResumeNotification),
+    DEF(BlackBoxRecorderDirectAccessBuffer),
     {0, nullptr}};
 
 enum PROCESSINFOCLASS {
@@ -1205,6 +1226,11 @@ enum PROCESSINFOCLASS {
   ProcessMembershipInformation = 109,
   ProcessEffectiveIoPriority = 110,
   ProcessEffectivePagePriority = 111,
+  ProcessSchedulerSharedData = 112,
+  ProcessSlistRollbackInformation = 113,
+  ProcessNetworkIoCounters = 114,
+  ProcessFindFirstThreadByTebValue = 115,
+  MaxProcessInfoClass = 116,
 };
 
 EnumMap PROCESSINFOCLASS_MAP[] = {
@@ -1322,16 +1348,22 @@ EnumMap PROCESSINFOCLASS_MAP[] = {
     DEF(ProcessMembershipInformation),
     DEF(ProcessEffectiveIoPriority),
     DEF(ProcessEffectivePagePriority),
+    DEF(ProcessSchedulerSharedData),
+    DEF(ProcessSlistRollbackInformation),
+    DEF(ProcessNetworkIoCounters),
+    DEF(ProcessFindFirstThreadByTebValue),
     {0, nullptr}};
 
 enum QUEUE_USER_APC_FLAGS {
   QUEUE_USER_APC_FLAGS_NONE = 0,
   QUEUE_USER_APC_FLAGS_SPECIAL_USER_APC = 1,
+  QUEUE_USER_APC_CALLBACK_DATA_CONTEXT = 65536,
 };
 
 EnumMap QUEUE_USER_APC_FLAGS_MAP[] = {
     DEF(QUEUE_USER_APC_FLAGS_NONE),
     DEF(QUEUE_USER_APC_FLAGS_SPECIAL_USER_APC),
+    DEF(QUEUE_USER_APC_CALLBACK_DATA_CONTEXT),
     {0, nullptr}};
 
 enum RESOURCEMANAGER_INFORMATION_CLASS {
@@ -1718,6 +1750,7 @@ enum SYSTEM_INFORMATION_CLASS {
   SystemCodeIntegrityUnlockModeInformation = 205,
   SystemLeapSecondInformation = 206,
   SystemFlags2Information = 207,
+  SystemSecurityModelInformation = 208,
   SystemCodeIntegritySyntheticCacheInformation = 209,
   SystemFeatureConfigurationInformation = 210,
   SystemFeatureConfigurationSectionInformation = 211,
@@ -1748,6 +1781,16 @@ enum SYSTEM_INFORMATION_CLASS {
   SystemPointerAuthInformation = 236,
   SystemSecureKernelDebuggerInformation = 237,
   SystemOriginalImageFeatureInformation = 238,
+  SystemMemoryNumaInformation = 239,
+  SystemMemoryNumaPerformanceInformation = 240,
+  SystemCodeIntegritySignedPoliciesFullInformation = 241,
+  SystemSecureCoreInformation = 242,
+  SystemTrustedAppsRuntimeInformation = 243,
+  SystemBadPageInformationEx = 244,
+  SystemResourceDeadlockTimeout = 245,
+  SystemBreakOnContextUnwindFailureInformation = 246,
+  SystemOslRamdiskInformation = 247,
+  MaxSystemInfoClass = 248,
 };
 
 EnumMap SYSTEM_INFORMATION_CLASS_MAP[] = {
@@ -1959,6 +2002,7 @@ EnumMap SYSTEM_INFORMATION_CLASS_MAP[] = {
     DEF(SystemCodeIntegrityUnlockModeInformation),
     DEF(SystemLeapSecondInformation),
     DEF(SystemFlags2Information),
+    DEF(SystemSecurityModelInformation),
     DEF(SystemCodeIntegritySyntheticCacheInformation),
     DEF(SystemFeatureConfigurationInformation),
     DEF(SystemFeatureConfigurationSectionInformation),
@@ -1989,6 +2033,15 @@ EnumMap SYSTEM_INFORMATION_CLASS_MAP[] = {
     DEF(SystemPointerAuthInformation),
     DEF(SystemSecureKernelDebuggerInformation),
     DEF(SystemOriginalImageFeatureInformation),
+    DEF(SystemMemoryNumaInformation),
+    DEF(SystemMemoryNumaPerformanceInformation),
+    DEF(SystemCodeIntegritySignedPoliciesFullInformation),
+    DEF(SystemSecureCoreInformation),
+    DEF(SystemTrustedAppsRuntimeInformation),
+    DEF(SystemBadPageInformationEx),
+    DEF(SystemResourceDeadlockTimeout),
+    DEF(SystemBreakOnContextUnwindFailureInformation),
+    DEF(SystemOslRamdiskInformation),
     {0, nullptr}};
 
 enum THREADINFOCLASS {
@@ -2048,6 +2101,11 @@ enum THREADINFOCLASS {
   ThreadStrongerBadHandleChecks = 53,
   ThreadEffectiveIoPriority = 54,
   ThreadEffectivePagePriority = 55,
+  ThreadUpdateLockOwnership = 56,
+  ThreadSchedulerSharedDataSlot = 57,
+  ThreadTebInformationAtomic = 58,
+  ThreadIndexInformation = 59,
+  MaxThreadInfoClass = 60,
 };
 
 EnumMap THREADINFOCLASS_MAP[] = {DEF(ThreadBasicInformation),
@@ -2106,6 +2164,10 @@ EnumMap THREADINFOCLASS_MAP[] = {DEF(ThreadBasicInformation),
                                  DEF(ThreadStrongerBadHandleChecks),
                                  DEF(ThreadEffectiveIoPriority),
                                  DEF(ThreadEffectivePagePriority),
+                                 DEF(ThreadUpdateLockOwnership),
+                                 DEF(ThreadSchedulerSharedDataSlot),
+                                 DEF(ThreadTebInformationAtomic),
+                                 DEF(ThreadIndexInformation),
                                  {0, nullptr}};
 
 enum TIMER_INFORMATION_CLASS {
@@ -2171,8 +2233,9 @@ enum TOKEN_INFORMATION_CLASS {
   TokenChildProcessFlags = 45,
   TokenIsLessPrivilegedAppContainer = 46,
   TokenIsSandboxed = 47,
-  TokenOriginatingProcessTrustLevel = 48,
-  MaxTokenInfoClass = 49,
+  TokenIsAppSilo = 48,
+  TokenLoggingInformation = 49,
+  MaxTokenInfoClass = 50,
 };
 
 EnumMap TOKEN_INFORMATION_CLASS_MAP[] = {
@@ -2223,7 +2286,8 @@ EnumMap TOKEN_INFORMATION_CLASS_MAP[] = {
     DEF(TokenChildProcessFlags),
     DEF(TokenIsLessPrivilegedAppContainer),
     DEF(TokenIsSandboxed),
-    DEF(TokenOriginatingProcessTrustLevel),
+    DEF(TokenIsAppSilo),
+    DEF(TokenLoggingInformation),
     {0, nullptr}};
 
 enum TOKEN_TYPE {
@@ -2268,6 +2332,28 @@ EnumMap TRANSACTIONMANAGER_INFORMATION_CLASS_MAP[] = {
     DEF(TransactionManagerRecoveryInformation),
     DEF(TransactionManagerOldestTransactionInformation),
     {0, nullptr}};
+
+enum VIRTUAL_MEMORY_INFORMATION_CLASS {
+  VmPrefetchInformation = 0,
+  VmPagePriorityInformation = 1,
+  VmCfgCallTargetInformation = 2,
+  VmPageDirtyStateInformation = 3,
+  VmImageHotPatchInformation = 4,
+  VmPhysicalContiguityInformation = 5,
+  VmVirtualMachinePrepopulateInformation = 6,
+  VmRemoveFromWorkingSetInformation = 7,
+};
+
+EnumMap VIRTUAL_MEMORY_INFORMATION_CLASS_MAP[] = {
+    DEF(VmPrefetchInformation),
+    DEF(VmPagePriorityInformation),
+    DEF(VmCfgCallTargetInformation),
+    DEF(VmPageDirtyStateInformation),
+    DEF(VmImageHotPatchInformation),
+    DEF(VmPhysicalContiguityInformation),
+    DEF(VmVirtualMachinePrepopulateInformation),
+    DEF(VmRemoveFromWorkingSetInformation),
+};
 
 enum WAIT_TYPE {
   WaitAll = 0,
@@ -2379,6 +2465,7 @@ struct AllEnum allEnums[] = {DEF(ALPC_MESSAGE_INFORMATION_CLASS),
                              DEF(TOKEN_TYPE),
                              DEF(TRANSACTION_INFORMATION_CLASS),
                              DEF(TRANSACTIONMANAGER_INFORMATION_CLASS),
+                             DEF(VIRTUAL_MEMORY_INFORMATION_CLASS),
                              DEF(WAIT_TYPE),
                              DEF(WORKERFACTORYINFOCLASS),
                              {nullptr, nullptr}};

@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2587 2025-03-01 17:20:32Z roger $";
+    "$Id: EntryPoint.cpp 2599 2025-03-02 00:47:31Z Roger $";
 
 #include "EntryPoint.h"
 
@@ -733,6 +733,7 @@ void EntryPoint::setArgument(int argNum, std::string const &argType,
       {argENUM, "TOKEN_TYPE"},
       {argENUM, "TRANSACTION_INFORMATION_CLASS"},
       {argENUM, "TRANSACTIONMANAGER_INFORMATION_CLASS"},
+      {argENUM, "VIRTUAL_MEMORY_INFORMATION_CLASS"},
       {argENUM, "WAIT_TYPE"},
       {argENUM, "WORKERFACTORYINFOCLASS"},
 
