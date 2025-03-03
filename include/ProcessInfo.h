@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2462 $
+    $Revision: 2604 $
 */
 
-// $Id: ProcessInfo.h 2462 2024-09-07 18:16:41Z roger $
+// $Id: ProcessInfo.h 2604 2025-03-03 12:48:04Z roger $
 
 #include "NtDllStruct.h"
 
@@ -178,16 +178,19 @@ struct PEB {
   BYTE Reserved1[2]; /*  00 */        ///< Reserved
   BYTE BeingDebugged; /*  02 */       ///< TRUE when process is being debugged
   BYTE Reserved2[1]; /*  03 */        ///< Reserved
-  PVOID __pad4; /*  04 */             ///< Padding
+  PVOID __pad1;                       ///< Padding
   HMODULE ImageBaseAddress; /*  08 */ ///< Image base address
   PPEB_LDR_DATA LdrData; /*  0c */    ///< Loader data
   RTL_USER_PROCESS_PARAMETERS *ProcessParameters;
-  /*  10 */                      ///< Process parameters
-  PVOID __pad_14; /*  14 */      ///< Padding
-  HANDLE ProcessHeap; /*  18 */  ///< Handle of the default process heap
-  BYTE __pad_1c[236]; /*  1c */  ///< Padding
-  PVOID Reserved3[51]; /* 108 */ ///< Reserved
-  ULONG SessionId; /* 1d4 */     ///< The current session Id
+  /*  10 */                     ///< Process parameters
+  PVOID __pad_2;                ///< Padding
+  HANDLE ProcessHeap; /*  18 */ ///< Handle of the default process heap
+  PVOID __pad3[14];             ///< Padding
+  BYTE ___pad4[20];             ///< Padding
+  ULONG GlobalFlag; /* 68 */    ///< Global Flags
+  PVOID __pad5[38];             ///< Reserved
+  BYTE ___pad6[208];            ///< Padding
+  ULONG SessionId; /* 1d4 */    ///< The current session Id
 };
 using PPEB = PEB *;
 

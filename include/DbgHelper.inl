@@ -20,10 +20,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2541 $
+    $Revision: 2604 $
 */
 
-// $Id: DbgHelper.inl 2541 2025-01-21 23:00:17Z roger $
+// $Id: DbgHelper.inl 2604 2025-03-03 12:48:04Z roger $
 
 #include <iostream>
 
@@ -32,7 +32,9 @@
 /** Helper for streaming SymTagEnum values */
 inline std::ostream &operator<<(std::ostream &os, enum SymTagEnum const value) {
 #define DEF(X)                                                                 \
-  { X, #X }
+  {                                                                            \
+    X, #X                                                                      \
+  }
 
   static struct {
     int value;

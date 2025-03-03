@@ -28,7 +28,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2595 2025-03-01 20:25:48Z roger $";
+    "$Id: NtTrace.cpp 2610 2025-03-03 23:35:40Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -126,6 +126,12 @@ public:
   void setNoException(bool b) { bNoExcept = b; }
 
   /**
+   * Set the 'show loader snaps' flag.
+   * @param b the new value: if true loader snaps will be logged
+   */
+  void setShowLoaderSnaps(bool b) { bShowLoaderSnaps = b; }
+
+  /**
    * Set the categories
    * @param category a comma-delimited list of categories to trace
    */
@@ -165,6 +171,7 @@ public:
 private:
   bool bLogDlls{true};
   bool bNoExcept{false};
+  bool bShowLoaderSnaps{false};
   std::ostream &os;
 
   bool bActive{true};
@@ -207,6 +214,7 @@ private:
   void header(DWORD processId, DWORD threadId);
   bool detachAll();
   bool detach(DWORD processId, HANDLE hProcess);
+  void setShowLoaderSnaps(HANDLE hProcess);
 };
 
 // static
@@ -677,6 +685,14 @@ void TrapNtDebugger::OnLoadDll(DWORD processId, DWORD threadId, HANDLE hProcess,
     os << std::endl;
   }
 
+  if (LoadDll.lpBaseOfDll == BaseOfNtDll) {
+    if (bShowLoaderSnaps) {
+      header(processId, threadId);
+      os << "Setting SHOW_LDR_SNAPS\n";
+      setShowLoaderSnaps(hProcess);
+    }
+  }
+
   if (LoadDll.lpBaseOfDll == TargetDll) {
     SetDllBreakpoints(hProcess);
   }
@@ -898,6 +914,24 @@ BOOL TrapNtDebugger::CtrlHandler(DWORD fdwCtrlType) {
   return ret;
 }
 
+void TrapNtDebugger::setShowLoaderSnaps(HANDLE hProcess) {
+  static auto *pfn = (NtQueryInformationProcess *)GetProcAddress(
+      BaseOfNtDll, "NtQueryInformationProcess");
+  if (pfn) {
+    PROCESS_BASIC_INFORMATION pbi = {sizeof(pbi)};
+    if (0 == pfn(hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), 0)) {
+      PULONG pGlobalFlag = &pbi.PebBaseAddress->GlobalFlag;
+      ULONG GlobalFlag{0};
+      const ULONG SHOW_LDR_SNAPS = 2;
+      ReadProcessMemory(hProcess, pGlobalFlag, &GlobalFlag, sizeof(GlobalFlag),
+                        0);
+      GlobalFlag |= SHOW_LDR_SNAPS;
+      WriteProcessMemory(hProcess, pGlobalFlag, &GlobalFlag, sizeof(GlobalFlag),
+                         0);
+    }
+  }
+}
+
 void setErrorCodes(std::string const &codeFilter) {
   std::vector<std::string> codes;
 
@@ -925,6 +959,7 @@ int main(int argc, char **argv) {
   bool bNoExcept(false);
   bool noDebugHeap(false);
   bool bNoNames(false);
+  bool bShowLoaderSnaps(false);
 
   Options options(szRCSID);
   options.set(
@@ -957,6 +992,7 @@ int main(int argc, char **argv) {
   options.set("pid", &bPid, "show process ID");
   options.set("tid", &bTid, "show thread ID");
   options.set("nl", &bNewline, "force newline on OutputDebugString");
+  options.set("sls", &bShowLoaderSnaps, "Show Loader Snaps");
 
   options.setArgs(1, -1, "[pid | cmd <args>]");
   if (!options.process(argc, argv,
@@ -983,6 +1019,7 @@ int main(int argc, char **argv) {
                                                      : std::cout);
   debugger.setLogDlls(!bNoDlls);
   debugger.setNoException(bNoExcept);
+  debugger.setShowLoaderSnaps(bShowLoaderSnaps);
   debugger.setFilter(filter);
   debugger.setCategory(category);
 
