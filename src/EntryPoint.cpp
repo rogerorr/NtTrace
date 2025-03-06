@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2599 2025-03-02 00:47:31Z Roger $";
+    "$Id: EntryPoint.cpp 2616 2025-03-06 19:00:59Z roger $";
 
 #include "EntryPoint.h"
 
@@ -971,7 +971,7 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
     os << ") => ";
     showDword(os, returnCode);
 
-    if (returnCode != 0 && retType == retNTSTATUS) {
+    if (IS_ERROR(returnCode) && retType == retNTSTATUS) {
       showWinError(os, static_cast<HRESULT>(RtlNtStatusToDosError(returnCode)));
     }
     if (bStackTrace) {
