@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2480 $
+    $Revision: 2612 $
 */
 
-// $Id: AdjustPriv.h 2480 2024-09-28 19:32:14Z roger $
+// $Id: AdjustPriv.h 2612 2025-03-04 23:05:26Z roger $
 
 namespace or2 {
 
@@ -57,7 +57,7 @@ BOOL inline EnableNamedPriv(
 
   if (!LookupPrivilegeValue((LPSTR) nullptr, lpName, &privValue)) {
     std::cerr << "LookupPrivilegeValue failed with: " << GetLastError()
-              << std::endl;
+              << " for " << lpName << std::endl;
     return FALSE;
   }
 
@@ -80,8 +80,8 @@ BOOL inline EnableNamedPriv(
     if (lastError == ERROR_NOT_ALL_ASSIGNED) {
       // Can't enable permission we haven't got
     } else {
-      std::cerr << "AdjustTokenPrivileges failed with: " << lastError
-                << std::endl;
+      std::cerr << "AdjustTokenPrivileges failed with: " << lastError << " for "
+                << lpName << std::endl;
     }
     return FALSE;
   }
