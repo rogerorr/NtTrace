@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2573 2025-02-25 20:43:38Z roger $";
+    "$Id: ShowData.cpp 2620 2025-03-06 23:31:57Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -58,6 +58,8 @@ BOOL readHelper(HANDLE hProcess, ULONG_PTR remoteAddress, T &theValue) {
 }
 
 void ensurePopulated();
+
+bool isWow(HANDLE hProcess);
 } // namespace
 
 namespace showData {
@@ -725,6 +727,14 @@ void showThrowType(std::ostream &os, HANDLE hProcess, ULONG_PTR throwInfo,
   MsvcClassHeader msvcClassHeader = {0};
   MsvcClassInfo msvcClassInfo = {0};
   BYTE type_info[sizeof(std::type_info) + 256] = "";
+  DWORD offset = 0;
+
+#ifdef _M_X64
+  // process 32-bit type_info in 64-bit debugger
+  if (((throwInfo >> 32) == 0) && isWow(hProcess)) {
+    offset = sizeof(PVOID);
+  }
+#endif // _M_X64
 
   if (!readHelper(hProcess, (PVOID)throwInfo, msvcThrow) ||
       !readHelper(hProcess, (PVOID)(base + msvcThrow.pClassHeader),
@@ -732,7 +742,7 @@ void showThrowType(std::ostream &os, HANDLE hProcess, ULONG_PTR throwInfo,
       !readHelper(hProcess, (PVOID)(base + msvcClassHeader.Info[0]),
                   msvcClassInfo) ||
       !or2::ReadPartialProcessMemory(
-          hProcess, (PVOID)(base + msvcClassInfo.pTypeInfo), type_info,
+          hProcess, (PVOID)(base + msvcClassInfo.pTypeInfo), type_info + offset,
           sizeof(std::type_info), sizeof(type_info))) {
     return;
   }
@@ -765,4 +775,17 @@ void ensurePopulated() {
     }
   }
 }
+
+bool isWow(HANDLE hProcess) {
+  using IsWow64Process =
+      BOOL WINAPI(_In_ HANDLE hProcess, _Out_ PBOOL Wow64Process);
+
+  static IsWow64Process *pfnIsWow64Process = (IsWow64Process *)::GetProcAddress(
+      ::GetModuleHandle("Kernel32"), "IsWow64Process");
+  BOOL result(false);
+  if (pfnIsWow64Process)
+    pfnIsWow64Process(hProcess, &result);
+  return result != 0;
+}
+
 } // namespace
