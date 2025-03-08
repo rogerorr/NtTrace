@@ -47,54 +47,72 @@ LINKFLAGS = /link /opt:ref,icf
 NtTrace.exe : $(BUILD)\$(*B).obj $(*B).res 
 	cl $(CCFLAGS) /Fe$@ $** $(LINKFLAGS)
 
+ShowLoaderSnaps.exe : $(BUILD)\$(*B).obj $(*B).res 
+	cl $(CCFLAGS) /Fe$@ $** $(LINKFLAGS)
+
 # Dependencies
 
-$(BUILD)\NtTrace.obj : "include\DebugPriv.h" \
-	"include\AdjustPriv.h" \
-	"include\displayError.h" \
-	"include\displayError.inl" \
-	"include\MsvcExceptions.h" \
-	"include\NtDllStruct.h" \
-	"include\Options.h" \
-	"include\Options.inl" \
-	"include\ProcessHelper.h" \
-	"include\ProcessInfo.h" \
-	"include\SimpleTokenizer.h" \
-	include\DebugDriver.h \
-	include\EntryPoint.h \
-	include\ShowData.h \
-	include\TrapNtOpcodes.h
+$(BUILD)\NtTrace.obj : \
+	"include/DebugPriv.h" \
+	"include/AdjustPriv.h" \
+	"include/displayError.h" \
+	"include/displayError.inl" \
+	"include/MsvcExceptions.h" \
+	"include/NtDllStruct.h" \
+	"include/Options.h" \
+	"include/Options.inl" \
+	"include/ProcessHelper.h" \
+	"include/ProcessInfo.h" \
+	"include/SimpleTokenizer.h" \
+	"include/DebugDriver.h" \
+	"include/EntryPoint.h" \
+	"include/ShowData.h" \
+	"include/TrapNtOpcodes.h"
 
 NtTrace.res: $(*B).rc "version.rc"
 
 NtTrace.exe : $(BUILD)\DebugDriver.obj $(BUILD)\EntryPoint.obj $(BUILD)\Enumerations.obj $(BUILD)\ShowData.obj \
 	$(BUILD)\GetFileNameFromHandle.obj $(BUILD)\GetModuleBase.obj $(BUILD)\SymbolEngine.obj
 
+ShowLoaderSnaps.res: $(*B).rc "version.rc"
+
+ShowLoaderSnaps.exe : $(BUILD)\DebugDriver.obj
+
 $(BUILD)\DebugDriver.obj : \
-	"include\displayError.h" \
-	"include\displayError.inl" \
-	"include\DebugDriver.h"
+	"include/displayError.h" \
+	"include/displayError.inl" \
+	"include/DebugDriver.h"
 
 $(BUILD)\EntryPoint.obj : \
-	"include\displayError.h" \
-	"include\displayError.inl" \
-	"include\DbgHelper.h" \
-	"include\DbgHelper.inl" \
-	"include\NtDllStruct.h" \
-	"include\ProcessInfo.h" \
-	"include\SymbolEngine.h" \
-	"include\TrapNtOpcodes.h" \
-	"include\ShowData.h"
+	"include/displayError.h" \
+	"include/displayError.inl" \
+	"include/DbgHelper.h" \
+	"include/DbgHelper.inl" \
+	"include/NtDllStruct.h" \
+	"include/ProcessInfo.h" \
+	"include/SymbolEngine.h" \
+	"include/TrapNtOpcodes.h" \
+	"include/ShowData.h"
 
 $(BUILD)\ShowData.obj: \
-	"include\Enumerations.h" \
-	"include\NtDllStruct.h" \
-	"include\MsvcExceptions.h" \
-	"include\ProcessInfo.h" \
-	"include\ReadPartialMemory.h" \
-	"include\ShowData.h"
+	"include/Enumerations.h" \
+	"include/NtDllStruct.h" \
+	"include/MsvcExceptions.h" \
+	"include/ProcessInfo.h" \
+	"include/ReadPartialMemory.h" \
+	"include/ShowData.h"
 
-$(BUILD)\GetModuleBase.obj: include\GetModuleBase.h
+$(BUILD)\ShowLoaderSnaps.obj: \
+	"include/displayError.h" \
+	"include/displayError.inl" \
+	"include/Options.h" \
+	"include/Options.inl" \
+	"include/ProcessHelper.h" \
+	"include/ReadInt.h" \
+	"include/DebugDriver.h"
+
+$(BUILD)\GetModuleBase.obj: \
+	"include/GetModuleBase.h"
 
 $(BUILD)\SymbolEngine.obj: \
 	"include/SymbolEngine.h" \

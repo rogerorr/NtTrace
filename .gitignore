@@ -3,3 +3,5 @@ build64
 *.pdb 
 NtTrace*.exe 
 NtTrace.res 
+ShowLoaderSnaps.exe
+ShowLoaderSnaps.res
