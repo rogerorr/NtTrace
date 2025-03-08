@@ -29,7 +29,7 @@ COPYRIGHT
 #include "displayError.h"
 
 static char const szRCSID[] =
-    "$Id: DebugDriver.cpp 2464 2024-09-07 21:31:35Z roger $";
+    "$Id: DebugDriver.cpp 2621 2025-03-08 16:50:46Z roger $";
 
 //////////////////////////////////////////////////////////////////////////
 // Main debugger loop
@@ -44,27 +44,27 @@ void or2::DebugDriver::Loop(Debugger &debugger) {
     DWORD continueFlag = DBG_CONTINUE;
     switch (DebugEvent.dwDebugEventCode) {
     case EXCEPTION_DEBUG_EVENT: {
-      ProcessEntry &pe = processMap[DebugEvent.dwProcessId];
-      ThreadMap &tm = pe.threadMap;
+      ProcessEntry &pe = processMap_[DebugEvent.dwProcessId];
+      ThreadMap &tm = pe.threadMap_;
       HANDLE hThread = tm[DebugEvent.dwThreadId];
 
       // The first breakpoint is called by attaching to the process.
-      if (!pe.attached &&
+      if (!pe.attached_ &&
           (DebugEvent.u.Exception.ExceptionRecord.ExceptionCode ==
            STATUS_BREAKPOINT)) {
-        pe.attached = true;
+        pe.attached_ = true;
       } else {
         continueFlag = DBG_EXCEPTION_NOT_HANDLED;
       }
 
       debugger.OnException(DebugEvent.dwProcessId, DebugEvent.dwThreadId,
-                           pe.hProcess, hThread, DebugEvent.u.Exception,
+                           pe.hProcess_, hThread, DebugEvent.u.Exception,
                            &continueFlag);
     } break;
 
     case CREATE_THREAD_DEBUG_EVENT: {
-      ProcessEntry &processEntry = processMap[DebugEvent.dwProcessId];
-      processEntry.threadMap[DebugEvent.dwThreadId] =
+      ProcessEntry &processEntry = processMap_[DebugEvent.dwProcessId];
+      processEntry.threadMap_[DebugEvent.dwThreadId] =
           DebugEvent.u.CreateThread.hThread;
 
       debugger.OnCreateThread(DebugEvent.dwProcessId, DebugEvent.dwThreadId,
@@ -73,10 +73,10 @@ void or2::DebugDriver::Loop(Debugger &debugger) {
 
     case CREATE_PROCESS_DEBUG_EVENT: {
       ProcessEntry pe;
-      pe.hProcess = DebugEvent.u.CreateProcessInfo.hProcess;
-      pe.threadMap[DebugEvent.dwThreadId] =
+      pe.hProcess_ = DebugEvent.u.CreateProcessInfo.hProcess;
+      pe.threadMap_[DebugEvent.dwThreadId] =
           DebugEvent.u.CreateProcessInfo.hThread;
-      processMap[DebugEvent.dwProcessId] = pe;
+      processMap_[DebugEvent.dwProcessId] = pe;
 
       debugger.OnCreateProcess(DebugEvent.dwProcessId, DebugEvent.dwThreadId,
                                DebugEvent.u.CreateProcessInfo);
@@ -92,7 +92,7 @@ void or2::DebugDriver::Loop(Debugger &debugger) {
     }
 
     case EXIT_THREAD_DEBUG_EVENT: {
-      ThreadMap &threadMap = processMap[DebugEvent.dwProcessId].threadMap;
+      ThreadMap &threadMap = processMap_[DebugEvent.dwProcessId].threadMap_;
 
       debugger.OnExitThread(DebugEvent.dwProcessId, DebugEvent.dwThreadId,
                             DebugEvent.u.ExitThread);
@@ -105,8 +105,8 @@ void or2::DebugDriver::Loop(Debugger &debugger) {
       debugger.OnExitProcess(DebugEvent.dwProcessId, DebugEvent.dwThreadId,
                              DebugEvent.u.ExitProcess);
 
-      processMap.erase(DebugEvent.dwProcessId);
-      if (processMap.empty()) {
+      processMap_.erase(DebugEvent.dwProcessId);
+      if (processMap_.empty()) {
         timeout = 1; // Nothing left to live for :-)
       }
 
@@ -114,7 +114,7 @@ void or2::DebugDriver::Loop(Debugger &debugger) {
     }
 
     case LOAD_DLL_DEBUG_EVENT: {
-      HANDLE hProcess = processMap[DebugEvent.dwProcessId].hProcess;
+      HANDLE hProcess = processMap_[DebugEvent.dwProcessId].hProcess_;
 
       debugger.OnLoadDll(DebugEvent.dwProcessId, DebugEvent.dwThreadId,
                          hProcess, DebugEvent.u.LoadDll);
@@ -133,7 +133,7 @@ void or2::DebugDriver::Loop(Debugger &debugger) {
       break;
 
     case OUTPUT_DEBUG_STRING_EVENT: {
-      HANDLE hProcess = processMap[DebugEvent.dwProcessId].hProcess;
+      HANDLE hProcess = processMap_[DebugEvent.dwProcessId].hProcess_;
 
       debugger.OnOutputDebugString(DebugEvent.dwProcessId,
                                    DebugEvent.dwThreadId, hProcess,

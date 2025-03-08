@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 2455 2024-09-05 22:37:56Z roger $
+# $Id: NtTrace.mak 2627 2025-03-08 18:03:49Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,

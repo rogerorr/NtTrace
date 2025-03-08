@@ -23,7 +23,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2620 2025-03-06 23:31:57Z roger $";
+    "$Id: ShowData.cpp 2622 2025-03-08 17:07:47Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -155,9 +155,9 @@ void showEnum(std::ostream &os, ULONG_PTR value, std::string const &enumName) {
   std::map<std::string, Enumerations::EnumMap *>::const_iterator it =
       enumMap.find(enumName);
   if (it != enumMap.end()) {
-    for (Enumerations::EnumMap *p = it->second; p->name; ++p) {
-      if (p->value == value) {
-        os << " [" << p->name << ']';
+    for (Enumerations::EnumMap *p = it->second; p->name_; ++p) {
+      if (p->value_ == value) {
+        os << " [" << p->name_ << ']';
         break;
       }
     }
@@ -174,10 +174,10 @@ void showMask(std::ostream &os, ULONG_PTR value, std::string const &enumName) {
       enumMap.find(enumName);
   std::string delim = " [";
   if (it != enumMap.end()) {
-    for (Enumerations::EnumMap *p = it->second; p->name; ++p) {
-      if ((value & p->value) == p->value) {
-        os << delim << p->name;
-        value -= p->value;
+    for (Enumerations::EnumMap *p = it->second; p->name_; ++p) {
+      if ((value & p->value_) == p->value_) {
+        os << delim << p->name_;
+        value -= p->value_;
         delim = "|";
         break;
       }
@@ -328,7 +328,7 @@ void showPointer(std::ostream &os, HANDLE hProcess, const void *argVal) {
 void showPHandle(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal) {
   showPointer(os, hProcess, argVal);
   if (argVal) {
-    HANDLE handle = 0;
+    HANDLE handle{};
     (void)readHelper(hProcess, argVal, handle);
 
     os << " [";
@@ -770,8 +770,8 @@ void showThrowType(std::ostream &os, HANDLE hProcess, ULONG_PTR throwInfo,
 namespace {
 void ensurePopulated() {
   if (showData::enumMap.empty()) {
-    for (Enumerations::AllEnum *p = Enumerations::allEnums; p->name; ++p) {
-      showData::enumMap[p->name] = p->pMap;
+    for (Enumerations::AllEnum *p = Enumerations::allEnums; p->name_; ++p) {
+      showData::enumMap[p->name_] = p->pMap_;
     }
   }
 }

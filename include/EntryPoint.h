@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2572 $
+    $Revision: 2622 $
 */
 
-// $Id: EntryPoint.h 2572 2025-02-25 20:12:16Z roger $
+// $Id: EntryPoint.h 2622 2025-03-08 17:07:47Z roger $
 
 #include <windows.h>
 
@@ -76,13 +76,11 @@ enum ArgAttributes {
 };
 
 struct Argument {
-  Argument()
-      : argType(argULONG_PTR), argTypeName("ULONG"), name("Unknown"),
-        attributes(argNONE), dummy(false) {}
+  Argument() = default;
   Argument(ArgType argType, std::string const &argTypeName,
            std::string const &name, ArgAttributes attributes)
-      : argType(argType), argTypeName(argTypeName), name(name),
-        attributes(attributes), dummy(false) {}
+      : argType_(argType), argTypeName_(argTypeName), name_(name),
+        attributes_(attributes) {}
 
 #ifdef _M_IX86
   using ARG = DWORD;
@@ -97,12 +95,12 @@ struct Argument {
   /** true if argument is output-only */
   bool outputOnly() const;
 
-  ArgType argType;          // Argument type for processing
-  std::string argTypeName;  // Actual argument type
-  std::string name;         // formal name of argument
-  ArgAttributes attributes; // Optional attributes
-  bool dummy; // True if this is a dummy argument (2nd part of 64bit item on
-              // 32bit Windows)
+  ArgType argType_{argULONG_PTR};     // Argument type for processing
+  std::string argTypeName_{"ULONG"};  // Actual argument type
+  std::string name_{"Unknown"};       // formal name of argument
+  ArgAttributes attributes_{argNONE}; // Optional attributes
+  bool dummy_{}; // True if this is a dummy argument (2nd part of 64bit item on
+                 // 32bit Windows)
 };
 
 enum ReturnType {
@@ -118,28 +116,27 @@ public:
   using Typedefs = std::map<std::string, std::string>;
 
   explicit EntryPoint(std::string const &name, std::string const &category)
-      : name(name), category(category), disabled(category[0] == '-'),
-        targetAddress(0), preSave(0), retType(retNTSTATUS) {
-    if (disabled) {
-      this->category.erase(0, 1);
+      : name_(name), category_(category), disabled_(category[0] == '-') {
+    if (disabled_) {
+      this->category_.erase(0, 1);
     }
   }
 
-  std::string const &getName() const { return name; }
+  std::string const &getName() const { return name_; }
 
-  std::string const &getExported() const { return exported; }
+  std::string const &getExported() const { return exported_; }
 
-  void setExported(std::string const &value) { exported = value; }
+  void setExported(std::string const &value) { exported_ = value; }
 
-  std::string const &getCategory() const { return category; }
+  std::string const &getCategory() const { return category_; }
 
-  bool isDisabled() const { return disabled; }
+  bool isDisabled() const { return disabled_; }
 
-  size_t getArgumentCount() const { return arguments.size(); }
+  size_t getArgumentCount() const { return arguments_.size(); }
 
-  void setArgumentCount(size_t newSize) { arguments.resize(newSize); }
+  void setArgumentCount(size_t newSize) { arguments_.resize(newSize); }
 
-  Argument const &getArgument(size_t idx) const { return arguments[idx]; }
+  Argument const &getArgument(size_t idx) const { return arguments_[idx]; }
 
   void setArgument(int argNum, std::string const &argType,
                    std::string const &variableName, ArgAttributes attributes,
@@ -149,7 +146,7 @@ public:
 
   void setReturnType(std::string const &type, Typedefs const &typedefs);
 
-  ReturnType getReturnType() const { return retType; }
+  ReturnType getReturnType() const { return retType_; }
 
   static bool readEntryPoints(std::istream &cfgFile,
                               std::set<EntryPoint> &entryPoints,
@@ -164,13 +161,15 @@ public:
   /** Clear the trap for this entry in the target process */
   bool clearNtTrap(HANDLE hProcess, NtCall const &ntcall) const;
 
-  void setAddress(unsigned char *brkptAddress) { targetAddress = brkptAddress; }
+  void setAddress(unsigned char *brkptAddress) {
+    targetAddress_ = brkptAddress;
+  }
 
-  unsigned char *getAddress() const { return targetAddress; }
+  unsigned char *getAddress() const { return targetAddress_; }
 
-  void setPreSave(unsigned char *preSaveAddress) { preSave = preSaveAddress; }
+  void setPreSave(unsigned char *preSaveAddress) { preSave_ = preSaveAddress; }
 
-  unsigned char *getPreSave() const { return preSave; }
+  unsigned char *getPreSave() const { return preSave_; }
 
   void doPreSave(HANDLE hProcess, HANDLE hThread, CONTEXT const &Context);
 
@@ -183,17 +182,17 @@ public:
   static void stackTrace(std::ostream &os, HANDLE hProcess, HANDLE hThread);
 
 private:
-  std::string name;                // name of entry point
-  std::string exported;            // (optional) exported name for entry point
-  std::string category;            // category of entry point
-  bool disabled;                   // this entry point is disabled
-  std::vector<Argument> arguments; // vector of arguments
-  ReturnType retType;              // Return type
-  std::string retTypeName;         // full name of return type
-  unsigned char *targetAddress;
-  unsigned char *preSave; // address of pre-save (for X64 fast-call)
-  DWORD ssn;              // System Service Number
-                          // Used to set Eax/Rax to pre-call breakpoint
+  std::string name_;                // name of entry point
+  std::string exported_;            // (optional) exported name for entry point
+  std::string category_;            // category of entry point
+  bool disabled_{};                 // this entry point is disabled
+  std::vector<Argument> arguments_; // vector of arguments
+  ReturnType retType_{};            // Return type
+  std::string retTypeName_;         // full name of return type
+  unsigned char *targetAddress_{};
+  unsigned char *preSave_{}; // address of pre-save (for X64 fast-call)
+  DWORD ssn_{};              // System Service Number
+                             // Used to set Eax/Rax to pre-call breakpoint
 
   NtCall insertBrkpt(HANDLE hProcess, unsigned char *address,
                      unsigned int offset, unsigned char *setssn);
@@ -204,13 +203,13 @@ using EntryPointSet = std::set<EntryPoint>;
 //////////////////////////////////////////////////////////////////////////
 // Our data structure for an NT call
 struct NtCall {
-  EntryPoint *entryPoint{}; // Pointer into EntryPointMap
+  EntryPoint *entryPoint_{}; // Pointer into EntryPointMap
 
-  size_t nArgs{}; // Number of arguments
+  size_t nArgs_{}; // Number of arguments
 
   enum TrapType { trapContinue, trapReturn, trapReturn0, trapJump };
-  TrapType trapType{};
-  DWORD jumpTarget{}; // used for trapJump
+  TrapType trapType_{};
+  DWORD jumpTarget_{}; // used for trapJump
 };
 
 #endif // ENTRYPOINT_H_

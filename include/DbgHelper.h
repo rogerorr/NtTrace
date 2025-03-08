@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2480 $
+    $Revision: 2621 $
 */
 
-// $Id: DbgHelper.h 2480 2024-09-28 19:32:14Z roger $
+// $Id: DbgHelper.h 2621 2025-03-08 16:50:46Z roger $
 
 #include <cvconst.h> //DIA SDK
 #include <windows.h>
@@ -181,7 +181,7 @@ private:
   DbgHelper(DbgHelper const &);
   DbgHelper &operator=(DbgHelper const &);
 
-  HANDLE m_hProcess{0}; // Current process being debugged
+  HANDLE m_hProcess{}; // Current process being debugged
 
 #ifdef DBGHELP_6_1_APIS
   // Helper function for resolving addresses dynamically
