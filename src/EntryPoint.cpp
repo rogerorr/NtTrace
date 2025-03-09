@@ -23,9 +23,10 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2626 2025-03-08 18:03:35Z roger $";
+    "$Id: EntryPoint.cpp 2638 2025-03-08 23:00:02Z roger $";
 
 #include "EntryPoint.h"
+#include "Enumerations.h"
 
 #include <iomanip>
 #include <iostream>
@@ -49,6 +50,9 @@ namespace {
 void printStackTrace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
                      CONTEXT const &Context);
 std::string buffToHex(unsigned char *buffer, size_t length);
+ArgType getArgType(const std::string typeName,
+                   EntryPoint::Typedefs const &typedefs);
+bool deadExport(unsigned char instruction[], size_t length);
 
 #pragma warning(push)
 #pragma warning(disable : 4592) // symbol will be dynamically initialized
@@ -142,35 +146,44 @@ static unsigned char const signature4[] = {
     MOVdwordEax, 5, XOR, 2, LEA, 4, FS, 1, Call, 6, 0, 0}; // 18 bytes
 
 // Check for Windows 8.1 32bit signature
-// b8 0e 00 03 00         mov     eax,0x3000e
-// 64 ff 15 c0 00 00 00   call    dword ptr fs:[000000c0]
-// c2 04 00               ret     0x4
+// b8 0e 00 03 00        mov     eax,0x3000e
+// 64 ff 15 c0 00 00 00  call    dword ptr fs:[000000c0]
+// c2 04 00              ret     0x4
 
 static unsigned char const signature5[] = {MOVdwordEax, 5, FS, 1,
                                            Call,        6, 0,  0}; // 12 bytes
 
 // Check for Windows 10 NtQueryInformationProcess (and trap the
-// Wow64SystemServiceCall) ntdll!NtQueryInformationProcess: b8 19 00 00 00 mov
-// eax,19h e8 04 00 00 00        call    ntdll!NtQueryInformationProcess+0xe 00
-// 00 1d 77           <ntdll> 5a                    pop     edx 80 7a 03 4b cmp
-// byte ptr [edx+3],4Bh 75 0a                 jne
-// ntdll!NtQueryInformationProcess+0x1f 64 ff 15 c0 00 00 00  call    dword ptr
-// fs:[0C0h] c2 14 00              ret     14h ba c0 b4 25 77        mov
-// edx,offset ntdll!Wow64SystemServiceCall ff d2                 call    edx c2
-// 14 00              ret     14h
+// Wow64SystemServiceCall) ntdll!NtQueryInformationProcess:
+// b8 19 00 00 00        mov     eax,19h
+// e8 04 00 00 00        call    ntdll!NtQueryInformationProcess+0xe
+// 00 00 1d 77           <ntdll>
+// 5a                    pop     edx
+// 80 7a 03 4b           cmp     byte ptr [edx+3],4Bh
+// 75 0a                 jne     ntdll!NtQueryInformationProcess+0x1f
+// 64 ff 15 c0 00 00 00  call    dword ptr fs:[0C0h]
+// c2 14 00              ret     14h
+// ba c0 b4 25 77        mov     edx,offset ntdll!Wow64SystemServiceCall
+// ff d2                 call    edx c2
+// 14 00                 ret     14h
 
 static unsigned char const signature6[] = {
     MOVdwordEax, 5, 0xe8, 5 + 4, 0x5a, 1, 0x80, 4, 0x75, 2, FS, 1,
     Call,        6, 0xc2, 3,     0xba, 5, Call, 2, 0,    0}; // 38 bytes
 
 // Check for Windows 10 Creator NtQueryInformationProcess (and trap the
-// Wow64SystemServiceCall) ntdll!NtQueryInformationProcess: b8 19 00 00 00 mov
-// eax,19h e8 00 00 00 00        call    ntdll!NtQueryInformationProcess+0xa 5a
-// pop     edx 80 7a 14 4b           cmp     byte ptr [edx+14h],4Bh 75 0e jne
-// ntdll!NtQueryInformationProcess+0x1f 64 ff 15 c0 00 00 00  call    dword ptr
-// fs:[0C0h] c2 14 00              ret     14h 00 00 9a 77           <ntdll> ba
-// 40 61 a2 77        mov     edx,offset ntdll!Wow64SystemServiceCall ff d2 call
-// edx c2 14 00              ret     14h
+// Wow64SystemServiceCall) ntdll!NtQueryInformationProcess:
+// b8 19 00 00 00 mov    eax,19h
+// e8 00 00 00 00        call    ntdll!NtQueryInformationProcess+0xa
+// 5a                    pop     edx
+// 80 7a 14 4b           cmp     byte ptr [edx+14h],4Bh
+// 75 0e                 jne     ntdll!NtQueryInformationProcess+0x1f
+// 64 ff 15 c0 00 00 00  call    dword ptr fs:[0C0h]
+// c2 14 00              ret     14h
+// 00 00 9a 77           <ntdll>
+// ba 40 61 a2 77        mov     edx,offset ntdll!Wow64SystemServiceCall
+// ff d2                 call    edx
+// c2 14 00              ret     14h
 
 static unsigned char const signature6b[] = {
     MOVdwordEax, 5, 0xe8, 5,     0x5a, 1, 0x80, 4, 0x75, 2, FS, 1,
@@ -179,6 +192,24 @@ static unsigned char const signature6b[] = {
 static unsigned char const *signatures[] = {
     signature1, signature2, signature3,  signature4,
     signature5, signature6, signature6b,
+};
+
+// Dead Export from Win32u.dll for example for NtUserCallHwnd
+// e8 d1 ff ff ff       call    __stdcall DeadExport(void) (74d41006)
+// c2 08 00             ret     0x8
+// cc                   int     3
+
+static unsigned char const dead_export1[] = {0xe8, 5, 0xc2, 3, 0xcc, 1, 0, 0};
+
+// Dead Export from Win32u.dll for example for NtUserYieldTask
+// e9 a1 ff ff ff       jmp     DeadExport
+// cc                   int     3
+
+static unsigned char const dead_export2[] = {0xe9, 5, 0xcc, 1, 0, 0};
+
+static unsigned char const *dead_exports[] = {
+    dead_export1,
+    dead_export2,
 };
 
 static unsigned int const MAX_PREAMBLE(38);
@@ -215,12 +246,35 @@ static unsigned char const *signatures[] = {
 
 static unsigned int const MAX_PREAMBLE(21);
 
+// Dead Export from Win32u.dll for example for NtUserCallHwnd
+// 48 83 ec 28           sub     rsp,28h
+// 45 33 c0              xor     r8d,r8d
+// 33 d2                 xor     edx,edx
+// 33 c9                 xor     ecx,ecx
+// 48 ff 15 2e c1 00 00  call    qword ptr [win32u!_imp_RaiseFailFastException]
+
+static unsigned char const dead_export1[] = {0x48, 4, 0x45, 3, 0x33, 2, 0x33, 2,
+                                             0x48, 1, 0xff, 7, 0,    0};
+
+static unsigned char const *dead_exports[] = {
+    dead_export1,
+};
+
 #endif // _M_IX86
 
 //////////////////////////////////////////////////////////////////////////
 // Show the argument for the given process with the specified value.
 void Argument::showArgument(std::ostream &os, HANDLE hProcess, ARG argVal,
-                            bool returnOk, bool dup) const {
+                            bool returnOk, bool dup, bool showNames) const {
+  if ((attributes_ & argRESERVED) && (argVal == 0)) {
+    // An empty reserved argument
+    os << '0';
+    return;
+  }
+
+  if (showNames && !name_.empty())
+    os << name_ << "=";
+
   // Don't dereference output only arguments on failure
   if ((!returnOk && outputOnly()) || dup) {
     switch (argType_) {
@@ -343,6 +397,23 @@ bool Argument::outputOnly() const {
 }
 
 //////////////////////////////////////////////////////////////////////////
+// Write argument to the output stream
+void Argument::printOn(std::ostream &os) const {
+  std::string const opt(attributes_ & argOPTIONAL ? "opt_" : "");
+  if (attributes_ & argRESERVED)
+    os << "_Reserved_ ";
+  if ((attributes_ & (argIN | argOUT)) == (argIN | argOUT))
+    os << "_Inout_" << opt << ' ';
+  else if (attributes_ & argIN)
+    os << "_In_" << opt << ' ';
+  else if (attributes_ & argOUT)
+    os << "_Out_" << opt << ' ';
+  if (attributes_ & argCONST)
+    os << "const ";
+  os << argTypeName_ << " " << name_;
+}
+
+//////////////////////////////////////////////////////////////////////////
 NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
                                unsigned int offset, unsigned char *setssn) {
   // (The post-call code is at address + offset)
@@ -422,10 +493,12 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
       return NtCall();
     }
     nt.trapType_ = NtCall::trapJump;
-    nt.jumpTarget_ = (DWORD)(*(DWORD *)(&instruction[1]) + address + offset + 5);
+    nt.jumpTarget_ =
+        (DWORD)(*(DWORD *)(&instruction[1]) + address + offset + 5);
 
     // If the target is a return we can work out nArgs
-    if (ReadProcessMemory(hProcess, (LPVOID)nt.jumpTarget_, instruction, 3, 0)) {
+    if (ReadProcessMemory(hProcess, (LPVOID)nt.jumpTarget_, instruction, 3,
+                          0)) {
       if (instruction[0] == RETn) {
         nt.nArgs_ = *(short *)(&instruction[1]);
       } else if (instruction[0] == RET) {
@@ -549,6 +622,13 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
     return NtCall();
   }
 
+  if (optional_ && deadExport(instruction, MAX_PREAMBLE)) {
+    if (verbose) {
+      std::cout << "Dead export found for: " << name_ << '\n';
+    }
+    return NtCall();
+  }
+
   unsigned char *setssn = nullptr;
   for (auto pCheck : signatures) {
     unsigned int offset = 0;
@@ -654,164 +734,10 @@ bool EntryPoint::clearNtTrap(HANDLE hProcess, NtCall const &ntCall) const {
 
 //////////////////////////////////////////////////////////////////////////
 // Eg "NtOpenFile", 2, "POBJECT_ATTRIBUTES", "ObjectAttributes", argIN
-void EntryPoint::setArgument(int argNum, std::string const &argType,
+void EntryPoint::setArgument(int argNum, ArgType eArgType,
+                             std::string const &argType,
                              std::string const &variableName,
-                             ArgAttributes attributes,
-                             Typedefs const &typedefs) {
-  static const struct {
-    ArgType eArgType;
-    char const *argTypeName_;
-  } argTypes[] = {
-      {argULONG_PTR, "ULONG_PTR"},
-      {argULONG_PTR, "LONG_PTR"},
-      {argULONG_PTR, "UINT_PTR"},
-      {argULONG_PTR, "INT_PTR"},
-      {argULONG_PTR, "HANDLE"},
-      {argULONG_PTR, "SIZE_T"},
-      {argULONG_PTR, "NTSTATUS"},
-
-      {argULONG, "ULONG"},
-      {argULONG, "long"},
-      {argULONG, "LONG"},
-      {argULONG, "UINT"},
-      {argULONG, "int"},
-      {argULONG, "INT"},
-      {argULONG, "DWORD"},
-      {argULONG, "WORD"},
-      {argULONG, "USHORT"},
-      {argULONG, "WCHAR"},
-
-      {argULONG, "LCID"},
-
-      {argULONGLONG, "ULONGLONG"},
-
-      {argBYTE, "BYTE"},
-
-      {argENUM, "ALPC_MESSAGE_INFORMATION_CLASS"},
-      {argENUM, "ALPC_PORT_INFORMATION_CLASS"},
-      {argENUM, "ATOM_INFORMATION_CLASS"},
-      {argENUM, "AUDIT_EVENT_TYPE"},
-      {argENUM, "CPU_PARTITION_QUERY_INFORMATION_CLASS"},
-      {argENUM, "CPU_PARTITION_SET_INFORMATION_CLASS"},
-      {argENUM, "DEBUGOBJECTINFOCLASS"},
-      {argENUM, "DEVICE_POWER_STATE"},
-      {argENUM, "DIRECTORY_NOTIFY_INFORMATION_CLASS"},
-      {argENUM, "ENLISTMENT_INFORMATION_CLASS"},
-      {argENUM, "EVENT_INFORMATION_CLASS"},
-      {argENUM, "EVENT_TYPE"},
-      {argENUM, "FILE_INFORMATION_CLASS"},
-      {argENUM, "FS_INFORMATION_CLASS"},
-      {argENUM, "HARDERROR_RESPONSE_OPTION"},
-      {argENUM, "HOT_PATCH_INFORMATION_CLASS"},
-      {argENUM, "IO_SESSION_STATE"},
-      {argENUM, "IORING_CREATE_REQUIRED_FLAGS"},
-      {argENUM, "JOB_INFORMATION_CLASS"},
-      {argENUM, "KEY_INFORMATION_CLASS"},
-      {argENUM, "KEY_SET_INFORMATION_CLASS"},
-      {argENUM, "KEY_VALUE_INFORMATION_CLASS"},
-      {argENUM, "KPROFILE_SOURCE"},
-      {argENUM, "KTMOBJECT_TYPE"},
-      {argENUM, "MEMORY_INFORMATION_CLASS"},
-      {argENUM, "MEMORY_PARTITION_INFORMATION_CLASS"},
-      {argENUM, "MUTANT_INFORMATION_CLASS"},
-      {argENUM, "OBJECT_INFORMATION_CLASS"},
-      {argENUM, "PORT_INFORMATION_CLASS"},
-      {argENUM, "POWER_ACTION"},
-      {argENUM, "POWER_INFORMATION_LEVEL"},
-      {argENUM, "PROCESSINFOCLASS"},
-      {argENUM, "QUEUE_USER_APC_FLAGS"},
-      {argENUM, "RESOURCEMANAGER_INFORMATION_CLASS"},
-      {argENUM, "SECTION_INFORMATION_CLASS"},
-      {argENUM, "SECTION_INHERIT"},
-      {argENUM, "SHUTDOWN_ACTION"},
-      {argENUM, "SEMAPHORE_INFORMATION_CLASS"},
-      {argENUM, "SYSDBG_COMMAND"},
-      {argENUM, "SYSTEM_POWER_STATE"},
-      {argENUM, "SYSTEM_INFORMATION_CLASS"},
-      {argENUM, "THREADINFOCLASS"},
-      {argENUM, "TIMER_INFORMATION_CLASS"},
-      {argENUM, "TIMER_TYPE"},
-      {argENUM, "TOKEN_INFORMATION_CLASS"},
-      {argENUM, "TOKEN_TYPE"},
-      {argENUM, "TRANSACTION_INFORMATION_CLASS"},
-      {argENUM, "TRANSACTIONMANAGER_INFORMATION_CLASS"},
-      {argENUM, "VIRTUAL_MEMORY_INFORMATION_CLASS"},
-      {argENUM, "WAIT_TYPE"},
-      {argENUM, "WORKERFACTORYINFOCLASS"},
-
-      {argMASK, "NOTIFICATION_MASK"},
-      {argMASK, "SECURITY_INFORMATION"},
-
-      {argBOOLEAN, "BOOLEAN"},
-      {argBOOLEAN, "BOOL"},
-
-      {argACCESS_MASK, "ACCESS_MASK"},
-      {argACCESS_MASK, "DIRECTORY_ACCESS_MASK"},
-      {argACCESS_MASK, "EVENT_ACCESS_MASK"},
-      {argACCESS_MASK, "FILE_ACCESS_MASK"},
-      {argACCESS_MASK, "JOB_ACCESS_MASK"},
-      {argACCESS_MASK, "KEY_ACCESS_MASK"},
-      {argACCESS_MASK, "MUTANT_ACCESS_MASK"},
-      {argACCESS_MASK, "PROCESS_ACCESS_MASK"},
-      {argACCESS_MASK, "SECTION_ACCESS_MASK"},
-      {argACCESS_MASK, "SEMAPHORE_ACCESS_MASK"},
-      {argACCESS_MASK, "TIMER_ACCESS_MASK"},
-      {argACCESS_MASK, "THREAD_ACCESS_MASK"},
-      {argACCESS_MASK, "TOKEN_ACCESS_MASK"},
-
-      {argHANDLE, "HANDLE"},
-
-      {argPOINTER, "PVOID"},
-      {argPOINTER, "PSTR"},
-      {argPOINTER, "PWSTR"},
-
-      {argPHANDLE, "PHANDLE"},
-      {argPHANDLE, "PPVOID"},
-      {argPHANDLE, "PSIZE_T"},
-
-      {argPBYTE, "PBYTE"},
-      {argPBYTE, "PUCHAR"},
-
-      {argPUSHORT, "PUSHORT"},
-      {argPUSHORT, "PWORD"},
-
-      {argPULONG, "PULONG"},
-      {argPULONG, "PDWORD"},
-      {argPULONG, "PINT"},
-      {argPULONG, "PUINT"},
-      {argPULONG, "PULONGLONG"},
-      {argPULONG, "PULONG_PTR"},
-      {argPULONG, "PBOOLEAN"},
-      {argPULONG, "PLCID"},
-
-      {argPCLIENT_ID, "PCLIENT_ID"},
-      {argPFILE_BASIC_INFORMATION, "PFILE_BASIC_INFORMATION"},
-      {argPFILE_NETWORK_OPEN_INFORMATION, "PFILE_NETWORK_OPEN_INFORMATION"},
-      {argPIO_STATUS_BLOCK, "PIO_STATUS_BLOCK"},
-      {argPLARGE_INTEGER, "PLARGE_INTEGER"},
-      {argPLPC_MESSAGE, "PLPC_MESSAGE"},
-      {argPOBJECT_ATTRIBUTES, "POBJECT_ATTRIBUTES"},
-      {argPRTL_USER_PROCESS_PARAMETERS, "PRTL_USER_PROCESS_PARAMETERS"},
-      {argPUNICODE_STRING, "PUNICODE_STRING"},
-  };
-
-  Typedefs::const_iterator it = typedefs.find(argType);
-  std::string const alias = (it == typedefs.end() ? std::string() : it->second);
-
-  ArgType eArgType = argULONG_PTR;
-  bool found(false);
-  for (auto idx : argTypes) {
-    if ((argType == idx.argTypeName_) || (alias == idx.argTypeName_)) {
-      found = true;
-      eArgType = idx.eArgType;
-      break;
-    }
-  }
-
-  if (!found) {
-    std::cerr << "Assuming ULONG for: " << argType << std::endl;
-  }
-
+                             ArgAttributes attributes) {
   if (argNum >= (int)arguments_.size())
     arguments_.resize(argNum + 1);
   arguments_[argNum] = Argument(eArgType, argType, variableName, attributes);
@@ -824,7 +750,7 @@ void EntryPoint::setDummyArgument(int argNum, ArgAttributes attributes) {
     arguments_.resize(argNum + 1);
   arguments_[argNum] =
       Argument(argULONG_PTR, std::string(), std::string(), attributes);
-  arguments_[argNum].dummy_ = true;
+  arguments_[argNum].setDummy(true);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -955,15 +881,9 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
       Argument const &argument = getArgument(i);
       if (i)
         os << ", ";
-      if ((argument.attributes_ & argRESERVED) && (argVal == 0)) {
-        // An empty reserved argument
-        os << '0';
-        continue;
-      }
-      if (bNames && !argument.name_.empty())
-        os << argument.name_ << "=";
       bool const dup = !args.insert(argVal).second;
-      argument.showArgument(os, hProcess, argVal, !before && success, dup);
+      argument.showArgument(os, hProcess, argVal, !before && success, dup,
+                            bNames);
     }
   }
 
@@ -1039,6 +959,151 @@ std::string buffToHex(unsigned char *buffer, size_t length) {
   }
   oss << ']';
   return oss.str();
+}
+
+std::map<std::string, ArgType> getArgTypes() {
+
+  static const struct {
+    ArgType eArgType_;
+    char const *argTypeName_;
+  } argTypes[] = {
+      {argULONG_PTR, "ULONG_PTR"},
+      {argULONG_PTR, "LONG_PTR"},
+      {argULONG_PTR, "UINT_PTR"},
+      {argULONG_PTR, "INT_PTR"},
+      {argULONG_PTR, "HANDLE"},
+      {argULONG_PTR, "SIZE_T"},
+      {argULONG_PTR, "NTSTATUS"},
+
+      {argULONG, "ULONG"},
+      {argULONG, "long"},
+      {argULONG, "LONG"},
+      {argULONG, "UINT"},
+      {argULONG, "int"},
+      {argULONG, "INT"},
+      {argULONG, "DWORD"},
+      {argULONG, "WORD"},
+      {argULONG, "USHORT"},
+      {argULONG, "WCHAR"},
+
+      {argULONG, "LCID"},
+
+      {argULONGLONG, "ULONGLONG"},
+
+      {argBYTE, "BYTE"},
+
+      // Enumerations obtained from Enumerations (see below)
+
+      {argMASK, "NOTIFICATION_MASK"},
+      {argMASK, "SECURITY_INFORMATION"},
+
+      {argBOOLEAN, "BOOLEAN"},
+      {argBOOLEAN, "BOOL"},
+
+      {argACCESS_MASK, "ACCESS_MASK"},
+      {argACCESS_MASK, "DIRECTORY_ACCESS_MASK"},
+      {argACCESS_MASK, "EVENT_ACCESS_MASK"},
+      {argACCESS_MASK, "FILE_ACCESS_MASK"},
+      {argACCESS_MASK, "JOB_ACCESS_MASK"},
+      {argACCESS_MASK, "KEY_ACCESS_MASK"},
+      {argACCESS_MASK, "MUTANT_ACCESS_MASK"},
+      {argACCESS_MASK, "PROCESS_ACCESS_MASK"},
+      {argACCESS_MASK, "SECTION_ACCESS_MASK"},
+      {argACCESS_MASK, "SEMAPHORE_ACCESS_MASK"},
+      {argACCESS_MASK, "TIMER_ACCESS_MASK"},
+      {argACCESS_MASK, "THREAD_ACCESS_MASK"},
+      {argACCESS_MASK, "TOKEN_ACCESS_MASK"},
+
+      {argHANDLE, "HANDLE"},
+
+      {argPOINTER, "PVOID"},
+      {argPOINTER, "PSTR"},
+      {argPOINTER, "PWSTR"},
+
+      {argPHANDLE, "PHANDLE"},
+      {argPHANDLE, "PPVOID"},
+      {argPHANDLE, "PSIZE_T"},
+
+      {argPBYTE, "PBYTE"},
+      {argPBYTE, "PUCHAR"},
+
+      {argPUSHORT, "PUSHORT"},
+      {argPUSHORT, "PWORD"},
+
+      {argPULONG, "PULONG"},
+      {argPULONG, "PDWORD"},
+      {argPULONG, "PINT"},
+      {argPULONG, "PUINT"},
+      {argPULONG, "PULONGLONG"},
+      {argPULONG, "PULONG_PTR"},
+      {argPULONG, "PBOOLEAN"},
+      {argPULONG, "PLCID"},
+
+      {argPCLIENT_ID, "PCLIENT_ID"},
+      {argPFILE_BASIC_INFORMATION, "PFILE_BASIC_INFORMATION"},
+      {argPFILE_NETWORK_OPEN_INFORMATION, "PFILE_NETWORK_OPEN_INFORMATION"},
+      {argPIO_STATUS_BLOCK, "PIO_STATUS_BLOCK"},
+      {argPLARGE_INTEGER, "PLARGE_INTEGER"},
+      {argPLPC_MESSAGE, "PLPC_MESSAGE"},
+      {argPOBJECT_ATTRIBUTES, "POBJECT_ATTRIBUTES"},
+      {argPRTL_USER_PROCESS_PARAMETERS, "PRTL_USER_PROCESS_PARAMETERS"},
+      {argPUNICODE_STRING, "PUNICODE_STRING"},
+  };
+
+  std::map<std::string, ArgType> result;
+
+  for (auto idx : argTypes) {
+    result[idx.argTypeName_] = idx.eArgType_;
+  }
+
+  // Add the known enumerations, without other handling
+  for (Enumerations::AllEnum *p = Enumerations::allEnums; p->name_; ++p) {
+    result.insert(std::make_pair(p->name_, argENUM));
+  }
+
+  return result;
+}
+
+ArgType getArgType(const std::string typeName,
+                   EntryPoint::Typedefs const &typedefs) {
+  static const std::map<std::string, ArgType> argTypes = getArgTypes();
+
+  // First try the type name
+  auto it = argTypes.find(typeName);
+  if (it != argTypes.end()) {
+    return it->second;
+  }
+
+  // Then use any typedef alias for the type name
+  const auto alias_it = typedefs.find(typeName);
+  if (alias_it != typedefs.end()) {
+    it = argTypes.find(alias_it->second);
+    if (it != argTypes.end()) {
+      return it->second;
+    }
+  }
+
+  std::cerr << "Assuming ULONG for: " << typeName << std::endl;
+  return argULONG_PTR;
+}
+
+// win32u implements some "dead export" logic (the functions
+// simply call RaiseFailFastException)
+bool deadExport(unsigned char instruction[], size_t length) {
+  for (auto pCheck : dead_exports) {
+    unsigned int offset = 0;
+    for (; *pCheck != 0; pCheck += 2) {
+      if (offset >= length)
+        break;
+      if (instruction[offset] != pCheck[0])
+        break;
+      offset += pCheck[1];
+    }
+    if (pCheck[0] == 0) {
+      return true;
+    }
+  }
+  return false;
 }
 
 } // namespace
@@ -1211,10 +1276,11 @@ bool EntryPoint::readEntryPoints(std::istream &cfgFile,
         if (optional == "OPTIONAL")
           attributes |= argOPTIONAL;
 
-        currEntryPoint->setArgument(argNum, typeName, variableName,
-                                    (ArgAttributes)attributes, typedefs);
+        const ArgType eArgType = getArgType(typeName, typedefs);
+        currEntryPoint->setArgument(argNum, eArgType, typeName, variableName,
+                                    (ArgAttributes)attributes);
 #ifdef _M_IX86
-        if (currEntryPoint->getArgument(argNum).argType_ == argULONGLONG) {
+        if (eArgType == argULONGLONG) {
           // Insert an unnamed dummy argument for the high dword
           argNum++;
           currEntryPoint->setDummyArgument(argNum, (ArgAttributes)attributes);
@@ -1237,7 +1303,8 @@ bool EntryPoint::readEntryPoints(std::istream &cfgFile,
 void EntryPoint::writeExport(std::ostream &os) const {
   if (targetAddress_ == nullptr && !disabled_)
     os << "//inactive\n";
-  os << "//[" << (disabled_ ? "-" : "") << category_ << "]\n";
+  os << "//[" << (disabled_ ? "-" : "") << (optional_ ? "?" : "") << category_
+     << "]\n";
   if (retType_ == retNTSTATUS) {
     os << "NTSTATUS";
   } else {
@@ -1251,23 +1318,10 @@ void EntryPoint::writeExport(std::ostream &os) const {
 
   for (size_t i = 0, end = arguments_.size(); i != end; i++) {
     Argument const &argument = arguments_[i];
-    if (argument.dummy_) {
+    if (argument.isDummy()) {
       continue;
     }
-    os << "    ";
-
-    std::string const opt(argument.attributes_ & argOPTIONAL ? "opt_" : "");
-    if (argument.attributes_ & argRESERVED)
-      os << "_Reserved_ ";
-    if ((argument.attributes_ & (argIN | argOUT)) == (argIN | argOUT))
-      os << "_Inout_" << opt << ' ';
-    else if (argument.attributes_ & argIN)
-      os << "_In_" << opt << ' ';
-    else if (argument.attributes_ & argOUT)
-      os << "_Out_" << opt << ' ';
-    if (argument.attributes_ & argCONST)
-      os << "const ";
-    os << argument.argTypeName_ << " " << argument.name_;
+    os << "    " << argument;
 
     if (i != end - 1)
       os << ",";

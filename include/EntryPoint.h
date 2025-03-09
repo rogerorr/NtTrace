@@ -21,10 +21,10 @@
     Comments and suggestions are always welcome.
     Please report bugs to rogero@howzatt.co.uk.
 
-    $Revision: 2622 $
+    $Revision: 2638 $
 */
 
-// $Id: EntryPoint.h 2622 2025-03-08 17:07:47Z roger $
+// $Id: EntryPoint.h 2638 2025-03-08 23:00:02Z roger $
 
 #include <windows.h>
 
@@ -90,11 +90,20 @@ struct Argument {
 
   /** Show the argument for the given process with the specified value. */
   void showArgument(std::ostream &os, HANDLE hProcess, ARG value, bool returnOk,
-                    bool dup) const;
+                    bool dup, bool showName) const;
 
   /** true if argument is output-only */
   bool outputOnly() const;
 
+  /** true if argument is second part of 64bit item on 32bit Windows */
+  void setDummy(bool value) { dummy_ = value; }
+
+  bool isDummy() const { return dummy_; }
+
+  /** Write argument to the output stream */
+  void printOn(std::ostream &os) const;
+
+private:
   ArgType argType_{argULONG_PTR};     // Argument type for processing
   std::string argTypeName_{"ULONG"};  // Actual argument type
   std::string name_{"Unknown"};       // formal name of argument
@@ -102,6 +111,11 @@ struct Argument {
   bool dummy_{}; // True if this is a dummy argument (2nd part of 64bit item on
                  // 32bit Windows)
 };
+
+inline std::ostream &operator<<(std::ostream &os, const Argument &argument) {
+  argument.printOn(os);
+  return os;
+}
 
 enum ReturnType {
   retNTSTATUS = 0, // also the default
@@ -116,8 +130,9 @@ public:
   using Typedefs = std::map<std::string, std::string>;
 
   explicit EntryPoint(std::string const &name, std::string const &category)
-      : name_(name), category_(category), disabled_(category[0] == '-') {
-    if (disabled_) {
+      : name_(name), category_(category), disabled_(category[0] == '-'),
+        optional_(category[0] == '?') {
+    if (disabled_ || optional_) {
       this->category_.erase(0, 1);
     }
   }
@@ -132,15 +147,16 @@ public:
 
   bool isDisabled() const { return disabled_; }
 
+  bool isOptional() const { return optional_; }
+
   size_t getArgumentCount() const { return arguments_.size(); }
 
   void setArgumentCount(size_t newSize) { arguments_.resize(newSize); }
 
   Argument const &getArgument(size_t idx) const { return arguments_[idx]; }
 
-  void setArgument(int argNum, std::string const &argType,
-                   std::string const &variableName, ArgAttributes attributes,
-                   Typedefs const &typedefs);
+  void setArgument(int argNum, ArgType eArgType, std::string const &argType,
+                   std::string const &variableName, ArgAttributes attributes);
 
   void setDummyArgument(int argNum, ArgAttributes attributes);
 
@@ -186,6 +202,7 @@ private:
   std::string exported_;            // (optional) exported name for entry point
   std::string category_;            // category of entry point
   bool disabled_{};                 // this entry point is disabled
+  bool optional_{};                 // this entry point is optional
   std::vector<Argument> arguments_; // vector of arguments
   ReturnType retType_{};            // Return type
   std::string retTypeName_;         // full name of return type

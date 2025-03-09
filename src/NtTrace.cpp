@@ -28,7 +28,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2622 2025-03-08 17:07:47Z roger $";
+    "$Id: NtTrace.cpp 2637 2025-03-08 22:59:20Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -311,24 +311,37 @@ bool TrapNtDebugger::initialise() {
   }
 
   // Open the config file
+  std::ifstream cfgFile;
   if (configFile.empty()) {
-    char chExeName[MAX_PATH + 1] = "";
-    GetModuleFileName(nullptr, chExeName, sizeof(chExeName));
-    char *pDelim = strrchr(chExeName, '.');
-    size_t namelen = pDelim - chExeName;
+    // First try in current directory
+    configFile = "NtTrace.cfg";
+    cfgFile.open(configFile.c_str());
+    if (!cfgFile) {
+      // Fall back to the location of the exe
+      char chExeName[MAX_PATH + 1] = "";
+      GetModuleFileName(nullptr, chExeName, sizeof(chExeName));
+      char *pDelim = strrchr(chExeName, '.');
+      size_t namelen = pDelim - chExeName;
 // Remove optional architectural suffix from executable name
 #ifdef _M_IX86
-    static const std::string suffix = "86";
+      static const std::string suffix = "86";
 #else
-    static const std::string suffix = "64";
+      static const std::string suffix = "64";
 #endif // _M_IX86
-    if (namelen > suffix.size() && memcmp(chExeName + namelen - suffix.size(),
-                                          suffix.c_str(), suffix.size()) == 0) {
-      namelen -= suffix.size();
+      if (namelen > suffix.size() &&
+          memcmp(chExeName + namelen - suffix.size(), suffix.c_str(),
+                 suffix.size()) == 0) {
+        namelen -= suffix.size();
+      }
+      chExeName[namelen] = '\0';
+
+      configFile = std::string(chExeName, namelen) + ".cfg";
+      cfgFile.open(configFile.c_str());
     }
-    configFile = std::string(chExeName, namelen) + ".cfg";
+  } else {
+    cfgFile.open(configFile.c_str());
   }
-  std::ifstream cfgFile(configFile.c_str());
+
   if (cfgFile) {
     if (!EntryPoint::readEntryPoints(cfgFile, entryPoints_, typedefs_, target_))
       return false;
@@ -920,7 +933,8 @@ void TrapNtDebugger::setShowLoaderSnaps(HANDLE hProcess) {
       BaseOfNtDll_, "NtQueryInformationProcess");
   if (pfn) {
     PROCESS_BASIC_INFORMATION pbi = {sizeof(pbi)};
-    if (0 == pfn(hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), nullptr)) {
+    if (0 ==
+        pfn(hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), nullptr)) {
       PULONG pGlobalFlag = &pbi.PebBaseAddress->GlobalFlag;
       ULONG GlobalFlag{0};
       const ULONG SHOW_LDR_SNAPS = 2;
