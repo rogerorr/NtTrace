@@ -28,7 +28,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2637 2025-03-08 22:59:20Z roger $";
+    "$Id: NtTrace.cpp 2649 2025-04-11 15:38:47Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -600,10 +600,9 @@ void TrapNtDebugger::OnException(DWORD processId, DWORD threadId,
   } else if (Exception.ExceptionRecord.ExceptionCode == CLR_EXCEPTION ||
              Exception.ExceptionRecord.ExceptionCode == CLR_EXCEPTION_V4) {
     header(processId, threadId);
-    os_ << "CLR exception, HR: "
-        << (PVOID)(UINT_PTR)(HRESULT)
-               Exception.ExceptionRecord.ExceptionInformation[0]
-        << std::endl;
+    os_ << "CLR exception, HR: " << std::hex
+        << (HRESULT)Exception.ExceptionRecord.ExceptionInformation[0]
+        << std::dec << std::endl;
   } else if (Exception.ExceptionRecord.ExceptionCode == MSVC_NOTIFICATION) {
     if (Exception.ExceptionRecord.ExceptionInformation[0] == 0x1000) {
       header(processId, threadId);
