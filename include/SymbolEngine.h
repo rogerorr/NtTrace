@@ -3,8 +3,8 @@
 
 /**@file
 
- Wrapper for DbgHelper to provide common utility functions for processing
- Microsoft PDB information.
+  Wrapper for DbgHelper to provide common utility functions for processing
+  Microsoft PDB information.
 
   @author Roger Orr mailto:rogero@howzatt.co.uk
   Bug reports, comments, and suggestions are always welcome.
@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2662 $
+  $Revision: 2676 $
 */
 
-// $Id: SymbolEngine.h 2662 2025-04-21 13:52:03Z roger $
+// $Id: SymbolEngine.h 2676 2025-04-21 17:00:58Z roger $
 
 #include <iosfwd>
 #include <string>

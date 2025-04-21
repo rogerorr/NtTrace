@@ -1,34 +1,34 @@
 /*
 NAME
-    GetModuleBase.cpp
+  GetModuleBase.cpp
 
 DESCRIPTION
-    Helper for stack walking.
+  Helper for stack walking.
 
 AUTHOR
-    Roger Orr mailto:rogero@howzatt.co.uk
-    Bug reports, comments, and suggestions are always welcome.
+  Roger Orr mailto:rogero@howzatt.co.uk
+  Bug reports, comments, and suggestions are always welcome.
 
 COPYRIGHT
-    Copyright (C) 2003 under the MIT license:
+  Copyright (C) 2003 under the MIT license:
 
-    "Permission is hereby granted, free of charge, to any person obtaining a
-    copy of this software and associated documentation files (the "Software"),
-    to deal in the Software without restriction, including without limitation
-    the rights to use, copy, modify, merge, publish, distribute, sublicense,
-    and/or sell copies of the Software, and to permit persons to whom the
-    Software is furnished to do so, subject to the following conditions:
+  "Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
 
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-    IN THE SOFTWARE."
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  IN THE SOFTWARE."
 */
 
 #include "GetModuleBase.h"
@@ -46,7 +46,7 @@ COPYRIGHT
 #pragma comment(lib, "psapi")
 
 static char const szRCSID[] =
-    "$Id: GetModuleBase.cpp 2662 2025-04-21 13:52:03Z roger $";
+    "$Id: GetModuleBase.cpp 2676 2025-04-21 17:00:58Z roger $";
 
 namespace {
 //////////////////////////////////////////////////////////

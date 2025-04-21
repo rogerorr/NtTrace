@@ -1,49 +1,49 @@
 /*
 NAME
-    GetFileNameFromHandle
+  GetFileNameFromHandle
 
 DESCRIPTION
-    Helper function to try and get a meaningful file name from an opened file
-    handle
+  Helper function to try and get a meaningful file name from an opened file
+  handle
 
 AUTHOR
-    Roger Orr mailto:rogero@howzatt.co.uk
-    Bug reports, comments, and suggestions are always welcome.
+  Roger Orr mailto:rogero@howzatt.co.uk
+  Bug reports, comments, and suggestions are always welcome.
 
 COPYRIGHT
-    Original code © 2010 Microsoft Corporation. All rights reserved.
-    From http://msdn.microsoft.com/en-us/library/aa366789%28v=vs.85%29.aspx
+  Original code © 2010 Microsoft Corporation. All rights reserved.
+  From http://msdn.microsoft.com/en-us/library/aa366789%28v=vs.85%29.aspx
 
-    Changes copyright (C) 2011 by Roger Orr mailto:rogero@howzatt.co.uk
+  Changes copyright (C) 2011 by Roger Orr mailto:rogero@howzatt.co.uk
 
-    This software is distributed in the hope that it will be useful, but
-    without WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  This software is distributed in the hope that it will be useful, but
+  without WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-    Permission is granted to anyone to make or distribute verbatim
-    copies of this software provided that the copyright notice and
-    this permission notice are preserved, and that the distributor
-    grants the recipient permission for further distribution as permitted
-    by this notice.
+  Permission is granted to anyone to make or distribute verbatim
+  copies of this software provided that the copyright notice and
+  this permission notice are preserved, and that the distributor
+  grants the recipient permission for further distribution as permitted
+  by this notice.
 
 IMPLEMENTATION NOTES
-    There are various forms of 'raw' file names:
-      \Device\HarddiskVolume1\temp\xx.txt
-      \Device\LanmanRedirector\or2-freda\drivec\temp\xx.txt
-      \Device\Mup\or2-freda\drivec\temp\xx.txt
-      \Device\WinDfs\P:000000000001703e\or2-freda\drivec\temp\xx.txt
+  There are various forms of 'raw' file names:
+    \Device\HarddiskVolume1\temp\xx.txt
+    \Device\LanmanRedirector\or2-freda\drivec\temp\xx.txt
+    \Device\Mup\or2-freda\drivec\temp\xx.txt
+    \Device\WinDfs\P:000000000001703e\or2-freda\drivec\temp\xx.txt
 
-    and of 'dos device names' for drive letters:
-      \Device\HarddiskVolume1
-      \Device\LanmanRedirector\;Z:000000000001703e\or2-freda\drivec
-      \Device\WinDfs\P:000000000001703e
+  and of 'dos device names' for drive letters:
+    \Device\HarddiskVolume1
+    \Device\LanmanRedirector\;Z:000000000001703e\or2-freda\drivec
+    \Device\WinDfs\P:000000000001703e
 
-    Network files may be accessed via a UNC path rather than a drive letter.
+  Network files may be accessed via a UNC path rather than a drive letter.
 
 */
 
 static char const szRCSID[] =
-    "$Id: GetFileNameFromHandle.cpp 2662 2025-04-21 13:52:03Z roger $";
+    "$Id: GetFileNameFromHandle.cpp 2676 2025-04-21 17:00:58Z roger $";
 
 #include <windows.h>
 
