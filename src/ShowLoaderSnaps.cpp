@@ -1,32 +1,42 @@
 /*
 NAME
-    ShowLoaderSnaps.cpp
+  ShowLoaderSnaps.cpp
 
 DESCRIPTION
-    Process to display loadder snap messages
+  Process to display loader snap messages
 
-COPYRIGHT
-    Copyright (C) 2025 by Roger Orr <rogero@howzatt.co.uk>
+AUTHOR
+  Roger Orr mailto:rogero@howzatt.co.uk
+  Bug reports, comments, and suggestions are always welcome.
 
-    This software is distributed in the hope that it will be useful, but
-    without WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+COPYRIGHT (MIT License)
 
-    Permission is granted to anyone to make or distribute verbatim
-    copies of this software provided that the copyright notice and
-    this permission notice are preserved, and that the distributor
-    grants the recipient permission for further distribution as permitted
-    by this notice.
+  Copyright (C) 2025 under the MIT license:
 
-    Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.co.uk.
+  "Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  IN THE SOFTWARE."
 
 EXAMPLE
-    ShowLoaderSnaps fred.exe
+  ShowLoaderSnaps fred.exe
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 2618 2025-03-06 23:28:57Z roger $";
+    "$Id: ShowLoaderSnaps.cpp 2668 2025-04-21 14:30:46Z roger $";
 
 #pragma warning(disable : 4800) // forcing value to bool 'true' or 'false'
                                 // (performance warning)
@@ -55,70 +65,37 @@ using namespace or2;
 /** Debugger event handler for showing loader snaps entry points */
 class ShowLoaderSnaps : public DebuggerAdapter {
 public:
-  /**
-   * Construct a debugger
-   * @param os the output stream to write to
-   */
+  // Constructor: output will be written to `os`
   ShowLoaderSnaps(std::ostream &os) : os_(os) {}
 
-  void setMinimal() {
-    filters_.push_back(" - ENTER: ");
-    filters_.push_back(" - RETURN: ");
-    filters_.push_back(" - INFO: ");
-  }
+  // Set minimal output
+  void SetQuiet();
 
-  // callbacks on events
+  // Turn on loader snaps for the target process
+  void SetShowLoaderSnaps(HANDLE hProcess);
+
+  // Callback on output debug string event
   void
   OnOutputDebugString(DWORD /*processId*/, DWORD /*threadId*/, HANDLE hProcess,
-                      OUTPUT_DEBUG_STRING_INFO const &DebugString) override {
-    const auto message =
-        readString(hProcess, DebugString.lpDebugStringData,
-                   DebugString.fUnicode, DebugString.nDebugStringLength);
-    // Filter out unwanted messages
-    for (const auto &filter : filters_) {
-      if (message.find(filter) != std::string::npos) {
-        return;
-      }
-    }
-    os_ << message << std::flush;
-  }
-
-  std::string readString(HANDLE hProcess, LPVOID lpString, bool bUnicode,
-                         WORD nStringLength) {
-    std::string message;
-    if (nStringLength == 0) {
-    } else if (bUnicode) {
-      std::vector<wchar_t> chVector(nStringLength + 1);
-      if (ReadProcessMemory(hProcess, lpString, &chVector[0],
-                            nStringLength * sizeof(wchar_t), nullptr)) {
-        size_t const wcLen = wcstombs(nullptr, &chVector[0], 0);
-        if (wcLen == (size_t)-1) {
-          os_ << "invalid string\n";
-        } else {
-          message.resize(wcLen);
-          wcstombs(&message[0], &chVector[0], wcLen);
-        }
-      }
-    } else {
-      message.resize(nStringLength);
-      (void)ReadProcessMemory(hProcess, lpString, &message[0], nStringLength,
-                              nullptr);
-    }
-
-    // Remove any trailing string terminator
-    message.resize(message.find_last_not_of('\0') + 1);
-
-    return message;
-  }
+                      OUTPUT_DEBUG_STRING_INFO const &DebugString) override;
 
 private:
   std::ostream &os_;
   std::vector<std::string> filters_;
+
+  std::string ReadString(HANDLE hProcess, LPVOID lpString, bool bUnicode,
+                         WORD nStringLength);
 };
 
 //////////////////////////////////////////////////////////////////////////
-namespace {
-void SetShowLoaderSnaps(HANDLE hProcess) {
+void ShowLoaderSnaps::SetQuiet() {
+  filters_.push_back(" - ENTER: ");
+  filters_.push_back(" - RETURN: ");
+  filters_.push_back(" - INFO: ");
+}
+
+//////////////////////////////////////////////////////////////////////////
+void ShowLoaderSnaps::SetShowLoaderSnaps(HANDLE hProcess) {
   PROCESS_BASIC_INFORMATION pbi = {};
   if (0 == NtQueryInformationProcess(hProcess, ProcessBasicInformation, &pbi,
                                      sizeof(pbi), 0)) {
@@ -138,7 +115,51 @@ void SetShowLoaderSnaps(HANDLE hProcess) {
                        0);
   }
 }
-} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+void ShowLoaderSnaps::OnOutputDebugString(
+    DWORD /*processId*/, DWORD /*threadId*/, HANDLE hProcess,
+    OUTPUT_DEBUG_STRING_INFO const &DebugString) {
+  const auto message =
+      ReadString(hProcess, DebugString.lpDebugStringData, DebugString.fUnicode,
+                 DebugString.nDebugStringLength);
+  // Filter out unwanted messages
+  for (const auto &filter : filters_) {
+    if (message.find(filter) != std::string::npos) {
+      return;
+    }
+  }
+  os_ << message << std::flush;
+}
+
+//////////////////////////////////////////////////////////////////////////
+std::string ShowLoaderSnaps::ReadString(HANDLE hProcess, LPVOID lpString,
+                                        bool bUnicode, WORD nStringLength) {
+  std::string message;
+  if (nStringLength == 0) {
+  } else if (bUnicode) {
+    std::vector<wchar_t> chVector(nStringLength + 1);
+    if (ReadProcessMemory(hProcess, lpString, &chVector[0],
+                          nStringLength * sizeof(wchar_t), nullptr)) {
+      size_t const wcLen = wcstombs(nullptr, &chVector[0], 0);
+      if (wcLen == (size_t)-1) {
+        os_ << "invalid string\n";
+      } else {
+        message.resize(wcLen);
+        wcstombs(&message[0], &chVector[0], wcLen);
+      }
+    }
+  } else {
+    message.resize(nStringLength);
+    (void)ReadProcessMemory(hProcess, lpString, &message[0], nStringLength,
+                            nullptr);
+  }
+
+  // Remove any trailing string terminator
+  message.resize(message.find_last_not_of('\0') + 1);
+
+  return message;
+}
 
 //////////////////////////////////////////////////////////////////////////
 int main(int argc, char **argv) {
@@ -169,7 +190,7 @@ int main(int argc, char **argv) {
   ShowLoaderSnaps debugger((outputFile.length() != 0) ? (std::ostream &)ofs
                                                       : std::cout);
   if (quiet) {
-    debugger.setMinimal();
+    debugger.SetQuiet();
   }
 
   putenv("_NO_DEBUG_HEAP=1");
@@ -184,7 +205,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  SetShowLoaderSnaps(ProcessInformation.hProcess);
+  debugger.SetShowLoaderSnaps(ProcessInformation.hProcess);
   ResumeThread(ProcessInformation.hThread);
 
   // Close unwanted handles

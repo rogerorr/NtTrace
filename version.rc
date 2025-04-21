@@ -1,6 +1,6 @@
 // Resource file for include for project binaries
 //
-// $Id: version.rc 2046 2021-07-13 22:29:43Z roger $
+// $Id: version.rc 2653 2025-04-21 12:50:26Z roger $
 
 #include "winver.h"
 
@@ -40,7 +40,7 @@ BEGIN
          VALUE "CompanyName", "OR/2 Limited"
          VALUE "FileDescription", DESCRIPTION
          VALUE "FileVersion", VERSION_STRING
-         VALUE "LegalCopyright", "Copyright (C) OR/2 Limited 2010"
+         VALUE "LegalCopyright", "Copyright (C) OR/2 Limited 2010-2025 under the MIT license"
          VALUE "ProductName", "Debugging Tools"
       END
    END

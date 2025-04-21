@@ -6,11 +6,15 @@ DESCRIPTION
     Helper function to try and get a meaningful file name from an opened file
     handle
 
+AUTHOR
+    Roger Orr mailto:rogero@howzatt.co.uk
+    Bug reports, comments, and suggestions are always welcome.
+
 COPYRIGHT
     Original code © 2010 Microsoft Corporation. All rights reserved.
     From http://msdn.microsoft.com/en-us/library/aa366789%28v=vs.85%29.aspx
 
-    Changes copyright (C) 2011 by Roger Orr <rogero@howzatt.co.uk>
+    Changes copyright (C) 2011 by Roger Orr mailto:rogero@howzatt.co.uk
 
     This software is distributed in the hope that it will be useful, but
     without WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,9 +25,6 @@ COPYRIGHT
     this permission notice are preserved, and that the distributor
     grants the recipient permission for further distribution as permitted
     by this notice.
-
-    Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.co.uk.
 
 IMPLEMENTATION NOTES
     There are various forms of 'raw' file names:
@@ -42,7 +43,7 @@ IMPLEMENTATION NOTES
 */
 
 static char const szRCSID[] =
-    "$Id: GetFileNameFromHandle.cpp 2467 2024-09-07 21:35:42Z roger $";
+    "$Id: GetFileNameFromHandle.cpp 2662 2025-04-21 13:52:03Z roger $";
 
 #include <windows.h>
 

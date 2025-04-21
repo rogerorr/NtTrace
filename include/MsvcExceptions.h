@@ -5,26 +5,33 @@
 
     Data for Microsoft Visual Studio exceptions
 
-    @author Roger Orr <rogero@howzatt.co.uk>
+    @author Roger Orr mailto:rogero@howzatt.co.uk
+    Bug reports, comments, and suggestions are always welcome.
 
-    Copyright &copy; 2004.
-    This software is distributed in the hope that it will be useful, but
-    without WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    Copyright &copy; 2004 under the MIT license:
 
-    Permission is granted to anyone to make or distribute verbatim
-    copies of this software provided that the copyright notice and
-    this permission notice are preserved, and that the distributor
-    grants the recipient permission for further distribution as permitted
-    by this notice.
+    "Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
 
-    Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.co.uk.
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
 
-    $Revision: 2074 $
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+    IN THE SOFTWARE."
+
+    $Revision: 2656 $
 */
 
-// $Id: MsvcExceptions.h 2074 2021-07-17 17:07:41Z roger $
+// $Id: MsvcExceptions.h 2656 2025-04-21 12:59:05Z roger $
 
 /* Value of ExceptionCode for an MSVC C++ exception ("msc") */
 static DWORD const MSVC_EXCEPTION = 0xe06d7363;

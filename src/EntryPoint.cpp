@@ -1,29 +1,38 @@
 /*
 NAME
-    EntryPoint.cpp
+  EntryPoint.cpp
 
 DESCRIPTION
-    Handle a single entry point for NtTrace
+  Handle a single entry point for NtTrace
+
+AUTHOR
+  Roger Orr mailto:rogero@howzatt.co.uk
+  Bug reports, comments, and suggestions are always welcome.
 
 COPYRIGHT
-    Copyright (C) 2002, 2019 by Roger Orr <rogero@howzatt.co.uk>
+  Copyright (C) 2002, 2019 under the MIT license:
 
-    This software is distributed in the hope that it will be useful, but
-    without WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  "Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
 
-    Permission is granted to anyone to make or distribute verbatim
-    copies of this software provided that the copyright notice and
-    this permission notice are preserved, and that the distributor
-    grants the recipient permission for further distribution as permitted
-    by this notice.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
 
-    Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.co.uk.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  IN THE SOFTWARE."
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2638 2025-03-08 23:00:02Z roger $";
+    "$Id: EntryPoint.cpp 2668 2025-04-21 14:30:46Z roger $";
 
 #include "EntryPoint.h"
 #include "Enumerations.h"

@@ -1,33 +1,42 @@
 /*
 NAME
-    Enumerations.cpp
+  Enumerations.cpp
 
 DESCRIPTION
-    Class to define NT native enumerations for use by ShowData
+  Class to define NT native enumerations for use by ShowData
 
 NOTES
-    Many of the values are obtainable from ole32.dll, for example using:
-    sed -n "s/^enum /udt /p" Enumerations.cpp | symexplorer ole32.dll
+  Many of the values are obtainable from ole32.dll, for example using:
+  sed -n "s/^enum /udt /p" Enumerations.cpp | symexplorer ole32.dll
+
+AUTHOR
+  Roger Orr mailto:rogero@howzatt.co.uk
+  Bug reports, comments, and suggestions are always welcome.
 
 COPYRIGHT
-    Copyright (C) 2011, 2019 by Roger Orr <rogero@howzatt.co.uk>
+  Copyright (C) 2011, 2019 under the MIT license:
 
-    This software is distributed in the hope that it will be useful, but
-    without WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  "Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
 
-    Permission is granted to anyone to make or distribute verbatim
-    copies of this software provided that the copyright notice and
-    this permission notice are preserved, and that the distributor
-    grants the recipient permission for further distribution as permitted
-    by this notice.
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
 
-    Comments and suggestions are always welcome.
-    Please report bugs to rogero@howzatt.co.uk.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  IN THE SOFTWARE."
 */
 
 static char const szRCSID[] =
-    "$Id: Enumerations.cpp 2603 2025-03-02 16:27:41Z roger $";
+    "$Id: Enumerations.cpp 2668 2025-04-21 14:30:46Z roger $";
 
 #include "Enumerations.h"
 

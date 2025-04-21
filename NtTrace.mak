@@ -1,24 +1,33 @@
-# $Id: NtTrace.mak 2627 2025-03-08 18:03:49Z roger $
+# $Id: NtTrace.mak 2670 2025-04-21 14:35:30Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
 #
 
+# AUTHOR
+#   Roger Orr mailto:rogero@howzatt.co.uk
+#   Bugs, comments, and suggestions are always welcome.
+#
 # COPYRIGHT
-#     Copyright (C) 2007,2021 by Roger Orr <rogero@howzatt.co.uk>
+#   Copyright (C) 2007,2021 under the MIT license:
 # 
-#     This software is distributed in the hope that it will be useful, but
-#     without WITHOUT ANY WARRANTY; without even the implied warranty of
-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# 
-#     Permission is granted to anyone to make or distribute verbatim
-#     copies of this software provided that the copyright notice and
-#     this permission notice are preserved, and that the distributor
-#     grants the recipient permission for further distribution as permitted
-#     by this notice.
-# 
-#     Comments and suggestions are always welcome.
-#     Please report bugs to rogero@howzatt.co.uk.
+#   "Permission is hereby granted, free of charge, to any person obtaining a
+#   copy of this software and associated documentation files (the "Software"),
+#   to deal in the Software without restriction, including without limitation
+#   the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#   and/or sell copies of the Software, and to permit persons to whom the
+#   Software is furnished to do so, subject to the following conditions:
+#
+#   The above copyright notice and this permission notice shall be included in
+#   all copies or substantial portions of the Software.
+#
+#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+#   IN THE SOFTWARE."
 
 !if ("$(PLATFORM)" == "X64" || "$(PLATFORM)" == "x64")
 BUILD=build64
