@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2668 2025-04-21 14:30:46Z roger $";
+    "$Id: ShowData.cpp 2717 2025-04-21 22:27:47Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -54,7 +54,7 @@ static char const szRCSID[] =
 namespace {
 /** Read an object of type 'T' at remoteAddress in the specified process */
 template <typename T>
-BOOL readHelper(HANDLE hProcess, LPVOID remoteAddress, T &theValue) {
+BOOL readHelper(HANDLE hProcess, LPCVOID remoteAddress, T &theValue) {
   return ReadProcessMemory(hProcess, remoteAddress, &theValue, sizeof(T),
                            nullptr);
 }
@@ -62,13 +62,20 @@ BOOL readHelper(HANDLE hProcess, LPVOID remoteAddress, T &theValue) {
 /** Read an object of type 'T' at remoteAddress in the specified process */
 template <typename T>
 BOOL readHelper(HANDLE hProcess, ULONG_PTR remoteAddress, T &theValue) {
-  return ReadProcessMemory(hProcess, reinterpret_cast<LPVOID>(remoteAddress),
+  return ReadProcessMemory(hProcess, reinterpret_cast<LPCVOID>(remoteAddress),
                            &theValue, sizeof(T), nullptr);
 }
 
 void ensurePopulated();
 
 bool isWow(HANDLE hProcess);
+
+size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
+                  size_t wc_len) {
+  return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
+                             mb_str, static_cast<int>(mb_size), 0, nullptr);
+}
+
 } // namespace
 
 namespace showData {
@@ -208,7 +215,7 @@ void showHandle(std::ostream &os, HANDLE handle) {
 
 //////////////////////////////////////////////////////////////////////////
 // Show a module name from the debuggee
-bool showName(std::ostream &os, HANDLE hProcess, LPVOID lpImageName,
+bool showName(std::ostream &os, HANDLE hProcess, LPCVOID lpImageName,
               bool bUnicode) {
   void *lpString = nullptr;
 
@@ -227,7 +234,7 @@ bool showName(std::ostream &os, HANDLE hProcess, LPVOID lpImageName,
 
 //////////////////////////////////////////////////////////////////////////
 // Show a NUL terminated string from the debuggee
-bool showString(std::ostream &os, HANDLE hProcess, LPVOID lpString,
+bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
                 bool bUnicode, WORD nStringLength) {
   bool newline(false);
 
@@ -236,18 +243,18 @@ bool showString(std::ostream &os, HANDLE hProcess, LPVOID lpString,
     std::vector<wchar_t> chVector(nStringLength + 1);
     or2::ReadPartialProcessMemory(hProcess, lpString, &chVector[0], 1,
                                   nStringLength * sizeof(wchar_t));
-    size_t const wcLen = wcstombs(nullptr, &chVector[0], 0);
-    if (wcLen == (size_t)-1) {
+    size_t const mbLen = Utf16ToMbs(nullptr, 0, &chVector[0], nStringLength);
+    if (mbLen == 0) {
       for (int i = 0; i != nStringLength + 1; ++i) {
         os << "char " << i << " is " << std::hex << (unsigned int)chVector[i]
            << std::dec << '\n';
       }
-      os << "invalid string";
+      os << "invalid string: " << GetLastError();
     } else {
-      std::vector<char> mbStr(wcLen + 1);
-      wcstombs(&mbStr[0], &chVector[0], wcLen);
+      std::vector<char> mbStr(mbLen + 1);
+      Utf16ToMbs(&mbStr[0], mbLen, &chVector[0], nStringLength);
       os << &mbStr[0];
-      if (wcLen > 0 && mbStr[wcLen - 1] == '\n') {
+      if (mbLen > 0 && mbStr[mbLen - 1] == '\n') {
         newline = true;
       }
     }

@@ -9,7 +9,7 @@
   Bug reports, comments, and suggestions are always welcome.
 
   Copyright &copy; 2002, 2013 under the MIT license:
-  
+
   "Permission is hereby granted, free of charge, to any person obtaining a
   copy of this software and associated documentation files (the "Software"),
   to deal in the Software without restriction, including without limitation
@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2670 $
+  $Revision: 2716 $
 */
 
-// $Id: TrapNtOpcodes.h 2670 2025-04-21 14:35:30Z roger $
+// $Id: TrapNtOpcodes.h 2716 2025-04-21 22:23:58Z roger $
 
 // Define the op codes used for NtTrace
 static unsigned char const XOR = 0x33;         ///< xor reg1,reg2

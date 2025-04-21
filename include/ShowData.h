@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2670 $
+  $Revision: 2712 $
 */
 
-// $Id: ShowData.h 2670 2025-04-21 14:35:30Z roger $
+// $Id: ShowData.h 2712 2025-04-21 21:43:24Z roger $
 
 #include <ostream>
 #include <windows.h>
@@ -61,14 +61,14 @@ void showMask(std::ostream &os, ULONG_PTR value, std::string const &enumName);
 void showWinError(std::ostream &os, HRESULT hResult);
 
 /** show an image name from the debuggee (in ANSI or Unicode) */
-bool showName(std::ostream &os, HANDLE hProcess, LPVOID lpImageName,
+bool showName(std::ostream &os, HANDLE hProcess, LPCVOID lpImageName,
               bool bUnicode);
 
 /**
  * Show a string from the debuggee (in ANSI or Unicode)
  * @return true if ends with a newline, false if not
  */
-bool showString(std::ostream &os, HANDLE hProcess, LPVOID lpString,
+bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
                 bool bUnicode, WORD nStringLength);
 
 /** Show the command line from the target process */
