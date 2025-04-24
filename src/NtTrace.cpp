@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2721 2025-04-24 21:00:30Z roger $";
+    "$Id: NtTrace.cpp 2724 2025-04-24 22:36:40Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -108,7 +108,7 @@ public:
                   CREATE_PROCESS_DEBUG_INFO const &CreateProcessInfo) override;
   void OnExitThread(DWORD processId, DWORD threadId,
                     EXIT_THREAD_DEBUG_INFO const &ExitThread) override;
-  void OnExitProcess(DWORD processId, DWORD threadId,
+  void OnExitProcess(DWORD processId, DWORD threadId, HANDLE hProcess,
                      EXIT_PROCESS_DEBUG_INFO const &ExitProcess) override;
   void OnLoadDll(DWORD processId, DWORD threadId, HANDLE hProcess,
                  LOAD_DLL_DEBUG_INFO const &LoadDll) override;
@@ -681,7 +681,7 @@ void TrapNtDebugger::OnExitThread(DWORD processId, DWORD threadId,
 }
 
 //////////////////////////////////////////////////////////////////////////
-void TrapNtDebugger::OnExitProcess(DWORD processId, DWORD threadId,
+void TrapNtDebugger::OnExitProcess(DWORD processId, DWORD threadId, HANDLE /*hProcess*/,
                                    EXIT_PROCESS_DEBUG_INFO const &ExitProcess) {
   header(processId, threadId);
   os_ << "Process " << processId << " exit code: " << ExitProcess.dwExitCode

@@ -32,10 +32,9 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2719 2025-04-24 20:53:25Z roger $";
+    "$Id: ShowData.cpp 2728 2025-04-24 23:54:43Z roger $";
 
 #include "ShowData.h"
-#include "Enumerations.h"
 
 #include <DbgHelp.h>
 #include <windows.h>
@@ -43,6 +42,7 @@ static char const szRCSID[] =
 #include <iomanip>
 #include <map>
 #include <sstream>
+#include <string>
 #include <typeinfo>
 #include <vector>
 
@@ -66,8 +66,6 @@ BOOL readHelper(HANDLE hProcess, ULONG_PTR remoteAddress, T &theValue) {
                            &theValue, sizeof(T), nullptr);
 }
 
-void ensurePopulated();
-
 bool isWow(HANDLE hProcess);
 
 size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
@@ -82,7 +80,17 @@ namespace showData {
 
 //////////////////////////////////////////////////////////////////////////
 // Data for enumerations
-std::map<std::string, Enumerations::EnumMap *> enumMap;
+using Enumerators = std::vector<std::pair<std::string, unsigned long>>;
+using EnumMap = std::map<std::string, Enumerators>;
+EnumMap enumMap;
+
+//////////////////////////////////////////////////////////////////////////
+/** define an enumerator value for an enumeration */
+void defineEnumerator(std::string const &enumeration, std::string const &enumerator, unsigned long value)
+{
+  auto &entry = enumMap[enumeration];
+  entry.push_back(std::make_pair(enumerator, value));
+}
 
 //////////////////////////////////////////////////////////////////////////
 /** Stream a large integer to an output stream.
@@ -165,15 +173,12 @@ void showBoolean(std::ostream &os, BOOLEAN value) {
 //////////////////////////////////////////////////////////////////////////
 // Show an enumeration name, if available
 void showEnum(std::ostream &os, ULONG_PTR value, std::string const &enumName) {
-  ensurePopulated();
-
   showDword(os, value);
-  std::map<std::string, Enumerations::EnumMap *>::const_iterator it =
-      enumMap.find(enumName);
+  const auto it = enumMap.find(enumName);
   if (it != enumMap.end()) {
-    for (Enumerations::EnumMap *p = it->second; p->name_; ++p) {
-      if (p->value_ == value) {
-        os << " [" << p->name_ << ']';
+    for (const auto& enumerator : it->second) {
+      if (enumerator.second == value) {
+        os << " [" << enumerator.first << ']';
         break;
       }
     }
@@ -183,17 +188,14 @@ void showEnum(std::ostream &os, ULONG_PTR value, std::string const &enumName) {
 //////////////////////////////////////////////////////////////////////////
 // Show an mask enumeration name, if available
 void showMask(std::ostream &os, ULONG_PTR value, std::string const &enumName) {
-  ensurePopulated();
-
   showDword(os, value);
-  std::map<std::string, Enumerations::EnumMap *>::const_iterator it =
-      enumMap.find(enumName);
+  const auto it = enumMap.find(enumName);
   std::string delim = " [";
   if (it != enumMap.end()) {
-    for (Enumerations::EnumMap *p = it->second; p->name_; ++p) {
-      if ((value & p->value_) == p->value_) {
-        os << delim << p->name_;
-        value -= p->value_;
+    for (const auto& enumerator : it->second) {
+      if ((value & enumerator.second) == enumerator.second) {
+        os << delim << enumerator.first;
+        value -= enumerator.second;
         delim = "|";
         break;
       }
@@ -788,14 +790,6 @@ void showThrowType(std::ostream &os, HANDLE hProcess, ULONG_PTR throwInfo,
 } // namespace showData
 
 namespace {
-void ensurePopulated() {
-  if (showData::enumMap.empty()) {
-    for (Enumerations::AllEnum *p = Enumerations::allEnums; p->name_; ++p) {
-      showData::enumMap[p->name_] = p->pMap_;
-    }
-  }
-}
-
 bool isWow(HANDLE hProcess) {
   using IsWow64Process =
       BOOL WINAPI(_In_ HANDLE hProcess, _Out_ PBOOL Wow64Process);

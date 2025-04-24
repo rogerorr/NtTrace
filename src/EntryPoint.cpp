@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2719 2025-04-24 20:53:25Z roger $";
+    "$Id: EntryPoint.cpp 2726 2025-04-24 23:39:11Z roger $";
 
 #include "EntryPoint.h"
 
@@ -1068,6 +1068,10 @@ std::map<std::string, ArgType> getArgTypes() {
   // Add the known enumerations, without other handling
   for (Enumerations::AllEnum *p = Enumerations::allEnums; p->name_; ++p) {
     result.insert(std::make_pair(p->name_, argENUM));
+
+    for (Enumerations::EnumMap *q = p->pMap_; q->name_; ++q) {
+      defineEnumerator(p->name_, q->name_, q->value_);
+    }
   }
 
   return result;

@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2718 $
+  $Revision: 2724 $
 */
 
-// $Id: DebugDriver.h 2718 2025-04-24 20:44:06Z roger $
+// $Id: DebugDriver.h 2724 2025-04-24 22:36:40Z roger $
 
 #ifndef _WINDOWS_
 #include <windows.h>
@@ -71,7 +71,7 @@ public:
                             EXIT_THREAD_DEBUG_INFO const &ExitThread) = 0;
 
   /** Callback on process exit */
-  virtual void OnExitProcess(DWORD processId, DWORD threadId,
+  virtual void OnExitProcess(DWORD processId, DWORD threadId, HANDLE hProcess,
                              EXIT_PROCESS_DEBUG_INFO const &ExitProcess) = 0;
 
   /** Callback on loading DLL */
@@ -124,7 +124,7 @@ public:
                     EXIT_THREAD_DEBUG_INFO const &ExitThread) override {}
 
   /** Callback on process exit */
-  void OnExitProcess(DWORD processId, DWORD threadId,
+  void OnExitProcess(DWORD processId, DWORD threadId, HANDLE hProcess,
                      EXIT_PROCESS_DEBUG_INFO const &ExitProcess) override {}
 
   /** Callback on loading DLL */

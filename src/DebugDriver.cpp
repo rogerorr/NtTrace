@@ -34,7 +34,7 @@ COPYRIGHT
 #include "../include/DisplayError.h"
 
 static char const szRCSID[] =
-    "$Id: DebugDriver.cpp 2718 2025-04-24 20:44:06Z roger $";
+    "$Id: DebugDriver.cpp 2724 2025-04-24 22:36:40Z roger $";
 
 //////////////////////////////////////////////////////////////////////////
 // Main debugger loop
@@ -107,8 +107,9 @@ void or2::DebugDriver::Loop(Debugger &debugger) {
     } break;
 
     case EXIT_PROCESS_DEBUG_EVENT: {
+      ProcessEntry &entry = processMap_[DebugEvent.dwProcessId];
       debugger.OnExitProcess(DebugEvent.dwProcessId, DebugEvent.dwThreadId,
-                             DebugEvent.u.ExitProcess);
+                             entry.hProcess_, DebugEvent.u.ExitProcess);
 
       processMap_.erase(DebugEvent.dwProcessId);
       if (processMap_.empty()) {

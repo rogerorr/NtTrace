@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2719 $
+  $Revision: 2728 $
 */
 
-// $Id: ShowData.h 2719 2025-04-24 20:53:25Z roger $
+// $Id: ShowData.h 2728 2025-04-24 23:54:43Z roger $
 
 #include <ostream>
 #include <windows.h>
@@ -42,6 +42,9 @@
 
 /** namespace for functions showing data from another process */
 namespace showData {
+/** define an enumerator value for an enumeration */
+void defineEnumerator(std::string const &enumeration, std::string const &enumerator, unsigned long value);
+
 /** show a DWORD from the debuggee */
 void showDword(std::ostream &os, ULONG_PTR value);
 
@@ -49,13 +52,13 @@ void showDword(std::ostream &os, ULONG_PTR value);
 void showBoolean(std::ostream &os, BOOLEAN value);
 
 /** Show an enumeration name, if available */
-void showEnum(std::ostream &os, ULONG_PTR value, std::string const &enumName);
+void showEnum(std::ostream &os, ULONG_PTR value, std::string const &enumeration);
 
 /** show a handle from the debuggee */
 void showHandle(std::ostream &os, HANDLE handle);
 
 /** Show an mask enumeration name, if available */
-void showMask(std::ostream &os, ULONG_PTR value, std::string const &enumName);
+void showMask(std::ostream &os, ULONG_PTR value, std::string const &enumeration);
 
 /** show an HRESULT from the debuggee */
 void showWinError(std::ostream &os, HRESULT hResult);
