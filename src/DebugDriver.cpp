@@ -31,10 +31,10 @@ COPYRIGHT
 
 #include <iostream>
 
-#include "displayError.h"
+#include "../include/DisplayError.h"
 
 static char const szRCSID[] =
-    "$Id: DebugDriver.cpp 2668 2025-04-21 14:30:46Z roger $";
+    "$Id: DebugDriver.cpp 2718 2025-04-24 20:44:06Z roger $";
 
 //////////////////////////////////////////////////////////////////////////
 // Main debugger loop

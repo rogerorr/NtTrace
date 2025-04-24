@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2717 2025-04-21 22:27:47Z roger $";
+    "$Id: ShowData.cpp 2719 2025-04-24 20:53:25Z roger $";
 
 #include "ShowData.h"
 #include "Enumerations.h"
@@ -47,9 +47,9 @@ static char const szRCSID[] =
 #include <vector>
 
 // or2 includes
-#include <MsvcExceptions.h>
-#include <ProcessInfo.h>
-#include <ReadPartialMemory.h>
+#include "../include/MsvcExceptions.h"
+#include "../include/ProcessInfo.h"
+#include "../include/ReadPartialMemory.h"
 
 namespace {
 /** Read an object of type 'T' at remoteAddress in the specified process */

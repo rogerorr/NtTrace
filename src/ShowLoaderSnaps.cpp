@@ -36,7 +36,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 2668 2025-04-21 14:30:46Z roger $";
+    "$Id: ShowLoaderSnaps.cpp 2721 2025-04-24 21:00:30Z roger $";
 
 #pragma warning(disable : 4800) // forcing value to bool 'true' or 'false'
                                 // (performance warning)
@@ -51,9 +51,9 @@ static char const szRCSID[] =
 #include <winternl.h>
 
 // or2 includes
+#include <DisplayError.h>
 #include <Options.h>
 #include <ProcessHelper.h>
-#include <displayError.h>
 
 #include "DebugDriver.h"
 

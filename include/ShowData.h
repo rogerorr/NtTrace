@@ -28,17 +28,17 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2712 $
+  $Revision: 2719 $
 */
 
-// $Id: ShowData.h 2712 2025-04-21 21:43:24Z roger $
+// $Id: ShowData.h 2719 2025-04-24 20:53:25Z roger $
 
 #include <ostream>
 #include <windows.h>
 
 // or2 includes
-#include <NtDllStruct.h> // For Nt native data types
-#include <ProcessInfo.h>
+#include "../include/NtDllStruct.h" // For Nt native data types
+#include "../include/ProcessInfo.h"
 
 /** namespace for functions showing data from another process */
 namespace showData {

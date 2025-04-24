@@ -32,10 +32,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2675 $
+  $Revision: 2718 $
 */
 
-// $Id: displayError.h 2675 2025-04-21 16:52:13Z roger $
+// $Id: DisplayError.h 2718 2025-04-24 20:44:06Z roger $
 
 #include <iosfwd>
 #include <windows.h>
@@ -74,6 +74,6 @@ std::ostream &operator<<(std::ostream &os, displayError const &se);
 
 } // namespace or2
 
-#include "displayError.inl"
+#include "DisplayError.inl"
 
 #endif // DISPLAY_ERROR_H_

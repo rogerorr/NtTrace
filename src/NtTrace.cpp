@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2668 2025-04-21 14:30:46Z roger $";
+    "$Id: NtTrace.cpp 2721 2025-04-24 21:00:30Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -64,20 +64,20 @@ static char const szRCSID[] =
 #include <psapi.h> // LOAD_DLL_DEBUG_INFO does not always give us lpImageName
 
 // or2 includes
-#include <DebugPriv.h>
+#include "../include/DebugPriv.h"
+#include "../include/DisplayError.h"
+#include "../include/MsvcExceptions.h"
+#include "../include/NtDllStruct.h"
+#include "../include/Options.h"
+#include "../include/ProcessHelper.h"
+#include "../include/ReadInt.h"
+#include "../include/SimpleTokenizer.h"
 #include <GetFileNameFromHandle.h>
-#include <MsvcExceptions.h>
-#include <NtDllStruct.h>
-#include <Options.h>
-#include <ProcessHelper.h>
-#include <ReadInt.h>
-#include <SimpleTokenizer.h>
-#include <displayError.h>
+#include <SymbolEngine.h>
 
 #include "DebugDriver.h"
 #include "EntryPoint.h"
 #include "ShowData.h"
-#include "SymbolEngine.h"
 
 using namespace showData;
 using namespace or2;

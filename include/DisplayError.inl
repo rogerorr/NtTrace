@@ -36,10 +36,10 @@ namespace or2 {
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
     IN THE SOFTWARE."
 
-    $Revision: 2675 $
+    $Revision: 2718 $
 */
 
-// $Id: displayError.inl 2675 2025-04-21 16:52:13Z roger $
+// $Id: DisplayError.inl 2718 2025-04-24 20:44:06Z roger $
 
 inline displayError::displayError() : hresult(GetLastError()) {}
 

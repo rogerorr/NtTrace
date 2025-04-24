@@ -32,10 +32,9 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2668 2025-04-21 14:30:46Z roger $";
+    "$Id: EntryPoint.cpp 2719 2025-04-24 20:53:25Z roger $";
 
 #include "EntryPoint.h"
-#include "Enumerations.h"
 
 #include <iomanip>
 #include <iostream>
@@ -45,10 +44,11 @@ static char const szRCSID[] =
 #include <vector>
 #include <windows.h>
 
-#include "NtDllStruct.h"
-#include "SymbolEngine.h"
-#include "displayError.h"
+#include "../include/DisplayError.h"
+#include "../include/NtDllStruct.h"
+#include <SymbolEngine.h>
 
+#include "Enumerations.h"
 #include "ShowData.h"
 #include "TrapNtOpcodes.h"
 
