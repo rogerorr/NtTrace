@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 2670 2025-04-21 14:35:30Z roger $
+# $Id: NtTrace.mak 2722 2025-04-24 21:14:17Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
@@ -62,10 +62,10 @@ ShowLoaderSnaps.exe : $(BUILD)\$(*B).obj $(*B).res
 # Dependencies
 
 $(BUILD)\NtTrace.obj : \
-	"include/DebugPriv.h" \
 	"include/AdjustPriv.h" \
-	"include/displayError.h" \
-	"include/displayError.inl" \
+	"include/DebugPriv.h" \
+	"include/DisplayError.h" \
+	"include/DisplayError.inl" \
 	"include/MsvcExceptions.h" \
 	"include/NtDllStruct.h" \
 	"include/Options.h" \
@@ -88,13 +88,13 @@ ShowLoaderSnaps.res: $(*B).rc "version.rc"
 ShowLoaderSnaps.exe : $(BUILD)\DebugDriver.obj
 
 $(BUILD)\DebugDriver.obj : \
-	"include/displayError.h" \
-	"include/displayError.inl" \
+	"include/DisplayError.h" \
+	"include/DisplayError.inl" \
 	"include/DebugDriver.h"
 
 $(BUILD)\EntryPoint.obj : \
-	"include/displayError.h" \
-	"include/displayError.inl" \
+	"include/DisplayError.h" \
+	"include/DisplayError.inl" \
 	"include/DbgHelper.h" \
 	"include/DbgHelper.inl" \
 	"include/NtDllStruct.h" \
@@ -105,15 +105,15 @@ $(BUILD)\EntryPoint.obj : \
 
 $(BUILD)\ShowData.obj: \
 	"include/Enumerations.h" \
-	"include/NtDllStruct.h" \
 	"include/MsvcExceptions.h" \
+	"include/NtDllStruct.h" \
 	"include/ProcessInfo.h" \
 	"include/ReadPartialMemory.h" \
 	"include/ShowData.h"
 
 $(BUILD)\ShowLoaderSnaps.obj: \
-	"include/displayError.h" \
-	"include/displayError.inl" \
+	"include/DisplayError.h" \
+	"include/DisplayError.inl" \
 	"include/Options.h" \
 	"include/Options.inl" \
 	"include/ProcessHelper.h" \
@@ -127,5 +127,6 @@ $(BUILD)\SymbolEngine.obj: \
 	"include/SymbolEngine.h" \
 	"include/DbgHelper.h" \
 	"include/DbgHelper.inl" \
-	"include/StrFromWchar.h" \
-	"include/MSvcExceptions.h"
+	"include/MSvcExceptions.h" \
+	"include/ReadPartialMemory.h" \
+	"include/StrFromWchar.h"
