@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 2729 2025-04-25 00:03:52Z roger $
+# $Id: NtTrace.mak 2730 2025-04-25 08:50:36Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
@@ -50,13 +50,16 @@ LINKFLAGS = /link /opt:ref,icf
 {src}.cpp{$(BUILD)}.obj::
 	cl $(CCFLAGS) /Fo$(BUILD)\ /c /EHsc /I. $<
 
-.rc.res:
-	rc -r /Iinclude $(*B)
+{src}.rc{$(BUILD)}.res:
+	rc -r /fo$@ -r src/$(*B)
 
-NtTrace.exe : $(BUILD)\$(*B).obj $(*B).res 
+NtTrace.exe : $(BUILD)\$(*B).obj $(BUILD)\$(*B).res 
 	cl $(CCFLAGS) /Fe$@ $** $(LINKFLAGS)
 
-ShowLoaderSnaps.exe : $(BUILD)\$(*B).obj $(*B).res 
+MemoryStats.exe : $(BUILD)\$(*B).obj $(BUILD)\$(*B).res 
+	cl $(CCFLAGS) /Fe$@ $** $(LINKFLAGS)
+
+ShowLoaderSnaps.exe : $(BUILD)\$(*B).obj $(BUILD)\$(*B).res 
 	cl $(CCFLAGS) /Fe$@ $** $(LINKFLAGS)
 
 # Dependencies
@@ -77,6 +80,10 @@ $(BUILD)\NtTrace.obj : \
 	"include/EntryPoint.h" \
 	"include/ShowData.h" \
 	"include/TrapNtOpcodes.h"
+
+MemoryStats.res: $(*B).rc "version.rc"
+
+MemoryStats.exe : $(BUILD)\DebugDriver.obj $(BUILD)\ShowData.obj
 
 NtTrace.res: $(*B).rc "version.rc"
 
@@ -101,6 +108,16 @@ $(BUILD)\EntryPoint.obj : \
 	"include/ProcessInfo.h" \
 	"include/SymbolEngine.h" \
 	"include/TrapNtOpcodes.h" \
+	"include/ShowData.h"
+
+$(BUILD)\MemoryStats.obj: \
+	"include/DisplayError.h" \
+	"include/DisplayError.inl" \
+	"include/Options.h" \
+	"include/Options.inl" \
+	"include/ProcessHelper.h" \
+	"include/ReadInt.h" \
+	"include/DebugDriver.h" \
 	"include/ShowData.h"
 
 $(BUILD)\ShowData.obj: \

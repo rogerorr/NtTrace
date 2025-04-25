@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2728 2025-04-24 23:54:43Z roger $";
+    "$Id: ShowData.cpp 2730 2025-04-25 08:50:36Z roger $";
 
 #include "ShowData.h"
 
@@ -50,6 +50,8 @@ static char const szRCSID[] =
 #include "../include/MsvcExceptions.h"
 #include "../include/ProcessInfo.h"
 #include "../include/ReadPartialMemory.h"
+
+#pragma comment(lib, "dbghelp.lib") // for UnDecorateSymbolName
 
 namespace {
 /** Read an object of type 'T' at remoteAddress in the specified process */

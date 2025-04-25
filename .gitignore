@@ -1,7 +1,4 @@
 build32 
 build64 
+*.exe
 *.pdb 
-NtTrace*.exe 
-NtTrace.res 
-ShowLoaderSnaps.exe
-ShowLoaderSnaps.res
