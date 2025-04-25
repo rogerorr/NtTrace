@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 2722 2025-04-24 21:14:17Z roger $
+# $Id: NtTrace.mak 2729 2025-04-25 00:03:52Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
@@ -104,7 +104,6 @@ $(BUILD)\EntryPoint.obj : \
 	"include/ShowData.h"
 
 $(BUILD)\ShowData.obj: \
-	"include/Enumerations.h" \
 	"include/MsvcExceptions.h" \
 	"include/NtDllStruct.h" \
 	"include/ProcessInfo.h" \
