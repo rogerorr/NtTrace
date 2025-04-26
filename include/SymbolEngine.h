@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2676 $
+  $Revision: 2752 $
 */
 
-// $Id: SymbolEngine.h 2676 2025-04-21 17:00:58Z roger $
+// $Id: SymbolEngine.h 2752 2025-04-26 19:28:01Z roger $
 
 #include <iosfwd>
 #include <string>
@@ -163,15 +163,15 @@ private:
   SymbolEngine(SymbolEngine const &);
   SymbolEngine &operator=(SymbolEngine const &);
 
-  bool showLines{true};      // true to show lines
-  bool showParams{false};    // true to show parameters
-  bool showVariables{false}; // true to show variables
-  int maxStackDepth{-1};     // max stack depth to show, -1 for all
-  int skipCount{0};          // stack frames to skip
-  int maxSehDepth{0};        // max SEH stack depth to show
+  bool showLines_{true};      // true to show lines
+  bool showParams_{false};    // true to show parameters
+  bool showVariables_{false}; // true to show variables
+  int maxStackDepth_{-1};     // max stack depth to show, -1 for all
+  int skipCount_{0};          // stack frames to skip
+  int maxSehDepth_{0};        // max SEH stack depth to show
 
   struct Impl;
-  Impl *pImpl;
+  Impl *pImpl_;
 };
 
 } // namespace or2

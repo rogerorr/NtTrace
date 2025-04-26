@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2730 2025-04-25 08:50:36Z roger $";
+    "$Id: ShowData.cpp 2732 2025-04-25 18:11:31Z roger $";
 
 #include "ShowData.h"
 
@@ -88,8 +88,8 @@ EnumMap enumMap;
 
 //////////////////////////////////////////////////////////////////////////
 /** define an enumerator value for an enumeration */
-void defineEnumerator(std::string const &enumeration, std::string const &enumerator, unsigned long value)
-{
+void defineEnumerator(std::string const &enumeration,
+                      std::string const &enumerator, unsigned long value) {
   auto &entry = enumMap[enumeration];
   entry.push_back(std::make_pair(enumerator, value));
 }
@@ -178,7 +178,7 @@ void showEnum(std::ostream &os, ULONG_PTR value, std::string const &enumName) {
   showDword(os, value);
   const auto it = enumMap.find(enumName);
   if (it != enumMap.end()) {
-    for (const auto& enumerator : it->second) {
+    for (const auto &enumerator : it->second) {
       if (enumerator.second == value) {
         os << " [" << enumerator.first << ']';
         break;
@@ -194,7 +194,7 @@ void showMask(std::ostream &os, ULONG_PTR value, std::string const &enumName) {
   const auto it = enumMap.find(enumName);
   std::string delim = " [";
   if (it != enumMap.end()) {
-    for (const auto& enumerator : it->second) {
+    for (const auto &enumerator : it->second) {
       if ((value & enumerator.second) == enumerator.second) {
         os << delim << enumerator.first;
         value -= enumerator.second;

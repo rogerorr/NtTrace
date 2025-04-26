@@ -1,8 +1,8 @@
 // Resource file for MemoryStats
 //
-// $Id: MemoryStats.rc 2731 2025-04-25 08:51:26Z roger $
+// $Id: MemoryStats.rc 2733 2025-04-25 18:12:31Z roger $
 
-#define MINOR_VERSION 2730
+#define MINOR_VERSION 2732
 #define DESCRIPTION "Display memory statistics for child process(es)"
 #define APPLICATION
 

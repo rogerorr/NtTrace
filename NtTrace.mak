@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 2730 2025-04-25 08:50:36Z roger $
+# $Id: NtTrace.mak 2750 2025-04-26 19:13:34Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
@@ -51,7 +51,7 @@ LINKFLAGS = /link /opt:ref,icf
 	cl $(CCFLAGS) /Fo$(BUILD)\ /c /EHsc /I. $<
 
 {src}.rc{$(BUILD)}.res:
-	rc -r /fo$@ -r src/$(*B)
+	rc /nologo -r /fo$@ -r src/$(*B)
 
 NtTrace.exe : $(BUILD)\$(*B).obj $(BUILD)\$(*B).res 
 	cl $(CCFLAGS) /Fe$@ $** $(LINKFLAGS)

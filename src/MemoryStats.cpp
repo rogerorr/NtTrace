@@ -33,7 +33,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: MemoryStats.cpp 2730 2025-04-25 08:50:36Z roger $";
+    "$Id: MemoryStats.cpp 2732 2025-04-25 18:11:31Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -59,7 +59,7 @@ static char const szRCSID[] =
 /** Simple memory stats collector */
 class MemoryStats : public or2::DebuggerAdapter {
 private:
-  std::ostream& os_;
+  std::ostream &os_;
 
 public:
   /**
@@ -80,7 +80,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void MemoryStats::OnCreateProcess(
     DWORD processId, DWORD /*threadId*/,
-    CREATE_PROCESS_DEBUG_INFO const & createProcess) {
+    CREATE_PROCESS_DEBUG_INFO const &createProcess) {
   os_ << "Create process " << processId << " - ";
   showData::showCommandLine(os_, createProcess.hProcess);
   os_ << std::endl;
@@ -91,20 +91,19 @@ void MemoryStats::OnExitProcess(DWORD processId, DWORD /*threadId*/,
                                 HANDLE hProcess,
                                 EXIT_PROCESS_DEBUG_INFO const &exitProcess) {
   os_ << "EXIT PROCESS " << processId << ": " << exitProcess.dwExitCode
-            << std::endl;
+      << std::endl;
   PROCESS_MEMORY_COUNTERS pmc;
   if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc))) {
     os_ << "Memory stats for " << processId << ": "
-              << "PageFaultCount: " << pmc.PageFaultCount
-              << ", PeakWorkingSetSize: " << pmc.PeakWorkingSetSize
-              << ", WorkingSetSize: " << pmc.WorkingSetSize
-              << ", QuotaPeakPagedPoolUsage: " << pmc.QuotaPeakPagedPoolUsage
-              << ", QuotaPagedPoolUsage: " << pmc.QuotaPagedPoolUsage
-              << ", QuotaPeakNonPagedPoolUsage: "
-              << pmc.QuotaPeakNonPagedPoolUsage
-              << ", QuotaNonPagedPoolUsage: " << pmc.QuotaNonPagedPoolUsage
-              << ", PagefileUsage: " << pmc.PagefileUsage
-              << ", PeakPagefileUsage: " << pmc.PeakPagefileUsage << "\n";
+        << "PageFaultCount: " << pmc.PageFaultCount
+        << ", PeakWorkingSetSize: " << pmc.PeakWorkingSetSize
+        << ", WorkingSetSize: " << pmc.WorkingSetSize
+        << ", QuotaPeakPagedPoolUsage: " << pmc.QuotaPeakPagedPoolUsage
+        << ", QuotaPagedPoolUsage: " << pmc.QuotaPagedPoolUsage
+        << ", QuotaPeakNonPagedPoolUsage: " << pmc.QuotaPeakNonPagedPoolUsage
+        << ", QuotaNonPagedPoolUsage: " << pmc.QuotaNonPagedPoolUsage
+        << ", PagefileUsage: " << pmc.PagefileUsage
+        << ", PeakPagefileUsage: " << pmc.PeakPagefileUsage << "\n";
   }
 }
 
@@ -155,7 +154,7 @@ int main(int argc, char **argv) {
   }
 
   MemoryStats debugger((outputFile.length() != 0) ? (std::ostream &)ofs
-                                                     : std::cout);
+                                                  : std::cout);
   or2::DebugDriver().Loop(debugger);
 
   return 0;

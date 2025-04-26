@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2676 2025-04-21 17:00:58Z roger $";
+    "$Id: SymbolEngine.cpp 2752 2025-04-26 19:28:01Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -95,18 +95,18 @@ RegInfo getRegInfo(ULONG reg, const CONTEXT &context);
 
 struct EngineCallBack {
   EngineCallBack(SymbolEngine const &eng, SymbolEngine::EnumLocalCallBack &cb)
-      : eng(eng), cb(cb) {}
+      : eng_(eng), cb_(cb) {}
 
   static BOOL CALLBACK enumSymbolsProc(PSYMBOL_INFO pSymInfo,
                                        ULONG /*SymbolSize*/,
                                        PVOID UserContext) {
     EngineCallBack &thisCb = *(EngineCallBack *)UserContext;
 
-    return thisCb.cb(thisCb.eng, pSymInfo);
+    return thisCb.cb_(thisCb.eng_, pSymInfo);
   }
 
-  SymbolEngine const &eng;
-  SymbolEngine::EnumLocalCallBack &cb;
+  SymbolEngine const &eng_;
+  SymbolEngine::EnumLocalCallBack &cb_;
 };
 
 struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
@@ -230,7 +230,7 @@ struct SymbolEngine::Impl {
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
-SymbolEngine::SymbolEngine(HANDLE hProcess) : pImpl(new Impl) {
+SymbolEngine::SymbolEngine(HANDLE hProcess) : pImpl_(new Impl) {
   static bool inited = false;
   if (!inited) {
     DWORD dwOpts = SymGetOptions();
@@ -253,39 +253,39 @@ SymbolEngine::SymbolEngine(HANDLE hProcess) : pImpl(new Impl) {
 // Destroy wrapper
 SymbolEngine::~SymbolEngine() {
   fixSymSrv();
-  delete pImpl;
+  delete pImpl_;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
 // true to show line numbers if possible
-void SymbolEngine::setLines(bool value) { showLines = value; }
+void SymbolEngine::setLines(bool value) { showLines_ = value; }
 
-bool SymbolEngine::getLines() const { return showLines; }
+bool SymbolEngine::getLines() const { return showLines_; }
 
 // true to show parameters
-void SymbolEngine::setParams(bool value) { showParams = value; }
+void SymbolEngine::setParams(bool value) { showParams_ = value; }
 
-bool SymbolEngine::getParams() const { return showParams; }
+bool SymbolEngine::getParams() const { return showParams_; }
 
 // true to show variables
-void SymbolEngine::setVariables(bool value) { showVariables = value; }
+void SymbolEngine::setVariables(bool value) { showVariables_ = value; }
 
-bool SymbolEngine::getVariables() const { return showVariables; }
+bool SymbolEngine::getVariables() const { return showVariables_; }
 
 // set stack depth for walkbacks
-void SymbolEngine::setMaxDepth(int value) { maxStackDepth = value; }
+void SymbolEngine::setMaxDepth(int value) { maxStackDepth_ = value; }
 
-int SymbolEngine::getMaxDepth() const { return maxStackDepth; }
+int SymbolEngine::getMaxDepth() const { return maxStackDepth_; }
 
 // set skip count for stack walkbacks
-void SymbolEngine::setSkipCount(int value) { skipCount = value; }
+void SymbolEngine::setSkipCount(int value) { skipCount_ = value; }
 
-int SymbolEngine::getSkipCount() const { return skipCount; }
+int SymbolEngine::getSkipCount() const { return skipCount_; }
 
 // set seh stack depth walkbacks
-void SymbolEngine::setSehDepth(int value) { maxSehDepth = value; }
+void SymbolEngine::setSehDepth(int value) { maxSehDepth_ = value; }
 
-int SymbolEngine::getSehDepth() const { return maxSehDepth; }
+int SymbolEngine::getSehDepth() const { return maxSehDepth_; }
 
 /////////////////////////////////////////////////////////////////////////////////////
 DWORD64 SymbolEngine::GetModuleBase(DWORD64 dwAddress) const {
@@ -368,7 +368,7 @@ bool SymbolEngine::printAddress(DWORD64 address, std::ostream &os) const {
   ///////////////////////////////
   // Log the line number
 
-  if (showLines) {
+  if (showLines_) {
     DbgInit<IMAGEHLP_LINE64> lineInfo;
     DWORD dwDisplacement(0);
     if (GetLineFromAddr64(address, &dwDisplacement, &lineInfo)) {
@@ -411,7 +411,7 @@ void SymbolEngine::printInlineAddress(DWORD64 address, DWORD inline_context,
 
   ///////////////////////////////
   // Log the line number
-  if (showLines) {
+  if (showLines_) {
     DbgInit<IMAGEHLP_LINE64> lineInfo;
     DWORD dwDisplacement(0);
     if (GetLineFromInlineContext(address, inline_context, 0, &dwDisplacement,
@@ -429,12 +429,13 @@ void SymbolEngine::printInlineAddress(DWORD64 address, DWORD inline_context,
 /////////////////////////////////////////////////////////////////////////////////////
 // Convert address to a string.
 std::string SymbolEngine::addressToName(DWORD64 address) const {
-  std::map<DWORD64, std::string>::iterator it = pImpl->addressMap.find(address);
-  if (it == pImpl->addressMap.end()) {
+  std::map<DWORD64, std::string>::iterator it =
+      pImpl_->addressMap.find(address);
+  if (it == pImpl_->addressMap.end()) {
     std::ostringstream oss;
     if (!printAddress(address, oss))
       return oss.str();
-    it = pImpl->addressMap.insert(std::make_pair(address, oss.str())).first;
+    it = pImpl_->addressMap.insert(std::make_pair(address, oss.str())).first;
   }
 
   return it->second;
@@ -451,11 +452,11 @@ std::string SymbolEngine::inlineToName(DWORD64 address,
                                        DWORD inline_context) const {
   std::pair<DWORD64, DWORD> key(address, inline_context);
   std::map<std::pair<DWORD64, DWORD>, std::string>::iterator it =
-      pImpl->inlineMap.find(key);
-  if (it == pImpl->inlineMap.end()) {
+      pImpl_->inlineMap.find(key);
+  if (it == pImpl_->inlineMap.end()) {
     std::ostringstream oss;
     printInlineAddress(address, inline_context, oss);
-    it = pImpl->inlineMap.insert(std::make_pair(key, oss.str())).first;
+    it = pImpl_->inlineMap.insert(std::make_pair(key, oss.str())).first;
   }
 
   return it->second;
@@ -525,8 +526,8 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
   DWORD const maxNonExec(3);
 
   // use local copies of instance data
-  int depth = maxStackDepth;
-  int skip = skipCount;
+  int depth = maxStackDepth_;
+  int skip = skipCount_;
 
   // Despite having GetModuleBase in the call to StackWalk it needs help for the
   // first address
@@ -604,13 +605,13 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
        << "\n";
 #endif
 
-    if (showParams) {
+    if (showParams_) {
       os << "  " << (PVOID)stackFrame.AddrFrame.Offset << ":";
       addParams(os, stackFrame.Params,
                 sizeof(stackFrame.Params) / sizeof(stackFrame.Params[0]));
       os << "\n";
     }
-    if (showVariables) {
+    if (showVariables_) {
       showVariablesAt(os, stackFrame.AddrPC.Offset, stackFrame.AddrFrame.Offset,
                       rwContext, *this);
     }
@@ -622,7 +623,7 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
         for (DWORD i = 0; i < inline_count; i++, inline_context++) {
           os << std::setw(31) << std::left << "[inline frame]"
              << inlineToName(pc, inline_context) << '\n';
-          if (showVariables) {
+          if (showVariables_) {
             showInlineVariablesAt(os, stackFrame.AddrPC.Offset,
                                   stackFrame.AddrFrame.Offset, rwContext,
                                   inline_context, *this);
@@ -684,7 +685,7 @@ void(WINAPI *SymbolEngine::GetCurrentThreadContext)(PCONTEXT pContext) =
 //
 void SymbolEngine::SEHTrace(PVOID ExceptionList, std::ostream &os) const {
   // Got the first entry of the exception stack
-  for (int i = 0; (maxSehDepth < 0) || (i < maxSehDepth); ++i) {
+  for (int i = 0; (maxSehDepth_ < 0) || (i < maxSehDepth_); ++i) {
     if (ExceptionList == (PVOID)(INT_PTR)-1 || ExceptionList == nullptr)
       break;
 
@@ -705,7 +706,7 @@ void SymbolEngine::SEHTrace(PVOID ExceptionList, std::ostream &os) const {
     PVOID catchHandler = nullptr;
     bool isMsvcHandler = findMsvcCppHandler(frame.handler, &catchHandler);
 
-    if (showParams) {
+    if (showParams_) {
       struct {
         Frame frame;
         DWORD Params[3];
