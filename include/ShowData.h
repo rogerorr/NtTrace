@@ -143,12 +143,13 @@ void showThrowType(std::ostream &os, HANDLE hProcess, ULONG_PTR throwInfo,
 
 /** Streaming helper for showCommandLine */
 struct CommandLine {
-  HANDLE hProcess;
+  const HANDLE hProcess_;
+  CommandLine(HANDLE hProcess) : hProcess_(hProcess) {}
 };
 
 inline std::ostream &operator<<(std::ostream &os,
                                 const CommandLine &commandLine) {
-  showCommandLine(os, commandLine.hProcess);
+  showCommandLine(os, commandLine.hProcess_);
   return os;
 }
 } // namespace showData

@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2675 $
+  $Revision: 2761 $
 */
 
-// $Id: ProcessInfo.h 2675 2025-04-21 16:52:13Z roger $
+// $Id: ProcessInfo.h 2761 2025-04-29 22:20:48Z roger $
 
 #include "NtDllStruct.h"
 
@@ -204,10 +204,13 @@ using PPEB = PEB *;
 /** Get access to PEB for current process */
 #ifdef _M_X64
 inline PEB *getCurrentPeb() {
-  PEB *(*GetCurrentPEB)();
-  GetCurrentPEB = (PEB * (*)())
-      GetProcAddress(GetModuleHandle("ntdll.dll"), "RtlGetCurrentPeb");
-  return GetCurrentPEB();
+  if (auto handle = GetModuleHandle("ntdll.dll")) {
+    if (auto GetCurrentPEB =
+            (PEB * (*)()) GetProcAddress(handle, "RtlGetCurrentPeb")) {
+      return GetCurrentPEB();
+    }
+  }
+  return nullptr;
 }
 #else
 #pragma warning(push)

@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 2750 2025-04-26 19:13:34Z roger $
+# $Id: NtTrace.mak 2762 2025-04-29 22:26:48Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
@@ -44,7 +44,7 @@ clean :
 	@-del NtTrace.exe NtTrace.res *.pdb
 	@-rd /q /s $(BUILD)
 
-CCFLAGS = /nologo /MD /W3 /WX /Zi /Iinclude /D_CRT_SECURE_NO_WARNINGS /I "$(VSINSTALLDIR)\DIA SDK\include"
+CCFLAGS = /nologo /MD /W3 /WX /Zi /Iinclude /D_CRT_SECURE_NO_WARNINGS /I "$(VSINSTALLDIR)\DIA SDK\include" /permissive-
 LINKFLAGS = /link /opt:ref,icf
 
 {src}.cpp{$(BUILD)}.obj::
