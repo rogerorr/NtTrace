@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2756 2025-04-29 20:04:15Z roger $";
+    "$Id: NtTrace.cpp 2764 2025-04-29 22:38:32Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -942,8 +942,9 @@ void TrapNtDebugger::setShowLoaderSnaps(HANDLE hProcess) {
       BaseOfNtDll_, "NtQueryInformationProcess");
   if (pfn) {
     PROCESS_BASIC_INFORMATION pbi = {sizeof(pbi)};
-    if (0 ==
-        pfn(hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), nullptr)) {
+    if (0 == pfn(hProcess, ProcessBasicInformation, &pbi, sizeof(pbi),
+                 nullptr) &&
+        pbi.PebBaseAddress) {
       PULONG pGlobalFlag = &pbi.PebBaseAddress->GlobalFlag;
       ULONG GlobalFlag{0};
       const ULONG SHOW_LDR_SNAPS = 2;
@@ -1100,7 +1101,7 @@ int main(int argc, char **argv) {
     }
   } else {
     if (noDebugHeap) {
-      putenv("_NO_DEBUG_HEAP=1");
+      (void)putenv("_NO_DEBUG_HEAP=1");
     }
 
     PROCESS_INFORMATION ProcessInformation;

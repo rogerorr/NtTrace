@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2675 $
+  $Revision: 2767 $
 */
 
-// $Id: Options.inl 2675 2025-04-21 16:52:13Z roger $
+// $Id: Options.inl 2767 2025-04-29 23:05:46Z roger $
 
 #include <iomanip>
 #include <iostream>
@@ -176,35 +176,35 @@ inline bool Options::process(
           *((bool *)(option.pValue)) = true;
           break;
         case Data::eInt: {
-          if (sscanf(pArg, "%i", ((int *)(option.pValue))) != 1) {
+          if (sscanf_s(pArg, "%i", ((int *)(option.pValue))) != 1) {
             std::cerr << "Invalid numeric value '" << pArg << "' found for "
                       << option.option << std::endl;
             bRet = false;
           }
         } break;
         case Data::eUInt: {
-          if (sscanf(pArg, "%u", ((unsigned int *)(option.pValue))) != 1) {
+          if (sscanf_s(pArg, "%u", ((unsigned int *)(option.pValue))) != 1) {
             std::cerr << "Invalid numeric value '" << pArg << "' found for "
                       << option.option << std::endl;
             bRet = false;
           }
         } break;
         case Data::eLong: {
-          if (sscanf(pArg, "%li", ((long *)(option.pValue))) != 1) {
+          if (sscanf_s(pArg, "%li", ((long *)(option.pValue))) != 1) {
             std::cerr << "Invalid numeric value '" << pArg << "' found for "
                       << option.option << std::endl;
             bRet = false;
           }
         } break;
         case Data::eULong: {
-          if (sscanf(pArg, "%lu", ((unsigned long *)(option.pValue))) != 1) {
+          if (sscanf_s(pArg, "%lu", ((unsigned long *)(option.pValue))) != 1) {
             std::cerr << "Invalid numeric value '" << pArg << "' found for "
                       << option.option << std::endl;
             bRet = false;
           }
         } break;
         case Data::eDouble: {
-          if (sscanf(pArg, "%lf", ((double *)(option.pValue))) != 1) {
+          if (sscanf_s(pArg, "%lf", ((double *)(option.pValue))) != 1) {
             std::cerr << "Invalid numeric value '" << pArg << "' found for "
                       << option.option << std::endl;
             bRet = false;

@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2755 $
+  $Revision: 2766 $
 */
 
-// $Id: ShowData.h 2755 2025-04-29 20:01:56Z roger $
+// $Id: ShowData.h 2766 2025-04-29 22:56:33Z roger $
 
 #include <ostream>
 #include <windows.h>

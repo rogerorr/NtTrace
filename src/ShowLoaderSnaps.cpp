@@ -36,7 +36,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 2722 2025-04-24 21:14:17Z roger $";
+    "$Id: ShowLoaderSnaps.cpp 2763 2025-04-29 22:36:43Z roger $";
 
 #pragma warning(disable : 4800) // forcing value to bool 'true' or 'false'
                                 // (performance warning)
@@ -98,7 +98,8 @@ void ShowLoaderSnaps::SetQuiet() {
 void ShowLoaderSnaps::SetShowLoaderSnaps(HANDLE hProcess) {
   PROCESS_BASIC_INFORMATION pbi = {};
   if (0 == NtQueryInformationProcess(hProcess, ProcessBasicInformation, &pbi,
-                                     sizeof(pbi), 0)) {
+                                     sizeof(pbi), 0) &&
+      pbi.PebBaseAddress) {
 #ifdef _WIN64
     // GlobalFlag is not officially documented
     // Offsets obtained from PDB file for ntdll.dll
@@ -193,7 +194,7 @@ int main(int argc, char **argv) {
     debugger.SetQuiet();
   }
 
-  putenv("_NO_DEBUG_HEAP=1");
+  (void)putenv("_NO_DEBUG_HEAP=1");
 
   PROCESS_INFORMATION ProcessInformation;
   int ret = CreateProcessHelper(options.begin(), options.end(),
