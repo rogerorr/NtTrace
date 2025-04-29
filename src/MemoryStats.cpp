@@ -33,7 +33,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: MemoryStats.cpp 2732 2025-04-25 18:11:31Z roger $";
+    "$Id: MemoryStats.cpp 2755 2025-04-29 20:01:56Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -81,17 +81,16 @@ public:
 void MemoryStats::OnCreateProcess(
     DWORD processId, DWORD /*threadId*/,
     CREATE_PROCESS_DEBUG_INFO const &createProcess) {
-  os_ << "Create process " << processId << " - ";
-  showData::showCommandLine(os_, createProcess.hProcess);
-  os_ << std::endl;
+  os_ << "Start process " << processId << " - "
+      << showData::CommandLine(createProcess.hProcess) << std::endl;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void MemoryStats::OnExitProcess(DWORD processId, DWORD /*threadId*/,
                                 HANDLE hProcess,
                                 EXIT_PROCESS_DEBUG_INFO const &exitProcess) {
-  os_ << "EXIT PROCESS " << processId << ": " << exitProcess.dwExitCode
-      << std::endl;
+  os_ << "End process " << processId << ": " << exitProcess.dwExitCode << " - "
+      << showData::CommandLine(hProcess) << std::endl;
   PROCESS_MEMORY_COUNTERS pmc;
   if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc))) {
     os_ << "Memory stats for " << processId << ": "

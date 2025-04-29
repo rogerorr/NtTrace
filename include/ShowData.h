@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2732 $
+  $Revision: 2755 $
 */
 
-// $Id: ShowData.h 2732 2025-04-25 18:11:31Z roger $
+// $Id: ShowData.h 2755 2025-04-29 20:01:56Z roger $
 
 #include <ostream>
 #include <windows.h>
@@ -140,6 +140,17 @@ void showUserProcessParams(std::ostream &os, HANDLE hProcess,
 /** Convert msvc throw information into a type name */
 void showThrowType(std::ostream &os, HANDLE hProcess, ULONG_PTR throwInfo,
                    ULONG_PTR base);
+
+/** Streaming helper for showCommandLine */
+struct CommandLine {
+  HANDLE hProcess;
+};
+
+inline std::ostream &operator<<(std::ostream &os,
+                                const CommandLine &commandLine) {
+  showCommandLine(os, commandLine.hProcess);
+  return os;
+}
 } // namespace showData
 
 #endif // SHOWDATA_H_
