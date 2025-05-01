@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2752 2025-04-26 19:28:01Z roger $";
+    "$Id: SymbolEngine.cpp 2773 2025-05-01 22:48:52Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -220,6 +220,14 @@ std::string getBaseType(DWORD baseType, ULONG64 length);
 BOOL getWow64ThreadContext(HANDLE hProcess, HANDLE hThread,
                            CONTEXT const &context, WOW64_CONTEXT *pWowContext);
 #endif // _M_X64
+
+// Wrapper for WideCharToMultiByte
+size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
+                  size_t wc_len) {
+  return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
+                             mb_str, static_cast<int>(mb_size), 0, nullptr);
+}
+
 } // namespace
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -230,6 +238,8 @@ struct SymbolEngine::Impl {
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
+#pragma warning(push)
+#pragma warning(disable : 4996)
 SymbolEngine::SymbolEngine(HANDLE hProcess) : pImpl_(new Impl) {
   static bool inited = false;
   if (!inited) {
@@ -248,6 +258,7 @@ SymbolEngine::SymbolEngine(HANDLE hProcess) : pImpl_(new Impl) {
 
   Initialise(hProcess);
 }
+#pragma warning(pop)
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Destroy wrapper
@@ -1005,12 +1016,12 @@ std::string SymbolEngine::getString(PVOID address, BOOL unicode,
     ReadPartialProcessMemory(GetProcess(), address, &chVector[0],
                              sizeof(wchar_t),
                              maxStringLength * sizeof(wchar_t));
-    size_t const wcLen = wcstombs(nullptr, &chVector[0], 0);
-    if (wcLen == (size_t)-1) {
+    size_t const mbLen = Utf16ToMbs(nullptr, 0, &chVector[0], maxStringLength);
+    if (mbLen == 0) {
       return "invalid string";
     } else {
-      std::vector<char> mbStr(wcLen + 1);
-      wcstombs(&mbStr[0], &chVector[0], wcLen);
+      std::vector<char> mbStr(mbLen + 1);
+      Utf16ToMbs(&mbStr[0], mbLen, &chVector[0], maxStringLength);
       return &mbStr[0];
     }
   } else {

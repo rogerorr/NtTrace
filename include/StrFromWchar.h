@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2675 $
+  $Revision: 2775 $
 */
 
-// $Id: StrFromWchar.h 2675 2025-04-21 16:52:13Z roger $
+// $Id: StrFromWchar.h 2775 2025-05-01 22:51:58Z roger $
 
 #include <string>
 #include <vector>
@@ -48,7 +48,10 @@ inline std::string strFromWchar(wchar_t const *const wString) {
   size_t const len = wcslen(wString) + 1;
   size_t const nBytes = len * sizeof(wchar_t);
   std::vector<char> chArray(nBytes);
+  #pragma warning(push)
+  #pragma warning(disable: 4996)
   wcstombs(&chArray[0], wString, nBytes);
+  #pragma warning(pop)
   return std::string(&chArray[0]);
 }
 
@@ -62,7 +65,10 @@ inline std::string strFromWchar(wchar_t const *const wString) {
 inline std::wstring wstrFromMBchar(char const *const mbString) {
   size_t const len = strlen(mbString) + 1;
   std::vector<wchar_t> chArray(len);
+  #pragma warning(push)
+  #pragma warning(disable: 4996)
   mbstowcs(&chArray[0], mbString, len);
+  #pragma warning(pop)
   return std::wstring(&chArray[0]);
 }
 
