@@ -33,7 +33,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: MemoryStats.cpp 2755 2025-04-29 20:01:56Z roger $";
+    "$Id: MemoryStats.cpp 2768 2025-05-01 21:50:07Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
                        "Display memory statistics for child process(es)"))
     return 1;
 
-  _putenv("_NO_DEBUG_HEAP=1");
+  (void)_putenv("_NO_DEBUG_HEAP=1");
 
   PROCESS_INFORMATION ProcessInformation;
   int ret = or2::CreateProcessHelper(options.begin(), options.end(),

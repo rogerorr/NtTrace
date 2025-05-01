@@ -37,12 +37,11 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2764 2025-04-29 22:38:32Z roger $";
+    "$Id: NtTrace.cpp 2770 2025-05-01 22:06:13Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
 #pragma warning(disable : 4511 4512) // copy ctor/op= could not be generated
-#pragma warning(disable : 4996) // 'asctime' and others were declared deprecated
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -241,7 +240,7 @@ std::string now() {
   static _timeb lasttime;
   static char seconds[] = "HH:MM:SS";
   if (lasttime.time != timeNow.time) {
-    memcpy(seconds, asctime(localtime(&timeNow.time)) + 11, 8);
+    strftime(seconds, sizeof(seconds), "%H:%M:%S", localtime(&timeNow.time));
     lasttime.time = timeNow.time;
   }
   char result[8 + 1 + 3 + 1];
@@ -1101,7 +1100,7 @@ int main(int argc, char **argv) {
     }
   } else {
     if (noDebugHeap) {
-      (void)putenv("_NO_DEBUG_HEAP=1");
+      (void)_putenv("_NO_DEBUG_HEAP=1");
     }
 
     PROCESS_INFORMATION ProcessInformation;

@@ -43,7 +43,7 @@ IMPLEMENTATION NOTES
 */
 
 static char const szRCSID[] =
-    "$Id: GetFileNameFromHandle.cpp 2676 2025-04-21 17:00:58Z roger $";
+    "$Id: GetFileNameFromHandle.cpp 2768 2025-05-01 21:50:07Z roger $";
 
 #include <windows.h>
 
@@ -118,21 +118,23 @@ std::string GetFileNameFromHandle(HANDLE hFile) {
 
     if (pMem) {
       TCHAR pszFilename[MAX_PATH + 1];
+      pszFilename[0] = '\0';
       if (GetMappedFileName(GetCurrentProcess(), pMem, pszFilename, MAX_PATH)) {
         result = pszFilename;
         // Translate path with device name to drive letters.
         TCHAR szTemp[BUFSIZE];
         szTemp[0] = '\0';
+        szTemp[1] = '\0';
+        TCHAR *pDrives = szTemp;
 
-        if (GetLogicalDriveStrings(BUFSIZE - 1, szTemp)) {
+        if (GetLogicalDriveStrings(BUFSIZE - 1, pDrives)) {
           TCHAR szName[MAX_PATH + 1];
           TCHAR szDrive[3] = TEXT(" :");
           BOOL bFound = FALSE;
-          TCHAR *p = szTemp;
 
           do {
             // Copy the drive letter to the template string
-            *szDrive = *p;
+            *szDrive = *pDrives;
 
             // Look up each device name
             if (QueryDosDevice(szDrive, szName, MAX_PATH)) {
@@ -160,9 +162,9 @@ std::string GetFileNameFromHandle(HANDLE hFile) {
             }
 
             // Go to the next NULL character.
-            while (*p++)
+            while (*pDrives++)
               ;
-          } while (!bFound && *p); // end of string
+          } while (!bFound && *pDrives); // end of string
           if (!bFound) {
             resolveUnc(result, mup, sizeof(mup) - 1) ||
                 resolveUnc(result, lanman, sizeof(lanman) - 1) ||
