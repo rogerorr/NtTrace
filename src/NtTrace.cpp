@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2770 2025-05-01 22:06:13Z roger $";
+    "$Id: NtTrace.cpp 2793 2025-05-02 11:08:50Z roger $";
 
 #pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
                                      // (performance warning)
@@ -235,16 +235,19 @@ namespace {
 // Return string for 'now' - substring of asctime + milliseconds
 std::string now() {
   struct _timeb timeNow;
-  _ftime(&timeNow);
+  (void)_ftime_s(&timeNow);
 
   static _timeb lasttime;
   static char seconds[] = "HH:MM:SS";
   if (lasttime.time != timeNow.time) {
-    strftime(seconds, sizeof(seconds), "%H:%M:%S", localtime(&timeNow.time));
+    struct tm tm_buf;
+    (void)localtime_s(&tm_buf, &timeNow.time);
+    strftime(seconds, sizeof(seconds), "%H:%M:%S", &tm_buf);
     lasttime.time = timeNow.time;
   }
   char result[8 + 1 + 3 + 1];
-  sprintf(result, "%s.%03i", seconds, static_cast<int>(timeNow.millitm));
+  snprintf(result, sizeof(result), "%s.%03i", seconds,
+           static_cast<int>(timeNow.millitm));
   return result;
 }
 
@@ -252,7 +255,7 @@ std::string now() {
 // Return string for 'delta time' - seconds + milliseconds (+[ss]s.mmm)
 std::string delta() {
   struct _timeb timeNow;
-  _ftime(&timeNow);
+  (void)_ftime_s(&timeNow);
 
   static _timeb lastTime;
 
@@ -272,12 +275,12 @@ std::string delta() {
 #pragma warning(pop)
 
     if (diff.time < 0) {
-      strcpy(result, "<0");
+      (void)strcpy_s(result, sizeof(result), "<0");
     } else if (diff.time > 999) {
-      strcpy(result, ">999s");
+      (void)strcpy_s(result, sizeof(result), ">999s");
     } else {
-      sprintf(result, "+%i.%03i", static_cast<int>(diff.time),
-              static_cast<int>(diff.millitm));
+      snprintf(result, sizeof(result), "+%i.%03i", static_cast<int>(diff.time),
+               static_cast<int>(diff.millitm));
     }
   }
   lastTime = timeNow;
@@ -407,7 +410,7 @@ void TrapNtDebugger::populateOffsets() {
   char chFileName[MAX_PATH + 1] = "";
   if (!GetModuleFileNameEx(GetCurrentProcess(), TargetDll_, chFileName,
                            sizeof(chFileName))) {
-    strcpy(chFileName, target_.c_str());
+    (void)strcpy_s(chFileName, sizeof(chFileName), target_.c_str());
   }
   if (0 == eng.LoadModule64(nullptr, chFileName, nullptr, baseAddress, 0)) {
     std::cerr << "Warning: Unable to load module for " << target_ << " at "
@@ -964,9 +967,12 @@ void setErrorCodes(std::string const &codeFilter) {
   for (const auto &it : codes) {
     unsigned int code(0);
     char scrap(0);
+#pragma warning(push)
+#pragma warning(disable : 4996)
     if (sscanf(it.c_str(), "%x%c", &code, &scrap) != 1) {
       throw std::runtime_error("Unrecognised error code value '" + it + "'");
     }
+#pragma warning(pop)
     errorCodes.insert(static_cast<NTSTATUS>(code));
   }
 }
