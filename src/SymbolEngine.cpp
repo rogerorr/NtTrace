@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2773 2025-05-01 22:48:52Z roger $";
+    "$Id: SymbolEngine.cpp 2801 2025-05-03 14:09:38Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -852,8 +852,6 @@ bool SymbolEngine::ReadMemory(LPCVOID lpBaseAddress, // base of memory area
                               LPVOID lpBuffer,       // data buffer
                               SIZE_T nSize) const    // number of bytes to read
 {
-#pragma warning(disable : 4800) // forcing value to bool 'true' or 'false'
-
   return ReadProcessMemory(GetProcess(), lpBaseAddress, lpBuffer, nSize,
                            nullptr);
 }

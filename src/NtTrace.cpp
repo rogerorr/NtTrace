@@ -37,10 +37,8 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2793 2025-05-02 11:08:50Z roger $";
+    "$Id: NtTrace.cpp 2801 2025-05-03 14:09:38Z roger $";
 
-#pragma warning(disable : 4800)      // forcing value to bool 'true' or 'false'
-                                     // (performance warning)
 #pragma warning(disable : 4511 4512) // copy ctor/op= could not be generated
 
 #ifdef _M_X64

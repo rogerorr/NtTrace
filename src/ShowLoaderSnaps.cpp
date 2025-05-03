@@ -36,11 +36,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 2763 2025-04-29 22:36:43Z roger $";
-
-#pragma warning(disable : 4800) // forcing value to bool 'true' or 'false'
-                                // (performance warning)
-#pragma warning(disable : 4996) // 'asctime' and others were declared deprecated
+    "$Id: ShowLoaderSnaps.cpp 2806 2025-05-03 16:33:56Z Roger $";
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -60,6 +56,16 @@ static char const szRCSID[] =
 using namespace or2;
 
 #pragma comment(lib, "ntdll")
+
+//////////////////////////////////////////////////////////////////////////
+namespace
+{
+size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
+                  size_t wc_len) {
+  return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
+                             mb_str, static_cast<int>(mb_size), 0, nullptr);
+}
+}
 
 //////////////////////////////////////////////////////////////////////////
 /** Debugger event handler for showing loader snaps entry points */
@@ -142,12 +148,12 @@ std::string ShowLoaderSnaps::ReadString(HANDLE hProcess, LPVOID lpString,
     std::vector<wchar_t> chVector(nStringLength + 1);
     if (ReadProcessMemory(hProcess, lpString, &chVector[0],
                           nStringLength * sizeof(wchar_t), nullptr)) {
-      size_t const wcLen = wcstombs(nullptr, &chVector[0], 0);
-      if (wcLen == (size_t)-1) {
+      size_t const wcLen = Utf16ToMbs(nullptr, 0, &chVector[0], nStringLength);
+      if (wcLen == 0) {
         os_ << "invalid string\n";
       } else {
         message.resize(wcLen);
-        wcstombs(&message[0], &chVector[0], wcLen);
+        Utf16ToMbs(&message[0], wcLen, &chVector[0], nStringLength);
       }
     }
   } else {
@@ -194,7 +200,7 @@ int main(int argc, char **argv) {
     debugger.SetQuiet();
   }
 
-  (void)putenv("_NO_DEBUG_HEAP=1");
+  (void)_putenv("_NO_DEBUG_HEAP=1");
 
   PROCESS_INFORMATION ProcessInformation;
   int ret = CreateProcessHelper(options.begin(), options.end(),
