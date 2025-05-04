@@ -36,7 +36,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 2806 2025-05-03 16:33:56Z Roger $";
+    "$Id: ShowLoaderSnaps.cpp 2824 2025-05-04 21:49:55Z roger $";
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -58,14 +58,13 @@ using namespace or2;
 #pragma comment(lib, "ntdll")
 
 //////////////////////////////////////////////////////////////////////////
-namespace
-{
+namespace {
 size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
                   size_t wc_len) {
   return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
                              mb_str, static_cast<int>(mb_size), 0, nullptr);
 }
-}
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 /** Debugger event handler for showing loader snaps entry points */
