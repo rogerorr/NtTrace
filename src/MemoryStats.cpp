@@ -33,7 +33,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: MemoryStats.cpp 2768 2025-05-01 21:50:07Z roger $";
+    "$Id: MemoryStats.cpp 2824 2025-05-04 21:49:55Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -108,9 +108,12 @@ void MemoryStats::OnExitProcess(DWORD processId, DWORD /*threadId*/,
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char **argv) {
+  bool bOnly(false);
   std::string outputFile;
   or2::Options options(szRCSID);
   options.set("out", &outputFile, "Output file");
+  options.set("only", &bOnly,
+              "Only debug the first process, don't debug child processes");
   options.setArgs(1, -1, "cmd [args]");
   if (!options.process(argc, argv,
                        "Display memory statistics for child process(es)"))
@@ -119,8 +122,9 @@ int main(int argc, char **argv) {
   (void)_putenv("_NO_DEBUG_HEAP=1");
 
   PROCESS_INFORMATION ProcessInformation;
-  int ret = or2::CreateProcessHelper(options.begin(), options.end(),
-                                     DEBUG_PROCESS, &ProcessInformation);
+  int ret = or2::CreateProcessHelper(
+      options.begin(), options.end(),
+      bOnly ? DEBUG_ONLY_THIS_PROCESS : DEBUG_PROCESS, &ProcessInformation);
 
   if (ret != 0) {
     std::cerr << "CreateProcess failed with: " << or2::displayError();
