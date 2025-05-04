@@ -10,7 +10,7 @@ AUTHOR
   Bug reports, comments, and suggestions are always welcome.
 
 COPYRIGHT
-  Copyright (C) 2002, 2019 under the MIT license:
+  Copyright (C) 2002, 2025 under the MIT license:
 
   "Permission is hereby granted, free of charge, to any person obtaining a
   copy of this software and associated documentation files (the "Software"),
@@ -37,9 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2801 2025-05-03 14:09:38Z roger $";
-
-#pragma warning(disable : 4511 4512) // copy ctor/op= could not be generated
+    "$Id: NtTrace.cpp 2844 2025-05-04 22:43:34Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -267,10 +265,7 @@ std::string delta() {
       diff.time -= 1;
     }
     diff.time -= lastTime.time;
-#pragma warning(push)
-#pragma warning(disable : 4244) // conversion from 'int' to 'unsigned short'
     diff.millitm -= lastTime.millitm;
-#pragma warning(pop)
 
     if (diff.time < 0) {
       (void)strcpy_s(result, sizeof(result), "<0");

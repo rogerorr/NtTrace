@@ -29,15 +29,15 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2752 $
+  $Revision: 2819 $
 */
 
-// $Id: SymbolEngine.h 2752 2025-04-26 19:28:01Z roger $
+// $Id: SymbolEngine.h 2819 2025-05-03 21:32:00Z roger $
 
 #include <iosfwd>
 #include <string>
 
-#include "..\include\DbgHelper.h"
+#include "../include/DbgHelper.h"
 
 namespace or2 {
 
