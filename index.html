@@ -48,7 +48,7 @@ Process 2428 exit code: 0
 </pre></code>
 
 <b>Syntax:</b><br>
-&nbsp; nttrace [-a] [-e] [-v] [-config *] [-errors *] [-export *] [-filter *] [-category *] [-hd] [-nonames] [-nodlls] [-noexcept] [-only] [-out *] [-pre] [-stack] [-time] [-delta] [-pid] [-tid] [-nl] [-sls] [pid | cmd &lt;args&gt;]
+&nbsp; nttrace [-a] [-e] [-v] [-config *] [-errors *] [-export *] [-filter *] [-category *] [-hd] [-nonames] [-nodlls] [-noexcept] [-nothread] [-only] [-out *] [-pre] [-stack] [-time] [-delta] [-pid] [-tid] [-nl] [-sls] [pid | cmd &lt;args&gt;]
 <p>
 Options:<br>
 <table border=0>
@@ -64,6 +64,7 @@ Options:<br>
 <tr><td>  -nonames  </td><td> Don't name arguments </td></tr>
 <tr><td>  -nodlls   </td><td> Don't process DLL load/unload </td></tr>
 <tr><td>  -noexcept </td><td> Don't process exceptions </td></tr>
+<tr><td>  -nothread </td><td> Don't process thread creation or exit </td></tr>
 <tr><td>  -only     </td><td> Only debug the first process, don't debug child processes </td></tr>
 <tr><td>  -out      </td><td> Output file </td></tr>
 <tr><td>  -pre      </td><td> Trace pre-call as well as post-call </td></tr>
