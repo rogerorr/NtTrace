@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2844 2025-05-04 22:43:34Z roger $";
+    "$Id: NtTrace.cpp 2857 2025-07-26 21:35:53Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -130,6 +130,12 @@ public:
   void setNoException(bool b) { bNoExcept_ = b; }
 
   /**
+   * Set the 'nothread' flag.
+   * @param b the new value: if true thread creation and exit will be ignored
+   */
+  void setNoThread(bool b) { bNoThread_ = b; }
+
+  /**
    * Set the 'show loader snaps' flag.
    * @param b the new value: if true loader snaps will be logged
    */
@@ -175,6 +181,7 @@ public:
 private:
   bool bLogDlls_{true};
   bool bNoExcept_{false};
+  bool bNoThread_{false};
   bool bShowLoaderSnaps_{false};
   std::ostream &os_;
 
@@ -641,6 +648,10 @@ void TrapNtDebugger::OnException(DWORD processId, DWORD threadId,
 void TrapNtDebugger::OnCreateThread(
     DWORD processId, DWORD threadId,
     CREATE_THREAD_DEBUG_INFO const &CreateThread) {
+  if (bNoThread_) {
+    // ignore...
+    return;
+  }
   header(processId, threadId);
   os_ << "Created thread: " << threadId << " at " << CreateThread.lpStartAddress
       << std::endl;
@@ -670,6 +681,10 @@ void TrapNtDebugger::OnCreateProcess(
 //////////////////////////////////////////////////////////////////////////
 void TrapNtDebugger::OnExitThread(DWORD processId, DWORD threadId,
                                   EXIT_THREAD_DEBUG_INFO const &ExitThread) {
+  if (bNoThread_) {
+    // ignore...
+    return;
+  }
   header(processId, threadId);
   os_ << "Thread " << threadId << " exit code: " << ExitThread.dwExitCode
       << std::endl;
@@ -980,6 +995,7 @@ int main(int argc, char **argv) {
   bool bOnly(false);
   bool bNoDlls(false);
   bool bNoExcept(false);
+  bool bNoThread(false);
   bool noDebugHeap(false);
   bool bNoNames(false);
   bool bShowLoaderSnaps(false);
@@ -1005,6 +1021,7 @@ int main(int argc, char **argv) {
   options.set("nonames", &bNoNames, "Don't name arguments");
   options.set("nodlls", &bNoDlls, "Don't process DLL load/unload");
   options.set("noexcept", &bNoExcept, "Don't process exceptions");
+  options.set("nothread", &bNoThread, "Don't process thread creation or exit");
   options.set("only", &bOnly,
               "Only debug the first process, don't debug child processes");
   options.set("out", &outputFile, "Output file");
@@ -1042,6 +1059,7 @@ int main(int argc, char **argv) {
                                                      : std::cout);
   debugger.setLogDlls(!bNoDlls);
   debugger.setNoException(bNoExcept);
+  debugger.setNoThread(bNoThread);
   debugger.setShowLoaderSnaps(bShowLoaderSnaps);
   debugger.setFilter(filter);
   debugger.setCategory(category);
