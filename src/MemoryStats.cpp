@@ -33,7 +33,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: MemoryStats.cpp 2824 2025-05-04 21:49:55Z roger $";
+    "$Id: MemoryStats.cpp 2870 2025-09-30 22:20:51Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -44,7 +44,9 @@ static char const szRCSID[] =
 
 #include <fstream>
 #include <iostream>
+#include <locale>
 #include <map>
+#include <regex>
 #include <sstream>
 #include <stdexcept>
 
@@ -60,13 +62,20 @@ static char const szRCSID[] =
 class MemoryStats : public or2::DebuggerAdapter {
 private:
   std::ostream &os_;
+  std::regex regex_;
+
+  struct comma_out : std::numpunct<char> {
+    char do_thousands_sep() const { return ','; }    // separate with commas
+    std::string do_grouping() const { return "\3"; } // groups of 3 digit
+  };
 
 public:
   /**
    * Construct a memory stats collector.
    * @param os the output stream to write debug event information to
    */
-  MemoryStats(std::ostream &os) : os_(os) {}
+  MemoryStats(std::ostream &os, const std::string &filter)
+      : os_(os), regex_(filter) {}
 
   /** Process has been created */
   void OnCreateProcess(DWORD processId, DWORD threadId,
@@ -81,36 +90,50 @@ public:
 void MemoryStats::OnCreateProcess(
     DWORD processId, DWORD /*threadId*/,
     CREATE_PROCESS_DEBUG_INFO const &createProcess) {
-  os_ << "Start process " << processId << " - "
-      << showData::CommandLine(createProcess.hProcess) << std::endl;
+  std::ostringstream oss;
+  oss << showData::CommandLine(createProcess.hProcess);
+  const std::string command_line{oss.str()};
+  if (regex_search(command_line, regex_)) {
+    os_ << "Start process " << processId << " - " << command_line << std::endl;
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 void MemoryStats::OnExitProcess(DWORD processId, DWORD /*threadId*/,
                                 HANDLE hProcess,
                                 EXIT_PROCESS_DEBUG_INFO const &exitProcess) {
-  os_ << "End process " << processId << ": " << exitProcess.dwExitCode << " - "
-      << showData::CommandLine(hProcess) << std::endl;
-  PROCESS_MEMORY_COUNTERS pmc;
-  if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc))) {
-    os_ << "Memory stats for " << processId << ": "
-        << "PageFaultCount: " << pmc.PageFaultCount
-        << ", PeakWorkingSetSize: " << pmc.PeakWorkingSetSize
-        << ", WorkingSetSize: " << pmc.WorkingSetSize
-        << ", QuotaPeakPagedPoolUsage: " << pmc.QuotaPeakPagedPoolUsage
-        << ", QuotaPagedPoolUsage: " << pmc.QuotaPagedPoolUsage
-        << ", QuotaPeakNonPagedPoolUsage: " << pmc.QuotaPeakNonPagedPoolUsage
-        << ", QuotaNonPagedPoolUsage: " << pmc.QuotaNonPagedPoolUsage
-        << ", PagefileUsage: " << pmc.PagefileUsage
-        << ", PeakPagefileUsage: " << pmc.PeakPagefileUsage << "\n";
+  const std::string command_line{showData::CommandLine(hProcess)};
+  if (regex_search(command_line, regex_)) {
+    os_ << "End process " << processId << ": " << exitProcess.dwExitCode
+        << " - " << command_line << std::endl;
+    PROCESS_MEMORY_COUNTERS pmc;
+    if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc))) {
+      std::ostringstream oss;
+      oss << "Memory stats for " << processId << ": ";
+      oss.imbue(std::locale(oss.getloc(), new comma_out));
+      oss << "PageFaultCount: " << pmc.PageFaultCount
+          << ", PeakWorkingSetSize: " << pmc.PeakWorkingSetSize
+          << ", WorkingSetSize: " << pmc.WorkingSetSize
+          << ", QuotaPeakPagedPoolUsage: " << pmc.QuotaPeakPagedPoolUsage
+          << ", QuotaPagedPoolUsage: " << pmc.QuotaPagedPoolUsage
+          << ", QuotaPeakNonPagedPoolUsage: " << pmc.QuotaPeakNonPagedPoolUsage
+          << ", QuotaNonPagedPoolUsage: " << pmc.QuotaNonPagedPoolUsage
+          << ", PagefileUsage: " << pmc.PagefileUsage
+          << ", PeakPagefileUsage: " << pmc.PeakPagefileUsage << "\n";
+      os_ << oss.str();
+    }
   }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 int main(int argc, char **argv) {
   bool bOnly(false);
+  std::string filter{".*"};
   std::string outputFile;
   or2::Options options(szRCSID);
+  options.set(
+      "filter", &filter,
+      "Regular expression filter on command lines of processes to trace");
   options.set("out", &outputFile, "Output file");
   options.set("only", &bOnly,
               "Only debug the first process, don't debug child processes");
@@ -156,8 +179,8 @@ int main(int argc, char **argv) {
     }
   }
 
-  MemoryStats debugger((outputFile.length() != 0) ? (std::ostream &)ofs
-                                                  : std::cout);
+  MemoryStats debugger(
+      (outputFile.length() != 0) ? (std::ostream &)ofs : std::cout, filter);
   or2::DebugDriver().Loop(debugger);
 
   return 0;

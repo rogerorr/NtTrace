@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2766 $
+  $Revision: 2870 $
 */
 
-// $Id: ShowData.h 2766 2025-04-29 22:56:33Z roger $
+// $Id: ShowData.h 2870 2025-09-30 22:20:51Z roger $
 
 #include <ostream>
 #include <windows.h>
@@ -145,6 +145,7 @@ void showThrowType(std::ostream &os, HANDLE hProcess, ULONG_PTR throwInfo,
 struct CommandLine {
   const HANDLE hProcess_;
   CommandLine(HANDLE hProcess) : hProcess_(hProcess) {}
+  operator std::string() const;
 };
 
 inline std::ostream &operator<<(std::ostream &os,

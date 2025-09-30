@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2732 2025-04-25 18:11:31Z roger $";
+    "$Id: ShowData.cpp 2870 2025-09-30 22:20:51Z roger $";
 
 #include "ShowData.h"
 
@@ -787,6 +787,12 @@ void showThrowType(std::ostream &os, HANDLE hProcess, ULONG_PTR throwInfo,
   } else {
     os << " raw type: " << decorated_name;
   }
+}
+
+CommandLine::operator std::string() const {
+  std::ostringstream oss;
+  showCommandLine(oss, hProcess_);
+  return oss.str();
 }
 
 } // namespace showData
