@@ -33,7 +33,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: MemoryStats.cpp 2870 2025-09-30 22:20:51Z roger $";
+    "$Id: MemoryStats.cpp 2875 2025-10-21 22:59:32Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -42,6 +42,7 @@ static char const szRCSID[] =
 
 #include <windows.h>
 
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <locale>
@@ -68,6 +69,19 @@ private:
     char do_thousands_sep() const { return ','; }    // separate with commas
     std::string do_grouping() const { return "\3"; } // groups of 3 digit
   };
+
+  using ticks = std::chrono::duration<uint64_t, std::ratio<1, 10'000'000>>;
+  static ticks FileTimeToTicks(FILETIME ft)
+  {
+     ULARGE_INTEGER ull;
+     ull.u.LowPart = ft.dwLowDateTime;
+     ull.u.HighPart = ft.dwHighDateTime;
+     return ticks(ull.QuadPart);
+  }
+  
+  static double TicksToMS(ticks duration) {
+    return std::chrono::duration<double, std::chrono::milliseconds::period>(duration).count();
+  }
 
 public:
   /**
@@ -105,7 +119,25 @@ void MemoryStats::OnExitProcess(DWORD processId, DWORD /*threadId*/,
   const std::string command_line{showData::CommandLine(hProcess)};
   if (regex_search(command_line, regex_)) {
     os_ << "End process " << processId << ": " << exitProcess.dwExitCode
-        << " - " << command_line << std::endl;
+        << " - " << command_line;
+    FILETIME CreationTime;
+    FILETIME ExitTime;
+    FILETIME KernelTime;
+    FILETIME UserTime;
+    if (GetProcessTimes(hProcess,
+        &CreationTime,
+        &ExitTime,
+        &KernelTime,
+        &UserTime)) {
+      ticks elapsed_time = FileTimeToTicks(ExitTime) - FileTimeToTicks(CreationTime);
+      ticks kernel_time = FileTimeToTicks(KernelTime);
+      ticks user_time = FileTimeToTicks(UserTime);
+      os_ << ": " << TicksToMS(elapsed_time) << "ms elapsed, ";
+      os_ << TicksToMS(kernel_time) << "ms kernel, ";
+      os_ << TicksToMS(user_time) << "ms user";
+    }
+    os_ << '\n';      
+
     PROCESS_MEMORY_COUNTERS pmc;
     if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc))) {
       std::ostringstream oss;
