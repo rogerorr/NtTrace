@@ -43,8 +43,9 @@ IMPLEMENTATION NOTES
 */
 
 static char const szRCSID[] =
-    "$Id: GetFileNameFromHandle.cpp 2768 2025-05-01 21:50:07Z roger $";
+    "$Id: GetFileNameFromHandle.cpp 2880 2025-10-24 22:03:14Z roger $";
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #include <string>

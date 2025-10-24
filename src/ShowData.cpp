@@ -32,11 +32,12 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2870 2025-09-30 22:20:51Z roger $";
+    "$Id: ShowData.cpp 2880 2025-10-24 22:03:14Z roger $";
 
 #include "ShowData.h"
 
 #include <DbgHelp.h>
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #include <iomanip>

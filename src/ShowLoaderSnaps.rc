@@ -1,8 +1,8 @@
 // Resource file for ShowLoaderSnaps
 //
-// $Id: ShowLoaderSnaps.rc 2825 2025-05-04 21:50:27Z roger $
+// $Id: ShowLoaderSnaps.rc 2890 2025-10-24 22:17:43Z roger $
 
-#define MINOR_VERSION 2824
+#define MINOR_VERSION 2889
 #define DESCRIPTION "Show Loader Snaps when running a process"
 #define APPLICATION
 

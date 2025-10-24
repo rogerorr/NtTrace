@@ -36,13 +36,14 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 2824 2025-05-04 21:49:55Z roger $";
+    "$Id: ShowLoaderSnaps.cpp 2889 2025-10-24 22:17:28Z roger $";
 
 #define WIN32_LEAN_AND_MEAN
 
 #include <fstream>
 #include <iostream>
 #include <string>
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winternl.h>
 

@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2726 2025-04-24 23:39:11Z roger $";
+    "$Id: EntryPoint.cpp 2889 2025-10-24 22:17:28Z roger $";
 
 #include "EntryPoint.h"
 
@@ -42,6 +42,7 @@ static char const szRCSID[] =
 #include <sstream>
 #include <string>
 #include <vector>
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #include "../include/DisplayError.h"

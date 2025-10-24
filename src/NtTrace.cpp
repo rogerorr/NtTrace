@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2857 2025-07-26 21:35:53Z roger $";
+    "$Id: NtTrace.cpp 2889 2025-10-24 22:17:28Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -54,6 +54,7 @@ static char const szRCSID[] =
 #include <sys/timeb.h>
 #include <time.h>
 #include <vector>
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #include <psapi.h> // LOAD_DLL_DEBUG_INFO does not always give us lpImageName

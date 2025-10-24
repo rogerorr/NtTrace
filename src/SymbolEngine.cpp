@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2801 2025-05-03 14:09:38Z roger $";
+    "$Id: SymbolEngine.cpp 2880 2025-10-24 22:03:14Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -42,6 +42,7 @@ static char const szRCSID[] =
 #include "SymbolEngine.h"
 
 // clang-format off
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 // clang-format on
 #include <comutil.h>

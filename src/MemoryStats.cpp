@@ -33,13 +33,14 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: MemoryStats.cpp 2875 2025-10-21 22:59:32Z roger $";
+    "$Id: MemoryStats.cpp 2880 2025-10-24 22:03:14Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
 #define WIN32_NO_STATUS
 #endif // _M_X64
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #include <chrono>

@@ -33,6 +33,7 @@ COPYRIGHT
 
 #include "GetModuleBase.h"
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #pragma warning(push)
 #pragma warning(disable : 4091) // 'typedef ': ignored on left of '' when no
@@ -46,7 +47,7 @@ COPYRIGHT
 #pragma comment(lib, "psapi")
 
 static char const szRCSID[] =
-    "$Id: GetModuleBase.cpp 2676 2025-04-21 17:00:58Z roger $";
+    "$Id: GetModuleBase.cpp 2880 2025-10-24 22:03:14Z roger $";
 
 namespace {
 //////////////////////////////////////////////////////////
