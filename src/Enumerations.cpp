@@ -36,7 +36,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: Enumerations.cpp 2668 2025-04-21 14:30:46Z roger $";
+    "$Id: Enumerations.cpp 2923 2025-11-08 02:04:43Z roger $";
 
 #include "Enumerations.h"
 
@@ -1118,6 +1118,15 @@ EnumMap POWER_INFORMATION_LEVEL_MAP[] = {
     DEF(SessionAllowExternalDmaDevices),
     DEF(SendSuspendResumeNotification),
     DEF(BlackBoxRecorderDirectAccessBuffer),
+    {0, nullptr}};
+
+enum PROCESS_ACTIVITY_TYPE {
+  ProcessActivityTypeAudio = 0,
+  ProcessActivityTypeMax = 1,
+};
+
+EnumMap PROCESS_ACTIVITY_TYPE_MAP[] = {
+    DEF(ProcessActivityTypeAudio),
     {0, nullptr}};
 
 enum PROCESSINFOCLASS {
@@ -2456,6 +2465,7 @@ struct AllEnum allEnums[] = {DEF(ALPC_MESSAGE_INFORMATION_CLASS),
                              DEF(PORT_INFORMATION_CLASS),
                              DEF(POWER_ACTION),
                              DEF(POWER_INFORMATION_LEVEL),
+                             DEF(PROCESS_ACTIVITY_TYPE),
                              DEF(PROCESSINFOCLASS),
                              DEF(QUEUE_USER_APC_FLAGS),
                              DEF(RESOURCEMANAGER_INFORMATION_CLASS),

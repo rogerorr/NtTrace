@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2880 2025-10-24 22:03:14Z roger $";
+    "$Id: SymbolEngine.cpp 2900 2025-11-04 18:50:32Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator

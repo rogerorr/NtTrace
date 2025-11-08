@@ -33,7 +33,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: MemoryStats.cpp 2880 2025-10-24 22:03:14Z roger $";
+    "$Id: MemoryStats.cpp 2901 2025-11-04 18:51:33Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -72,16 +72,17 @@ private:
   };
 
   using ticks = std::chrono::duration<uint64_t, std::ratio<1, 10'000'000>>;
-  static ticks FileTimeToTicks(FILETIME ft)
-  {
-     ULARGE_INTEGER ull;
-     ull.u.LowPart = ft.dwLowDateTime;
-     ull.u.HighPart = ft.dwHighDateTime;
-     return ticks(ull.QuadPart);
+  static ticks FileTimeToTicks(FILETIME ft) {
+    ULARGE_INTEGER ull;
+    ull.u.LowPart = ft.dwLowDateTime;
+    ull.u.HighPart = ft.dwHighDateTime;
+    return ticks(ull.QuadPart);
   }
-  
+
   static double TicksToMS(ticks duration) {
-    return std::chrono::duration<double, std::chrono::milliseconds::period>(duration).count();
+    return std::chrono::duration<double, std::chrono::milliseconds::period>(
+               duration)
+        .count();
   }
 
 public:
@@ -125,19 +126,17 @@ void MemoryStats::OnExitProcess(DWORD processId, DWORD /*threadId*/,
     FILETIME ExitTime;
     FILETIME KernelTime;
     FILETIME UserTime;
-    if (GetProcessTimes(hProcess,
-        &CreationTime,
-        &ExitTime,
-        &KernelTime,
-        &UserTime)) {
-      ticks elapsed_time = FileTimeToTicks(ExitTime) - FileTimeToTicks(CreationTime);
+    if (GetProcessTimes(hProcess, &CreationTime, &ExitTime, &KernelTime,
+                        &UserTime)) {
+      ticks elapsed_time =
+          FileTimeToTicks(ExitTime) - FileTimeToTicks(CreationTime);
       ticks kernel_time = FileTimeToTicks(KernelTime);
       ticks user_time = FileTimeToTicks(UserTime);
       os_ << ": " << TicksToMS(elapsed_time) << "ms elapsed, ";
       os_ << TicksToMS(kernel_time) << "ms kernel, ";
       os_ << TicksToMS(user_time) << "ms user";
     }
-    os_ << '\n';      
+    os_ << '\n';
 
     PROCESS_MEMORY_COUNTERS pmc;
     if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc))) {

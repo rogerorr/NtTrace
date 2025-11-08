@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2889 2025-10-24 22:17:28Z roger $";
+    "$Id: EntryPoint.cpp 2911 2025-11-05 03:37:29Z roger $";
 
 #include "EntryPoint.h"
 
