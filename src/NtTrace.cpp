@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2911 2025-11-05 03:37:29Z roger $";
+    "$Id: NtTrace.cpp 2925 2025-11-14 08:51:48Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -215,6 +215,8 @@ private:
       filters_; // If not empty, filter for 'active' entry points
 
   std::set<DWORD> initialised_processes_;
+
+  std::map<DWORD, std::map<PVOID, std::string>> dll_names_;
 
   bool OnBreakpoint(DWORD processId, DWORD threadId, HANDLE hProcess,
                     HANDLE hThread, LPVOID exceptionAddress);
@@ -700,6 +702,7 @@ void TrapNtDebugger::OnExitProcess(DWORD processId, DWORD threadId,
       << std::endl;
   processes_.erase(processId);
   initialised_processes_.erase(processId);
+  dll_names_.erase(processId);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -714,6 +717,12 @@ void TrapNtDebugger::OnLoadDll(DWORD processId, DWORD threadId, HANDLE hProcess,
       if (!LoadDll.lpImageName ||
           !showName(os_, hProcess, LoadDll.lpImageName, LoadDll.fUnicode)) {
         showModuleNameEx(hProcess, LoadDll.lpBaseOfDll, LoadDll.hFile);
+      }
+      if (LoadDll.hFile) {
+        const std::string filename = GetFileNameFromHandle(LoadDll.hFile);
+        if (!filename.empty()) {
+          dll_names_[processId][LoadDll.lpBaseOfDll] = filename;
+        }
       }
     }
     os_ << std::endl;
@@ -737,7 +746,13 @@ void TrapNtDebugger::OnUnloadDll(DWORD processId, DWORD threadId,
                                  UNLOAD_DLL_DEBUG_INFO const &UnloadDll) {
   if (bLogDlls_) {
     header(processId, threadId);
-    os_ << "Unload of DLL at " << UnloadDll.lpBaseOfDll << std::endl;
+    os_ << "Unload of DLL at " << UnloadDll.lpBaseOfDll;
+    auto it = dll_names_[processId].find(UnloadDll.lpBaseOfDll);
+    if (it != dll_names_[processId].end()) {
+      os_ << " (" << it->second << ")";
+      dll_names_[processId].erase(it);
+    }
+    os_ << std::endl;
   }
 }
 

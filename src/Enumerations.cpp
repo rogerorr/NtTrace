@@ -1125,9 +1125,8 @@ enum PROCESS_ACTIVITY_TYPE {
   ProcessActivityTypeMax = 1,
 };
 
-EnumMap PROCESS_ACTIVITY_TYPE_MAP[] = {
-    DEF(ProcessActivityTypeAudio),
-    {0, nullptr}};
+EnumMap PROCESS_ACTIVITY_TYPE_MAP[] = {DEF(ProcessActivityTypeAudio),
+                                       {0, nullptr}};
 
 enum PROCESSINFOCLASS {
   ProcessBasicInformation = 0,
