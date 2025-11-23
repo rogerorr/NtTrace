@@ -36,7 +36,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 2911 2025-11-05 03:37:29Z roger $";
+    "$Id: ShowLoaderSnaps.cpp 2929 2025-11-23 00:00:15Z roger $";
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -91,6 +91,8 @@ private:
 
   std::string ReadString(HANDLE hProcess, LPVOID lpString, bool bUnicode,
                          WORD nStringLength);
+
+  void DecodeBase(HANDLE hProcess, const std::string& message);
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -137,6 +139,7 @@ void ShowLoaderSnaps::OnOutputDebugString(
     }
   }
   os_ << message << std::flush;
+  DecodeBase(hProcess, message);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -166,6 +169,21 @@ std::string ShowLoaderSnaps::ReadString(HANDLE hProcess, LPVOID lpString,
   message.resize(message.find_last_not_of('\0') + 1);
 
   return message;
+}
+
+//////////////////////////////////////////////////////////////////////////
+void ShowLoaderSnaps::DecodeBase(HANDLE hProcess, const std::string& message) {
+  size_t base = message.find("base 0x");
+  if (base == std::string::npos) {
+    return;
+  }
+
+  HMODULE module = reinterpret_cast<HMODULE>(stoll(message.substr(base + 5), nullptr, 16));
+  char chFileName[MAX_PATH + 1] = "";
+  if (GetModuleFileNameEx(hProcess, module, chFileName,
+                           sizeof(chFileName))) {
+    os_ << "Note: 0x" << module << "=" << chFileName << '\n';
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////
