@@ -44,10 +44,11 @@ COPYRIGHT
 #include <string>
 #include <vector>
 
+#pragma comment(lib, "dbghelp.lib")
 #pragma comment(lib, "psapi")
 
 static char const szRCSID[] =
-    "$Id: GetModuleBase.cpp 2900 2025-11-04 18:50:32Z roger $";
+    "$Id: GetModuleBase.cpp 2964 2025-12-13 23:00:55Z roger $";
 
 namespace {
 //////////////////////////////////////////////////////////
@@ -91,18 +92,17 @@ DWORD64 CALLBACK GetModuleBase(HANDLE hProcess, DWORD64 dwAddress) {
       baseAddress = (DWORD64)mbInfo.AllocationBase;
       HMODULE const hmod = (HMODULE)mbInfo.AllocationBase;
 
-      char szFileName[MAX_PATH] = "";
-      DWORD const dwNameLen = GetModuleFileNameWrapper(
-          hProcess, hmod, szFileName, sizeof szFileName / sizeof szFileName[0]);
+      const auto filename = GetModuleFileNameWrapper(
+          hProcess, hmod);
 
-      if (0 != dwNameLen) {
+      if (!filename.empty()) {
         bool bPathSet(false);
         std::vector<char> searchpath(1024);
         if (::SymGetSearchPath(hProcess, &searchpath[0], 1024)) {
           // symbol files often stored with binary image
-          char const *delim = strrchr(szFileName, '\\');
-          if (delim) {
-            std::string fullpath(szFileName, delim - szFileName);
+          const auto index = filename.find_last_of('\\');
+          if (index != std::string::npos) {
+            std::string fullpath(filename.substr(0, index));
             fullpath += ";";
             fullpath += &searchpath[0];
             ::SymSetSearchPath(
@@ -115,9 +115,9 @@ DWORD64 CALLBACK GetModuleBase(HANDLE hProcess, DWORD64 dwAddress) {
         // We do not need to pass a file handle - trapNtCalls reveals that
         // DbgHelp simply opens the file if we don't provide a handle or
         // duplicates the handle if we do.
-        if (!::SymLoadModule64(hProcess, nullptr, szFileName, nullptr,
+        if (!::SymLoadModule64(hProcess, nullptr, filename.c_str(), nullptr,
                                baseAddress, 0)) {
-          // ATLTRACE("SymLoadModule, failed for %s\n", szFileName);
+          // ATLTRACE("SymLoadModule, failed for %s\n", filename.c_str());
         }
         fixSymSrv();
         if (bPathSet) {
@@ -140,42 +140,24 @@ DWORD64 CALLBACK GetModuleBase(HANDLE hProcess, DWORD64 dwAddress) {
  *
  * @param hProcess the process to query
  * @param hMod the module to query
- * @param szBuff the output filename buffer
- * @param bufLen the size of the output buffer
- * @returns the length of the string copied to the buffer, or zero on failure,
+ * @returns the filename, which is empty on failure,
  * in which case call GetLastError for the underlying error code.
  */
-DWORD GetModuleFileNameWrapper(HANDLE hProcess, HMODULE hMod, char *szBuff,
-                               DWORD bufLen) {
-  DWORD ret = ::GetModuleFileNameEx(hProcess, hMod, szBuff, bufLen);
+std::string GetModuleFileNameWrapper(HANDLE hProcess, HMODULE hMod) {
+  DWORD bufLen = MAX_PATH;
+  std::string result(bufLen, '\0');
+  DWORD ret = ::GetModuleFileNameEx(hProcess, hMod, &result[0], bufLen);
+  while (ret == bufLen) {
+    // File name truncation
+    bufLen *= 2;
+    result.resize(bufLen);
+    ret = ::GetModuleFileNameEx(hProcess, hMod, &result[0], bufLen);
+  }
   if (ret == 0 && hMod == nullptr) {
-    DWORD lastError = GetLastError();
+    const DWORD lastError = GetLastError();
     if (lastError == ERROR_PARTIAL_COPY || lastError == ERROR_INVALID_HANDLE) {
-      // Use alternate API to get exe name in 64-bit windows.
-      using pfnQueryFullProcessImageName = BOOL(WINAPI *)(
-          /*__in*/ HANDLE hProcess,
-          /*__in*/ DWORD dwFlags,
-          /*__out*/ LPCSTR lpExeName,
-          /*__inout*/ PDWORD lpdwSize);
-
-      static pfnQueryFullProcessImageName pQueryFullProcessImageName =
-          (pfnQueryFullProcessImageName)GetProcAddress(
-              GetModuleHandle("KERNEL32"), "QueryFullProcessImageNameA");
-
-      if (pQueryFullProcessImageName &&
-          pQueryFullProcessImageName(hProcess, 0, szBuff, &bufLen)) {
+      if (QueryFullProcessImageName(hProcess, 0, &result[0], &bufLen)) {
         ret = bufLen;
-      } else {
-        // Windows 2003 only has this one: which returns paths in device form
-        using pfnGetProcessImageFileName = DWORD(WINAPI *)(
-            IN HANDLE hProcess, OUT LPTSTR lpImageFileName, IN DWORD nSize);
-
-        static pfnGetProcessImageFileName pGetProcessImageFileName =
-            (pfnGetProcessImageFileName)GetProcAddress(
-                GetModuleHandle("psapi"), "GetProcessImageFileNameA");
-        if (pGetProcessImageFileName) {
-          ret = pGetProcessImageFileName(hProcess, szBuff, bufLen);
-        }
       }
     }
     if (ret == 0) {
@@ -183,9 +165,10 @@ DWORD GetModuleFileNameWrapper(HANDLE hProcess, HMODULE hMod, char *szBuff,
     }
   }
   if (ret != 0) {
-    if (memcmp(szBuff, "\\??\\", 4) == 0) {
-      szBuff[1] = '\\'; // For some reason the wrong UNC header is returned
+    if (result.compare(0, 4, "\\??\\") == 0) {
+      result[1] = '\\'; // For some reason the wrong UNC header is returned
     }
   }
-  return ret;
+  result.resize(ret);
+  return result;
 }

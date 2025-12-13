@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 2789 2025-05-02 11:06:01Z roger $
+# $Id: NtTrace.mak 2962 2025-12-13 22:50:51Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
@@ -78,6 +78,8 @@ $(BUILD)\NtTrace.obj : \
 	"include/SimpleTokenizer.h" \
 	"include/DebugDriver.h" \
 	"include/EntryPoint.h" \
+	"include/GetFileNameFromHandle.h" \
+	"include/GetModuleBase.h" \
 	"include/ShowData.h" \
 	"include/TrapNtOpcodes.h"
 
@@ -92,7 +94,7 @@ NtTrace.exe : $(BUILD)\DebugDriver.obj $(BUILD)\EntryPoint.obj $(BUILD)\Enumerat
 
 ShowLoaderSnaps.res: $(*B).rc "version.rc"
 
-ShowLoaderSnaps.exe : $(BUILD)\DebugDriver.obj
+ShowLoaderSnaps.exe : $(BUILD)\DebugDriver.obj $(BUILD)\GetModuleBase.obj
 
 $(BUILD)\DebugDriver.obj : \
 	"include/DisplayError.h" \
@@ -134,7 +136,8 @@ $(BUILD)\ShowLoaderSnaps.obj: \
 	"include/Options.inl" \
 	"include/ProcessHelper.h" \
 	"include/ReadInt.h" \
-	"include/DebugDriver.h"
+	"include/DebugDriver.h" \
+	"include/GetModuleBase.h"
 
 $(BUILD)\GetModuleBase.obj: \
 	"include/GetModuleBase.h"

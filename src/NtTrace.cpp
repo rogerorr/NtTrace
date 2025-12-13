@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2925 2025-11-14 08:51:48Z roger $";
+    "$Id: NtTrace.cpp 2962 2025-12-13 22:50:51Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -69,6 +69,7 @@ static char const szRCSID[] =
 #include "../include/ReadInt.h"
 #include "../include/SimpleTokenizer.h"
 #include <GetFileNameFromHandle.h>
+#include <GetModuleBase.h>
 #include <SymbolEngine.h>
 
 #include "DebugDriver.h"
@@ -410,12 +411,11 @@ BOOL CALLBACK populateCallback(PSYMBOL_INFO pSymInfo, ULONG /*SymbolSize*/,
 void TrapNtDebugger::populateOffsets() {
   or2::SymbolEngine eng(GetCurrentProcess());
   DWORD64 baseAddress((DWORD64)TargetDll_);
-  char chFileName[MAX_PATH + 1] = "";
-  if (!GetModuleFileNameEx(GetCurrentProcess(), TargetDll_, chFileName,
-                           sizeof(chFileName))) {
-    (void)strcpy_s(chFileName, sizeof(chFileName), target_.c_str());
+  std::string file_name = GetModuleFileNameWrapper(GetCurrentProcess(), TargetDll_);
+  if (file_name.empty()) {
+    file_name = target_;
   }
-  if (0 == eng.LoadModule64(nullptr, chFileName, nullptr, baseAddress, 0)) {
+  if (0 == eng.LoadModule64(nullptr, file_name.c_str(), nullptr, baseAddress, 0)) {
     std::cerr << "Warning: Unable to load module for " << target_ << " at "
               << TargetDll_ << '\n';
   }
@@ -781,18 +781,17 @@ void TrapNtDebugger::showModuleNameEx(HANDLE hProcess, PVOID lpModuleBase,
   if (lpModuleBase == BaseOfNtDll_)
     hProcess = GetCurrentProcess();
 
-  char chFileName[MAX_PATH + 1] = "";
-  if (!GetModuleFileNameEx(hProcess, (HMODULE)lpModuleBase, chFileName,
-                           sizeof(chFileName))) {
+  std::string file_name = GetModuleFileNameWrapper(hProcess, (HMODULE)lpModuleBase);
+  if (file_name.empty()) {
     if (hFile) {
-      os_ << GetFileNameFromHandle(hFile);
+      file_name = GetFileNameFromHandle(hFile);
     } else {
       std::cerr << "unknown module: " << lpModuleBase << ": " << displayError()
                 << std::endl;
+      return;
     }
-  } else {
-    os_ << chFileName;
   }
+  os_ << file_name;
 }
 
 bool TrapNtDebugger::listCategories() {

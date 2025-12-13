@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2900 2025-11-04 18:50:32Z roger $";
+    "$Id: SymbolEngine.cpp 2952 2025-12-06 16:21:58Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -320,13 +320,12 @@ bool SymbolEngine::printAddress(DWORD64 address, std::ostream &os) const {
     std::ostringstream str;
     HMODULE const hmod = (HMODULE)mbInfo.AllocationBase;
 
-    char szFileName[MAX_PATH] = "";
-    if (!GetModuleFileNameWrapper(GetProcess(), hmod, szFileName,
-                                  sizeof szFileName / sizeof szFileName[0])) {
+    const std::string filename = GetModuleFileNameWrapper(GetProcess(), hmod);
+    if (filename.empty()) {
       cacheSymbol = false;
       str << hmod;
     } else
-      str << strrchr(szFileName, '\\') + 1;
+      str << filename.substr(filename.find_last_of('\\') + 1);
     str << " + 0x" << std::hex << (address - (ULONG_PTR)mbInfo.AllocationBase)
         << std::dec;
 

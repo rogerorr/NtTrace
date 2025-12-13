@@ -28,14 +28,15 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2662 $
+  $Revision: 2950 $
 */
 
-// $Id: GetModuleBase.h 2662 2025-04-21 13:52:03Z roger $
+// $Id: GetModuleBase.h 2950 2025-12-06 16:10:34Z roger $
 
 #ifndef _WINDOWS_
 #include <windows.h>
 #endif // _WINDOWS_
+#include <string>
 
 /**
  * GetModuleBase: try to get information about a module being loaded.
@@ -50,12 +51,9 @@ DWORD64 CALLBACK GetModuleBase(HANDLE hProcess, DWORD64 dwAddress);
  *
  * @param hProcess the process to query
  * @param hMod the module to query
- * @param szBuff the output filename buffer
- * @param bufLen the size of the output buffer
- * @returns the length of the string copied to the buffer, or zero on failure,
+ * @returns the filename, which is empty on failure,
  * in which case call GetLastError for the underlying error code.
  */
-DWORD GetModuleFileNameWrapper(HANDLE hProcess, HMODULE hMod, char *szBuff,
-                               DWORD bufLen);
+std::string GetModuleFileNameWrapper(HANDLE hProcess, HMODULE hMod);
 
 #endif // GETMODULEBASE_H_

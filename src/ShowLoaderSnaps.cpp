@@ -36,7 +36,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 2929 2025-11-23 00:00:15Z roger $";
+    "$Id: ShowLoaderSnaps.cpp 2959 2025-12-13 22:30:59Z roger $";
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -53,6 +53,7 @@ static char const szRCSID[] =
 #include "../include/ProcessHelper.h"
 
 #include "DebugDriver.h"
+#include "GetModuleBase.h"
 
 using namespace or2;
 
@@ -179,10 +180,9 @@ void ShowLoaderSnaps::DecodeBase(HANDLE hProcess, const std::string& message) {
   }
 
   HMODULE module = reinterpret_cast<HMODULE>(stoll(message.substr(base + 5), nullptr, 16));
-  char chFileName[MAX_PATH + 1] = "";
-  if (GetModuleFileNameEx(hProcess, module, chFileName,
-                           sizeof(chFileName))) {
-    os_ << "Note: 0x" << module << "=" << chFileName << '\n';
+  const std::string module_name = GetModuleFileNameWrapper(hProcess, module);
+  if (!module_name.empty()) {
+    os_ << "Note: 0x" << module << "=" << module_name << '\n';
   }
 }
 
