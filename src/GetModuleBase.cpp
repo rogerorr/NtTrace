@@ -48,7 +48,7 @@ COPYRIGHT
 #pragma comment(lib, "psapi")
 
 static char const szRCSID[] =
-    "$Id: GetModuleBase.cpp 2964 2025-12-13 23:00:55Z roger $";
+    "$Id: GetModuleBase.cpp 2966 2025-12-15 23:33:07Z roger $";
 
 namespace {
 //////////////////////////////////////////////////////////
@@ -92,8 +92,7 @@ DWORD64 CALLBACK GetModuleBase(HANDLE hProcess, DWORD64 dwAddress) {
       baseAddress = (DWORD64)mbInfo.AllocationBase;
       HMODULE const hmod = (HMODULE)mbInfo.AllocationBase;
 
-      const auto filename = GetModuleFileNameWrapper(
-          hProcess, hmod);
+      const auto filename = GetModuleFileNameWrapper(hProcess, hmod);
 
       if (!filename.empty()) {
         bool bPathSet(false);

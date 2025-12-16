@@ -1016,7 +1016,8 @@ enum POWER_INFORMATION_LEVEL {
   SessionAllowExternalDmaDevices = 95,
   SendSuspendResumeNotification = 96,
   BlackBoxRecorderDirectAccessBuffer = 97,
-  PowerInformationLevelMaximum = 98,
+  SystemPowerSourceState = 98,
+  PowerInformationLevelMaximum = 99,
 };
 
 EnumMap POWER_INFORMATION_LEVEL_MAP[] = {
@@ -1118,6 +1119,7 @@ EnumMap POWER_INFORMATION_LEVEL_MAP[] = {
     DEF(SessionAllowExternalDmaDevices),
     DEF(SendSuspendResumeNotification),
     DEF(BlackBoxRecorderDirectAccessBuffer),
+    DEF(SystemPowerSourceState),
     {0, nullptr}};
 
 enum PROCESS_ACTIVITY_TYPE {
@@ -1247,7 +1249,8 @@ enum PROCESSINFOCLASS {
   ProcessSlistRollbackInformation = 113,
   ProcessNetworkIoCounters = 114,
   ProcessFindFirstThreadByTebValue = 115,
-  MaxProcessInfoClass = 116,
+  ProcessEnclaveAddressSpaceRestriction = 116,
+  MaxProcessInfoClass = 117,
 };
 
 EnumMap PROCESSINFOCLASS_MAP[] = {
@@ -1369,6 +1372,7 @@ EnumMap PROCESSINFOCLASS_MAP[] = {
     DEF(ProcessSlistRollbackInformation),
     DEF(ProcessNetworkIoCounters),
     DEF(ProcessFindFirstThreadByTebValue),
+    DEF(ProcessEnclaveAddressSpaceRestriction),
     {0, nullptr}};
 
 enum QUEUE_USER_APC_FLAGS {
@@ -1807,7 +1811,11 @@ enum SYSTEM_INFORMATION_CLASS {
   SystemResourceDeadlockTimeout = 245,
   SystemBreakOnContextUnwindFailureInformation = 246,
   SystemOslRamdiskInformation = 247,
-  MaxSystemInfoClass = 248,
+  SystemProcessorFeaturesBitMapInformation = 250,
+  SystemBasicProcessInformation = 252,
+  SystemHandleCountInformation = 253,
+  SystemRuntimeAttestationReport = 254,
+  MaxSystemInfoClass = 255,
 };
 
 EnumMap SYSTEM_INFORMATION_CLASS_MAP[] = {
@@ -2059,6 +2067,10 @@ EnumMap SYSTEM_INFORMATION_CLASS_MAP[] = {
     DEF(SystemResourceDeadlockTimeout),
     DEF(SystemBreakOnContextUnwindFailureInformation),
     DEF(SystemOslRamdiskInformation),
+    DEF(SystemProcessorFeaturesBitMapInformation),
+    DEF(SystemBasicProcessInformation),
+    DEF(SystemHandleCountInformation),
+    DEF(SystemRuntimeAttestationReport),
     {0, nullptr}};
 
 enum THREADINFOCLASS {
@@ -2252,7 +2264,8 @@ enum TOKEN_INFORMATION_CLASS {
   TokenIsSandboxed = 47,
   TokenIsAppSilo = 48,
   TokenLoggingInformation = 49,
-  MaxTokenInfoClass = 50,
+  TokenLearningMode = 50,
+  MaxTokenInfoClass = 51,
 };
 
 EnumMap TOKEN_INFORMATION_CLASS_MAP[] = {
@@ -2305,6 +2318,7 @@ EnumMap TOKEN_INFORMATION_CLASS_MAP[] = {
     DEF(TokenIsSandboxed),
     DEF(TokenIsAppSilo),
     DEF(TokenLoggingInformation),
+    DEF(TokenLearningMode),
     {0, nullptr}};
 
 enum TOKEN_TYPE {
