@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2900 2025-11-04 18:50:32Z roger $";
+    "$Id: ShowData.cpp 2966 2025-12-15 23:33:07Z roger $";
 
 #include "ShowData.h"
 
@@ -238,7 +238,8 @@ bool showName(std::ostream &os, HANDLE hProcess, LPCVOID lpImageName,
 }
 
 //////////////////////////////////////////////////////////////////////////
-// Show a NUL terminated string from the debuggee
+// Show a NUL terminated string from the debuggee, expected/likely to be
+// up to nStringLength in size but may be longer
 bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
                 bool bUnicode, WORD nStringLength) {
   bool newline(false);
@@ -246,8 +247,15 @@ bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
   if (nStringLength == 0) {
   } else if (bUnicode) {
     std::vector<wchar_t> chVector(nStringLength + 1);
-    or2::ReadPartialProcessMemory(hProcess, lpString, &chVector[0], 1,
-                                  nStringLength * sizeof(wchar_t));
+    for (;;) {
+      or2::ReadPartialProcessMemory(hProcess, lpString, &chVector[0], 1,
+                                    nStringLength * sizeof(wchar_t));
+      if (chVector[nStringLength - 1] == L'\0') {
+        break;
+      }
+      nStringLength *= 2;
+      chVector.resize(nStringLength + 1);
+    }
     size_t const mbLen = Utf16ToMbs(nullptr, 0, &chVector[0], nStringLength);
     if (mbLen == 0) {
       for (int i = 0; i != nStringLength + 1; ++i) {
@@ -265,12 +273,18 @@ bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
     }
   } else {
     std::vector<char> chVector(nStringLength + 1);
-    or2::ReadPartialProcessMemory(hProcess, lpString, &chVector[0], 1,
-                                  nStringLength);
-    os << &chVector[0];
-    if (chVector[nStringLength - 1] == '\0') {
-      nStringLength--;
+    for (;;) {
+      or2::ReadPartialProcessMemory(hProcess, lpString, &chVector[0], 1,
+                                    nStringLength);
+      if (chVector[nStringLength - 1] == '\0') {
+        nStringLength--;
+        break;
+      }
+      nStringLength *= 2;
+      chVector.resize(nStringLength + 1);
     }
+
+    os << &chVector[0];
     if (nStringLength > 0 && chVector[nStringLength - 1] == '\n') {
       newline = true;
     }
