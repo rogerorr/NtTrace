@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2870 $
+  $Revision: 2968 $
 */
 
-// $Id: ShowData.h 2870 2025-09-30 22:20:51Z roger $
+// $Id: ShowData.h 2968 2025-12-17 11:24:42Z roger $
 
 #include <ostream>
 #include <windows.h>
@@ -75,7 +75,7 @@ bool showName(std::ostream &os, HANDLE hProcess, LPCVOID lpImageName,
  * @return true if ends with a newline, false if not
  */
 bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
-                bool bUnicode, WORD nStringLength);
+                bool bUnicode, WORD nStringLength, bool extend = false);
 
 /** Show the command line from the target process */
 void showCommandLine(std::ostream &os, HANDLE hProcess);

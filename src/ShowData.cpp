@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2966 2025-12-15 23:33:07Z roger $";
+    "$Id: ShowData.cpp 2968 2025-12-17 11:24:42Z roger $";
 
 #include "ShowData.h"
 
@@ -232,7 +232,7 @@ bool showName(std::ostream &os, HANDLE hProcess, LPCVOID lpImageName,
   } else if (lpString == nullptr) {
     return false;
   } else {
-    showString(os, hProcess, lpString, bUnicode, MAX_PATH);
+    showString(os, hProcess, lpString, bUnicode, MAX_PATH, true);
   }
   return true;
 }
@@ -241,18 +241,23 @@ bool showName(std::ostream &os, HANDLE hProcess, LPCVOID lpImageName,
 // Show a NUL terminated string from the debuggee, expected/likely to be
 // up to nStringLength in size but may be longer
 bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
-                bool bUnicode, WORD nStringLength) {
+                bool bUnicode, WORD nStringLength, bool extend) {
   bool newline(false);
 
   if (nStringLength == 0) {
   } else if (bUnicode) {
     std::vector<wchar_t> chVector(nStringLength + 1);
+    size_t offset{0};
     for (;;) {
-      or2::ReadPartialProcessMemory(hProcess, lpString, &chVector[0], 1,
-                                    nStringLength * sizeof(wchar_t));
-      if (chVector[nStringLength - 1] == L'\0') {
+      or2::ReadPartialProcessMemory(hProcess, lpString, &chVector[offset], 1,
+                                    (nStringLength - offset) * sizeof(wchar_t));
+      if (!extend) break;
+      auto it = std::find(chVector.begin() + offset, chVector.end(), L'\0');
+      if (it < chVector.begin() + nStringLength) {
+        nStringLength = static_cast<WORD>(it - chVector.begin());
         break;
       }
+      offset += nStringLength;
       nStringLength *= 2;
       chVector.resize(nStringLength + 1);
     }
@@ -273,13 +278,17 @@ bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
     }
   } else {
     std::vector<char> chVector(nStringLength + 1);
+    size_t offset{0};
     for (;;) {
-      or2::ReadPartialProcessMemory(hProcess, lpString, &chVector[0], 1,
+      or2::ReadPartialProcessMemory(hProcess, lpString, &chVector[offset], 1,
                                     nStringLength);
-      if (chVector[nStringLength - 1] == '\0') {
-        nStringLength--;
+      if (!extend) break;
+      auto it = std::find(chVector.begin() + offset, chVector.end(), '\0');
+      if (it < chVector.begin() + nStringLength) {
+        nStringLength = static_cast<WORD>(it - chVector.begin());
         break;
       }
+      offset += nStringLength;
       nStringLength *= 2;
       chVector.resize(nStringLength + 1);
     }
