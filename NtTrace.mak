@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 2962 2025-12-13 22:50:51Z roger $
+# $Id: NtTrace.mak 2980 2025-12-20 15:58:41Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
@@ -62,6 +62,9 @@ MemoryStats.exe : $(BUILD)\$(*B).obj $(BUILD)\$(*B).res
 ShowLoaderSnaps.exe : $(BUILD)\$(*B).obj $(BUILD)\$(*B).res 
 	cl $(CCFLAGS) /Fe$@ $** $(LINKFLAGS)
 
+SymExplorer.exe : $(BUILD)\$(*B).obj $(BUILD)\$(*B).res 
+	cl $(CCFLAGS) /Fe$@ $** $(LINKFLAGS)
+
 # Dependencies
 
 $(BUILD)\NtTrace.obj : \
@@ -95,6 +98,10 @@ NtTrace.exe : $(BUILD)\DebugDriver.obj $(BUILD)\EntryPoint.obj $(BUILD)\Enumerat
 ShowLoaderSnaps.res: $(*B).rc "version.rc"
 
 ShowLoaderSnaps.exe : $(BUILD)\DebugDriver.obj $(BUILD)\GetModuleBase.obj
+
+SymExplorer.res: $(*B).rc "version.rc"
+
+SymExplorer.exe : $(BUILD)\GetModuleBase.obj $(BUILD)\GetFileNameFromHandle.obj $(BUILD)\SymbolEngine.obj
 
 $(BUILD)\DebugDriver.obj : \
 	"include/DisplayError.h" \
@@ -149,3 +156,15 @@ $(BUILD)\SymbolEngine.obj: \
 	"include/MSvcExceptions.h" \
 	"include/ReadPartialMemory.h" \
 	"include/StrFromWchar.h"
+
+$(BUILD)\SymExplorer.obj: \
+	"include/BasicType.h" \
+	"include/DbgHelper.h" \
+	"include/DbgHelper.inl" \
+	"include/GetModuleBase.h" \
+	"include/NtDllStruct.h" \
+	"include/Options.h" \
+	"include/Options.inl" \
+	"include/StrFromWchar.h" \
+	"include/StreamGUID.h" \
+	"include/SymbolEngine.h"

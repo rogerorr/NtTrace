@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2962 2025-12-13 22:50:51Z roger $";
+    "$Id: NtTrace.cpp 2971 2025-12-20 13:51:55Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -411,11 +411,13 @@ BOOL CALLBACK populateCallback(PSYMBOL_INFO pSymInfo, ULONG /*SymbolSize*/,
 void TrapNtDebugger::populateOffsets() {
   or2::SymbolEngine eng(GetCurrentProcess());
   DWORD64 baseAddress((DWORD64)TargetDll_);
-  std::string file_name = GetModuleFileNameWrapper(GetCurrentProcess(), TargetDll_);
+  std::string file_name =
+      GetModuleFileNameWrapper(GetCurrentProcess(), TargetDll_);
   if (file_name.empty()) {
     file_name = target_;
   }
-  if (0 == eng.LoadModule64(nullptr, file_name.c_str(), nullptr, baseAddress, 0)) {
+  if (0 ==
+      eng.LoadModule64(nullptr, file_name.c_str(), nullptr, baseAddress, 0)) {
     std::cerr << "Warning: Unable to load module for " << target_ << " at "
               << TargetDll_ << '\n';
   }
@@ -781,7 +783,8 @@ void TrapNtDebugger::showModuleNameEx(HANDLE hProcess, PVOID lpModuleBase,
   if (lpModuleBase == BaseOfNtDll_)
     hProcess = GetCurrentProcess();
 
-  std::string file_name = GetModuleFileNameWrapper(hProcess, (HMODULE)lpModuleBase);
+  std::string file_name =
+      GetModuleFileNameWrapper(hProcess, (HMODULE)lpModuleBase);
   if (file_name.empty()) {
     if (hFile) {
       file_name = GetFileNameFromHandle(hFile);

@@ -36,7 +36,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 2959 2025-12-13 22:30:59Z roger $";
+    "$Id: ShowLoaderSnaps.cpp 2971 2025-12-20 13:51:55Z roger $";
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -93,7 +93,7 @@ private:
   std::string ReadString(HANDLE hProcess, LPVOID lpString, bool bUnicode,
                          WORD nStringLength);
 
-  void DecodeBase(HANDLE hProcess, const std::string& message);
+  void DecodeBase(HANDLE hProcess, const std::string &message);
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -173,13 +173,14 @@ std::string ShowLoaderSnaps::ReadString(HANDLE hProcess, LPVOID lpString,
 }
 
 //////////////////////////////////////////////////////////////////////////
-void ShowLoaderSnaps::DecodeBase(HANDLE hProcess, const std::string& message) {
+void ShowLoaderSnaps::DecodeBase(HANDLE hProcess, const std::string &message) {
   size_t base = message.find("base 0x");
   if (base == std::string::npos) {
     return;
   }
 
-  HMODULE module = reinterpret_cast<HMODULE>(stoll(message.substr(base + 5), nullptr, 16));
+  HMODULE module =
+      reinterpret_cast<HMODULE>(stoll(message.substr(base + 5), nullptr, 16));
   const std::string module_name = GetModuleFileNameWrapper(hProcess, module);
   if (!module_name.empty()) {
     os_ << "Note: 0x" << module << "=" << module_name << '\n';

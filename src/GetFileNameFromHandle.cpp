@@ -28,36 +28,56 @@ COPYRIGHT
 
 IMPLEMENTATION NOTES
   There are various forms of 'raw' file names:
-    \Device\HarddiskVolume1\temp\xx.txt
-    \Device\LanmanRedirector\or2-freda\drivec\temp\xx.txt
-    \Device\Mup\or2-freda\drivec\temp\xx.txt
-    \Device\WinDfs\P:000000000001703e\or2-freda\drivec\temp\xx.txt
+                \Device\HarddiskVolume1\temp\xx.txt
+                \Device\LanmanRedirector\or2-freda\drivec\temp\xx.txt
+                \Device\Mup\or2-freda\drivec\temp\xx.txt
+                \Device\WinDfs\P:000000000001703e\or2-freda\drivec\temp\xx.txt
 
   and of 'dos device names' for drive letters:
-    \Device\HarddiskVolume1
-    \Device\LanmanRedirector\;Z:000000000001703e\or2-freda\drivec
-    \Device\WinDfs\P:000000000001703e
+                \Device\HarddiskVolume1
+                \Device\LanmanRedirector\;Z:000000000001703e\or2-freda\drivec
+                \Device\WinDfs\P:000000000001703e
 
   Network files may be accessed via a UNC path rather than a drive letter.
 
 */
 
 static char const szRCSID[] =
-    "$Id: GetFileNameFromHandle.cpp 2900 2025-11-04 18:50:32Z roger $";
+    "$Id: GetFileNameFromHandle.cpp 2976 2025-12-20 15:39:09Z roger $";
+
+#include <iostream> // DO_NOT_COMMIT
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#include "../include/NtDllStruct.h"
+
 #include <string>
+#include <vector>
 
 #include <psapi.h>
 #include <string.h>
 #include <tchar.h>
 
 #pragma comment(lib, "mpr")
+#pragma comment(lib, "ntdll")
 #pragma comment(lib, "psapi")
 
 #define BUFSIZE 512
+
+extern "C" {
+
+typedef enum _MEMORY_INFORMATION_CLASS {
+  MemoryMappedFilenameInformation = 2,
+} MEMORY_INFORMATION_CLASS;
+
+NTSTATUS
+NTAPI
+NtQueryVirtualMemory(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress,
+                     _In_ MEMORY_INFORMATION_CLASS MemoryInformationClass,
+                     _Out_ PVOID MemoryInformation, _In_ ULONG Length,
+                     _Out_opt_ PULONG ReturnLength);
+}
 
 namespace {
 static char const lanman[] = "\\Device\\LanmanRedirector";
@@ -95,6 +115,45 @@ bool resolveUnc(std::string &filename, char const *uncPrefix, UINT uncLen) {
   }
   return result;
 }
+
+size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
+                  size_t wc_len) {
+  return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
+                             mb_str, static_cast<int>(mb_size), 0, nullptr);
+}
+
+std::string getMappedFileName(void *pMem) {
+  char filename[MAX_PATH + 1] = {};
+  if (GetMappedFileName(GetCurrentProcess(), pMem, filename, MAX_PATH)) {
+    return filename;
+  }
+  if (::GetLastError() != ERROR_MORE_DATA)
+    return std::string{};
+
+  // GetMappedFileName does not currently work with long paths
+  std::string result;
+  ULONG length{0};
+  (void)NtQueryVirtualMemory(GetCurrentProcess(), pMem,
+                             MemoryMappedFilenameInformation, nullptr, 0,
+                             &length);
+  if (length == 0)
+    return result;
+
+  std::vector<char> buffer(length);
+  const NTSTATUS st = NtQueryVirtualMemory(GetCurrentProcess(), pMem,
+                                           MemoryMappedFilenameInformation,
+                                           buffer.data(), length, nullptr);
+  if (st != 0) {
+    return result;
+  }
+
+  const auto unicode = reinterpret_cast<PUNICODE_STRING>(buffer.data());
+  std::vector<char> mbStr(unicode->Length + 1);
+  auto str_len = Utf16ToMbs(mbStr.data(), mbStr.size(), unicode->Buffer,
+                            unicode->Length / sizeof(wchar_t));
+
+  return std::string(mbStr.data(), str_len);
+}
 } // namespace
 
 std::string GetFileNameFromHandle(HANDLE hFile) {
@@ -118,10 +177,8 @@ std::string GetFileNameFromHandle(HANDLE hFile) {
     void *pMem = MapViewOfFile(hFileMap, FILE_MAP_READ, 0, 0, 1);
 
     if (pMem) {
-      TCHAR pszFilename[MAX_PATH + 1];
-      pszFilename[0] = '\0';
-      if (GetMappedFileName(GetCurrentProcess(), pMem, pszFilename, MAX_PATH)) {
-        result = pszFilename;
+      result = getMappedFileName(pMem);
+      if (!result.empty()) {
         // Translate path with device name to drive letters.
         TCHAR szTemp[BUFSIZE];
         szTemp[0] = '\0';
@@ -153,7 +210,7 @@ std::string GetFileNameFromHandle(HANDLE hFile) {
                     bFound = true;
                   }
                 } else {
-                  if ((_tcsnicmp(pszFilename, szName, uNameLen) == 0) &&
+                  if ((_tcsnicmp(result.c_str(), szName, uNameLen) == 0) &&
                       (result[uNameLen] == _T('\\'))) {
                     result.replace(0, uNameLen, szDrive);
                     bFound = true;

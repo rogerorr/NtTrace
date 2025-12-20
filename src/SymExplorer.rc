@@ -1,0 +1,9 @@
+// Resource file for SymExplorer
+//
+// $Id: SymExplorer.rc 2981 2025-12-20 15:59:10Z roger $
+
+#define MINOR_VERSION 2977
+#define DESCRIPTION "Explore the debugging symbols for a module"
+#define APPLICATION
+
+#include "../include/version.rc"

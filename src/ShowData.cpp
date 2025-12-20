@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2968 2025-12-17 11:24:42Z roger $";
+    "$Id: ShowData.cpp 2969 2025-12-20 12:54:11Z roger $";
 
 #include "ShowData.h"
 
@@ -251,7 +251,8 @@ bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
     for (;;) {
       or2::ReadPartialProcessMemory(hProcess, lpString, &chVector[offset], 1,
                                     (nStringLength - offset) * sizeof(wchar_t));
-      if (!extend) break;
+      if (!extend)
+        break;
       auto it = std::find(chVector.begin() + offset, chVector.end(), L'\0');
       if (it < chVector.begin() + nStringLength) {
         nStringLength = static_cast<WORD>(it - chVector.begin());
@@ -282,7 +283,8 @@ bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
     for (;;) {
       or2::ReadPartialProcessMemory(hProcess, lpString, &chVector[offset], 1,
                                     nStringLength);
-      if (!extend) break;
+      if (!extend)
+        break;
       auto it = std::find(chVector.begin() + offset, chVector.end(), '\0');
       if (it < chVector.begin() + nStringLength) {
         nStringLength = static_cast<WORD>(it - chVector.begin());
