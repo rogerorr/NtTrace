@@ -29,10 +29,13 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2675 $
+  $Revision: 2998 $
 */
 
-// $Id: NtDllStruct.h 2675 2025-04-21 16:52:13Z roger $
+// $Id: NtDllStruct.h 2998 2025-12-21 15:54:22Z roger $
+
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 
 // For MSVC 5.00/6.00 basetsd.h (changes with platform SDK)
 #ifndef _W64

@@ -28,10 +28,13 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2675 $
+  $Revision: 2998 $
 */
 
-// $Id: MsvcExceptions.h 2675 2025-04-21 16:52:13Z roger $
+// $Id: MsvcExceptions.h 2998 2025-12-21 15:54:22Z roger $
+
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 
 /* Value of ExceptionCode for an MSVC C++ exception ("msc") */
 static DWORD const MSVC_EXCEPTION = 0xe06d7363;

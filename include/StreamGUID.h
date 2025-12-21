@@ -28,12 +28,13 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2662 $
+  $Revision: 2997 $
 */
 
-// $Id: StreamGUID.h 2662 2025-04-21 13:52:03Z roger $
+// $Id: StreamGUID.h 2997 2025-12-21 15:47:53Z roger $
 
-#include <iostream>
+#include <iomanip>
+#include <ostream>
 #include <sstream>
 
 #include <windows.h>

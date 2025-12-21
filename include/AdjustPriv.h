@@ -28,10 +28,14 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2996 $
+  $Revision: 2998 $
 */
 
-// $Id: AdjustPriv.h 2996 2025-12-21 14:39:04Z roger $
+// $Id: AdjustPriv.h 2998 2025-12-21 15:54:22Z roger $
+
+#include <iostream>
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 
 namespace or2 {
 
