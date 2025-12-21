@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2675 $
+  $Revision: 3010 $
 */
 
-// $Id: DbgHelper.h 2675 2025-04-21 16:52:13Z roger $
+// $Id: DbgHelper.h 3010 2025-12-21 18:00:47Z roger $
 
 #include <cvconst.h> //DIA SDK
 #include <windows.h>
@@ -184,9 +184,8 @@ public:
 #endif // DBGHELP_6_2_APIS
 
 private:
-  // suppress copy and assign
-  DbgHelper(DbgHelper const &);
-  DbgHelper &operator=(DbgHelper const &);
+  DbgHelper(DbgHelper const &) = delete;
+  DbgHelper &operator=(DbgHelper const &) = delete;
 
   HANDLE m_hProcess{}; // Current process being debugged
 

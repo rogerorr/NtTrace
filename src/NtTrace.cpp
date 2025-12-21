@@ -37,13 +37,14 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2985 2025-12-21 00:20:59Z roger $";
+    "$Id: NtTrace.cpp 3008 2025-12-21 17:53:00Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
 #define WIN32_NO_STATUS
 #endif
 
+#include <ctime>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -52,7 +53,6 @@ static char const szRCSID[] =
 #include <set>
 #include <string>
 #include <sys/timeb.h>
-#include <time.h>
 #include <vector>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

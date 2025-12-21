@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 2988 2025-12-21 09:28:54Z roger $";
+    "$Id: SymExplorer.cpp 3010 2025-12-21 18:00:47Z roger $";
 
 #define NOMINMAX
 
@@ -127,7 +127,7 @@ std::string expandFlags(DWORD flags) {
 
 class SymExplorer {
 public:
-  SymExplorer(const std::string &prompt);
+  SymExplorer(std::string prompt);
 
   // Called by Debug engine for each public/global symbol
   BOOL enumSymbolsCallback(std::string const &SymbolName,
@@ -289,8 +289,8 @@ void appendQuotedString(std::string &name, std::istream &iss) {
 // forward references
 
 ////////////////////////////////////////////////////////////////////////////////////
-SymExplorer::SymExplorer(const std::string &prompt)
-    : eng_(GetCurrentProcess()), prompt_(prompt) {
+SymExplorer::SymExplorer(std::string prompt)
+    : eng_(GetCurrentProcess()), prompt_(std::move(prompt)) {
   // We want to undecorate functions ourselves and we want to work with both the
   // old and new DbgHelp.dll ...
   DWORD dwOpts = SymGetOptions();
@@ -778,7 +778,7 @@ bool SymExplorer::locals(std::istream &iss) {
   struct CallBack : public SymbolEngine::EnumLocalCallBack {
     CallBack(hexmode mode) : mode_(mode) {}
 
-    virtual bool operator()(SymbolEngine const &symEng, PSYMBOL_INFO pSymInfo) {
+    bool operator()(SymbolEngine const &symEng, PSYMBOL_INFO pSymInfo) override {
       std::string name(pSymInfo->Name, pSymInfo->NameLen);
       symEng.decorateName(name, pSymInfo->ModBase, pSymInfo->TypeIndex);
       std::cout << " " << name << " Flags: " << std::hex << pSymInfo->Flags
@@ -915,6 +915,14 @@ bool SymExplorer::udt(std::istream &iss) {
 
   // Dereference bases and typedefs
   if ((tag == SymTagBaseClass) || (tag == SymTagTypedef)) {
+    if (tag == SymTagTypedef) {
+      wchar_t *name = nullptr;
+      eng_.GetTypeInfo(baseAddress_, index, TI_GET_SYMNAME, &name);
+      if (name) {
+        std::cout << "using " << or2::strFromWchar(name) << " = ";
+        LocalFree(name); // By experiment the memory comes from LocalAlloc!
+      }
+    }
     DWORD typeidx(0);
     if (eng_.GetTypeInfo(baseAddress_, index, TI_GET_TYPEID, &typeidx)) {
       index = typeidx;
@@ -955,7 +963,7 @@ bool SymExplorer::udt(std::istream &iss) {
     std::cout << '\n';
   } else {
     std::cout << "Not a UDT type: " << (enum SymTagEnum)tag << std::endl;
-    return 1;
+    return result;
   }
 
   wchar_t *name = nullptr;

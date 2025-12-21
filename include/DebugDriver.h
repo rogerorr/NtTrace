@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2724 $
+  $Revision: 3010 $
 */
 
-// $Id: DebugDriver.h 2724 2025-04-24 22:36:40Z roger $
+// $Id: DebugDriver.h 3010 2025-12-21 18:00:47Z roger $
 
 #ifndef _WINDOWS_
 #include <windows.h>
@@ -91,7 +91,7 @@ public:
   virtual bool Active() { return true; }
 
   /** Virtual dtor for safe inheritance */
-  virtual ~Debugger() {}
+  virtual ~Debugger() = default;
 };
 
 //////////////////////////////////////////////////////////////////////////

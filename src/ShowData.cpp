@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2996 2025-12-21 14:39:04Z roger $";
+    "$Id: ShowData.cpp 3005 2025-12-21 17:33:52Z roger $";
 
 #include "ShowData.h"
 
@@ -74,7 +74,8 @@ bool isWow(HANDLE hProcess);
 size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
                   size_t wc_len) {
   return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
-                             mb_str, static_cast<int>(mb_size), 0, nullptr);
+                             mb_str, static_cast<int>(mb_size), nullptr,
+                             nullptr);
 }
 
 } // namespace

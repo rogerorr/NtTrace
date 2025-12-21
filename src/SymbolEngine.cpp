@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2996 2025-12-21 14:39:04Z roger $";
+    "$Id: SymbolEngine.cpp 3010 2025-12-21 18:00:47Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -115,7 +115,7 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
                    const CONTEXT &context)
       : opf(opf), frameOffset(frameOffset), context(context) {}
 
-  virtual bool operator()(SymbolEngine const &eng, PSYMBOL_INFO pSymInfo) {
+  bool operator()(SymbolEngine const &eng, PSYMBOL_INFO pSymInfo) override {
     std::string name(pSymInfo->Name, pSymInfo->NameLen);
     eng.decorateName(name, pSymInfo->ModBase, pSymInfo->TypeIndex);
     if (!(pSymInfo->Flags & SYMFLAG_LOCAL)) {
@@ -226,7 +226,8 @@ BOOL getWow64ThreadContext(HANDLE hProcess, HANDLE hThread,
 size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
                   size_t wc_len) {
   return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
-                             mb_str, static_cast<int>(mb_size), 0, nullptr);
+                             mb_str, static_cast<int>(mb_size), nullptr,
+                             nullptr);
 }
 
 } // namespace

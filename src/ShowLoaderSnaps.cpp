@@ -36,7 +36,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 2996 2025-12-21 14:39:04Z roger $";
+    "$Id: ShowLoaderSnaps.cpp 3006 2025-12-21 17:36:18Z roger $";
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -64,7 +64,8 @@ namespace {
 size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
                   size_t wc_len) {
   return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
-                             mb_str, static_cast<int>(mb_size), 0, nullptr);
+                             mb_str, static_cast<int>(mb_size), nullptr,
+                             nullptr);
 }
 } // namespace
 
@@ -107,7 +108,7 @@ void ShowLoaderSnaps::SetQuiet() {
 void ShowLoaderSnaps::SetShowLoaderSnaps(HANDLE hProcess) {
   PROCESS_BASIC_INFORMATION pbi{};
   if (0 == NtQueryInformationProcess(hProcess, ProcessBasicInformation, &pbi,
-                                     sizeof(pbi), 0) &&
+                                     sizeof(pbi), nullptr) &&
       pbi.PebBaseAddress) {
 #ifdef _WIN64
     // GlobalFlag is not officially documented
@@ -119,10 +120,10 @@ void ShowLoaderSnaps::SetShowLoaderSnaps(HANDLE hProcess) {
     ULONG GlobalFlag{0};
     const ULONG SHOW_LDR_SNAPS = 2;
     ReadProcessMemory(hProcess, pGlobalFlag, &GlobalFlag, sizeof(GlobalFlag),
-                      0);
+                      nullptr);
     GlobalFlag |= SHOW_LDR_SNAPS;
     WriteProcessMemory(hProcess, pGlobalFlag, &GlobalFlag, sizeof(GlobalFlag),
-                       0);
+                       nullptr);
   }
 }
 

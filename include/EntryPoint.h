@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2670 $
+  $Revision: 3008 $
 */
 
-// $Id: EntryPoint.h 2670 2025-04-21 14:35:30Z roger $
+// $Id: EntryPoint.h 3008 2025-12-21 17:53:00Z roger $
 
 #include <windows.h>
 
@@ -85,9 +85,9 @@ enum ArgAttributes {
 
 struct Argument {
   Argument() = default;
-  Argument(ArgType argType, std::string const &argTypeName,
-           std::string const &name, ArgAttributes attributes)
-      : argType_(argType), argTypeName_(argTypeName), name_(name),
+  Argument(ArgType argType, std::string argTypeName,
+           std::string name, ArgAttributes attributes)
+      : argType_(argType), argTypeName_(std::move(argTypeName)), name_(std::move(name)),
         attributes_(attributes) {}
 
 #ifdef _M_IX86
@@ -137,8 +137,8 @@ class EntryPoint {
 public:
   using Typedefs = std::map<std::string, std::string>;
 
-  explicit EntryPoint(std::string const &name, std::string const &category)
-      : name_(name), category_(category), disabled_(category[0] == '-'),
+  explicit EntryPoint(std::string name, std::string category)
+      : name_(std::move(name)), category_(std::move(category)), disabled_(category[0] == '-'),
         optional_(category[0] == '?') {
     if (disabled_ || optional_) {
       this->category_.erase(0, 1);

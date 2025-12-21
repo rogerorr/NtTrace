@@ -43,7 +43,7 @@ IMPLEMENTATION NOTES
 */
 
 static char const szRCSID[] =
-    "$Id: GetFileNameFromHandle.cpp 2999 2025-12-21 16:58:56Z roger $";
+    "$Id: GetFileNameFromHandle.cpp 3008 2025-12-21 17:53:00Z roger $";
 
 #include <iostream> // DO_NOT_COMMIT
 
@@ -52,11 +52,11 @@ static char const szRCSID[] =
 
 #include "../include/NtDllStruct.h"
 
+#include <cstring>
 #include <string>
 #include <vector>
 
 #include <psapi.h>
-#include <string.h>
 #include <tchar.h>
 
 #pragma comment(lib, "mpr")
@@ -67,9 +67,9 @@ static char const szRCSID[] =
 
 extern "C" {
 
-typedef enum _MEMORY_INFORMATION_CLASS {
+using MEMORY_INFORMATION_CLASS = enum _MEMORY_INFORMATION_CLASS {
   MemoryMappedFilenameInformation = 2,
-} MEMORY_INFORMATION_CLASS;
+};
 
 NTSTATUS
 NTAPI
@@ -119,7 +119,8 @@ bool resolveUnc(std::string &filename, char const *uncPrefix, UINT uncLen) {
 size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
                   size_t wc_len) {
   return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
-                             mb_str, static_cast<int>(mb_size), 0, nullptr);
+                             mb_str, static_cast<int>(mb_size), nullptr,
+                             nullptr);
 }
 
 std::string getMappedFileName(void *pMem) {

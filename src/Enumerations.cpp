@@ -37,14 +37,14 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: Enumerations.cpp 2973 2025-12-20 14:05:37Z roger $";
+    "$Id: Enumerations.cpp 3005 2025-12-21 17:33:52Z roger $";
 
 #include "Enumerations.h"
 
 namespace Enumerations {
 #define DEF(X) {(unsigned long)X, #X}
 
-enum _ALPC_MESSAGE_INFORMATION_CLASS {
+enum ALPC_MESSAGE_INFORMATION_CLASS {
   AlpcMessageSidInformation = 0,
   AlpcMessageTokenModifiedIdInformation = 1,
   AlpcMessageDirectStatusInformation = 2,
@@ -58,7 +58,7 @@ EnumMap ALPC_MESSAGE_INFORMATION_CLASS_MAP[] = {
     DEF(AlpcMessageHandleInformation),
     {0, nullptr}};
 
-enum _ALPC_PORT_INFORMATION_CLASS {
+enum ALPC_PORT_INFORMATION_CLASS {
   AlpcBasicInformation = 0,
   AlpcPortInformation = 1,
   AlpcAssociateCompletionPortInformation = 2,

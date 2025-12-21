@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2675 $
+  $Revision: 3010 $
 */
 
-// $Id: Options.h 2675 2025-04-21 16:52:13Z roger $
+// $Id: Options.h 3010 2025-12-21 18:00:47Z roger $
 
 #include <string>
 #include <vector>
@@ -155,9 +155,8 @@ public:
   const_iterator end() const;
 
 private:
-  // no copy/assign
-  Options(Options const &);
-  Options &operator=(Options const &);
+  Options(Options const &) = delete;
+  Options &operator=(Options const &) = delete;
 
   struct Data;
   Data *pData;

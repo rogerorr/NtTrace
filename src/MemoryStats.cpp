@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: MemoryStats.cpp 2985 2025-12-21 00:20:59Z roger $";
+    "$Id: MemoryStats.cpp 3010 2025-12-21 18:00:47Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -66,8 +66,8 @@ private:
   std::regex regex_;
 
   struct comma_out : std::numpunct<char> {
-    char do_thousands_sep() const { return ','; }    // separate with commas
-    std::string do_grouping() const { return "\3"; } // groups of 3 digit
+    char do_thousands_sep() const override { return ','; }    // separate with commas
+    std::string do_grouping() const override { return "\3"; } // groups of 3 digit
   };
 
   using ticks = std::chrono::duration<uint64_t, std::ratio<1, 10'000'000>>;

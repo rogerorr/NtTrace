@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2819 $
+  $Revision: 3010 $
 */
 
-// $Id: SymbolEngine.h 2819 2025-05-03 21:32:00Z roger $
+// $Id: SymbolEngine.h 3010 2025-12-21 18:00:47Z roger $
 
 #include <iosfwd>
 #include <string>
@@ -48,7 +48,7 @@ public:
   SymbolEngine(HANDLE hProcess);
 
   /** Destroy wrapper */
-  ~SymbolEngine();
+  ~SymbolEngine() override;
 
   /**
    * GetModuleBase: try to get information about a module being loaded.
@@ -141,7 +141,7 @@ public:
     /** callback function called for each enumerated local */
     virtual bool operator()(SymbolEngine const &eng,
                             struct _SYMBOL_INFO *pSymInfo) = 0;
-    virtual ~EnumLocalCallBack() {}
+    virtual ~EnumLocalCallBack() = default;
   };
 
   /** enumerate local variables at an address */
