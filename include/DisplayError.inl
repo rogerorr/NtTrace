@@ -36,10 +36,10 @@ namespace or2 {
     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
     IN THE SOFTWARE."
 
-    $Revision: 2718 $
+    $Revision: 2996 $
 */
 
-// $Id: DisplayError.inl 2718 2025-04-24 20:44:06Z roger $
+// $Id: DisplayError.inl 2996 2025-12-21 14:39:04Z roger $
 
 inline displayError::displayError() : hresult(GetLastError()) {}
 
@@ -56,7 +56,7 @@ inline void displayError::printOn(std::ostream &os) const {
   FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
                     FORMAT_MESSAGE_IGNORE_INSERTS,
                 nullptr, hresult, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (LPTSTR)&pszMsg, 0, nullptr);
+                reinterpret_cast<LPTSTR>(&pszMsg), 0, nullptr);
   if (pszMsg != nullptr) {
     size_t nLen = strlen(pszMsg);
     if (nLen > 1 && pszMsg[nLen - 1] == '\n') {

@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2675 $
+  $Revision: 2996 $
 */
 
-// $Id: ProcessHelper.h 2675 2025-04-21 16:52:13Z roger $
+// $Id: ProcessHelper.h 2996 2025-12-21 14:39:04Z roger $
 
 // clang-format off
 #include <windows.h> // for CreateProcess
@@ -201,7 +201,7 @@ inline std::vector<DWORD> FindProcesses(
   int pid(0);
 
   if ((pattern != nullptr) && (readInt(pattern, pid))) {
-    ret.push_back((DWORD)pid);
+    ret.push_back(static_cast<DWORD>(pid));
     return ret;
   }
 

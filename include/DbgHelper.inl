@@ -27,10 +27,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2675 $
+  $Revision: 2996 $
 */
 
-// $Id: DbgHelper.inl 2675 2025-04-21 16:52:13Z roger $
+// $Id: DbgHelper.inl 2996 2025-12-21 14:39:04Z roger $
 
 #include <iostream>
 
@@ -177,7 +177,7 @@ inline BOOL DbgHelper::GetSymFromAddr64(DWORD64 dwAddr,
 inline FARPROC DbgHelper::GetProc(char const *name) {
   MEMORY_BASIC_INFORMATION mbi;
   if (VirtualQuery(&::SymInitialize, &mbi, sizeof(mbi))) {
-    return ::GetProcAddress((HMODULE)mbi.AllocationBase, name);
+    return ::GetProcAddress(static_cast<HMODULE>(mbi.AllocationBase), name);
   }
   return nullptr;
 }

@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2675 $
+  $Revision: 2996 $
 */
 
-// $Id: AdjustPriv.h 2675 2025-04-21 16:52:13Z roger $
+// $Id: AdjustPriv.h 2996 2025-12-21 14:39:04Z roger $
 
 namespace or2 {
 
@@ -62,7 +62,7 @@ BOOL inline EnableNamedPriv(
     return FALSE;
   }
 
-  if (!LookupPrivilegeValue((LPSTR) nullptr, lpName, &privValue)) {
+  if (!LookupPrivilegeValue(nullptr, lpName, &privValue)) {
     std::cerr << "LookupPrivilegeValue failed with: " << GetLastError()
               << " for " << lpName << std::endl;
     return FALSE;
@@ -75,8 +75,8 @@ BOOL inline EnableNamedPriv(
   tkp.Privileges[0].Luid = privValue;
   tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 
-  AdjustTokenPrivileges(hToken, FALSE, &tkp, sizeof(TOKEN_PRIVILEGES),
-                        (PTOKEN_PRIVILEGES) nullptr, (PDWORD) nullptr);
+  AdjustTokenPrivileges(hToken, FALSE, &tkp, sizeof(TOKEN_PRIVILEGES), nullptr,
+                        nullptr);
 
   //
   // The return value of AdjustTokenPrivileges couldn't be tested on older NT

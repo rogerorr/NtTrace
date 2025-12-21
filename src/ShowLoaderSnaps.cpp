@@ -36,7 +36,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 2971 2025-12-20 13:51:55Z roger $";
+    "$Id: ShowLoaderSnaps.cpp 2996 2025-12-21 14:39:04Z roger $";
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -105,7 +105,7 @@ void ShowLoaderSnaps::SetQuiet() {
 
 //////////////////////////////////////////////////////////////////////////
 void ShowLoaderSnaps::SetShowLoaderSnaps(HANDLE hProcess) {
-  PROCESS_BASIC_INFORMATION pbi = {};
+  PROCESS_BASIC_INFORMATION pbi{};
   if (0 == NtQueryInformationProcess(hProcess, ProcessBasicInformation, &pbi,
                                      sizeof(pbi), 0) &&
       pbi.PebBaseAddress) {
