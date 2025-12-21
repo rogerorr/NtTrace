@@ -48,7 +48,7 @@ COPYRIGHT
 #pragma comment(lib, "psapi")
 
 static char const szRCSID[] =
-    "$Id: GetModuleBase.cpp 2996 2025-12-21 14:39:04Z roger $";
+    "$Id: GetModuleBase.cpp 2999 2025-12-21 16:58:56Z roger $";
 
 namespace {
 //////////////////////////////////////////////////////////
@@ -165,7 +165,7 @@ std::string GetModuleFileNameWrapper(HANDLE hProcess, HMODULE hMod) {
     }
   }
   if (ret != 0) {
-    if (result.compare(0, 4, "\\??\\") == 0) {
+    if (result.compare(0, 4, R"(\??\)") == 0) {
       result[1] = '\\'; // For some reason the wrong UNC header is returned
     }
   }

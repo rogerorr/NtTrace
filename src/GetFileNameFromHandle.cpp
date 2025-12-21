@@ -43,7 +43,7 @@ IMPLEMENTATION NOTES
 */
 
 static char const szRCSID[] =
-    "$Id: GetFileNameFromHandle.cpp 2976 2025-12-20 15:39:09Z roger $";
+    "$Id: GetFileNameFromHandle.cpp 2999 2025-12-21 16:58:56Z roger $";
 
 #include <iostream> // DO_NOT_COMMIT
 
@@ -80,10 +80,10 @@ NtQueryVirtualMemory(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress,
 }
 
 namespace {
-static char const lanman[] = "\\Device\\LanmanRedirector";
-static char const mup[] = "\\Device\\Mup";
-static char const dfs[] = "\\Device\\WinDfs";
-static char const dfsUnc[] = "\\Device\\WinDfs\\Root";
+static char const lanman[] = R"(\Device\LanmanRedirector)";
+static char const mup[] = R"(\Device\Mup)";
+static char const dfs[] = R"(\Device\WinDfs)";
+static char const dfsUnc[] = R"(\Device\WinDfs\Root)";
 
 /* Check for net use using the provided uncPrefix and target device name and
  * drive name */
@@ -111,7 +111,7 @@ bool resolveNetUse(std::string &filename, char const *uncPrefix, size_t uncLen,
 bool resolveUnc(std::string &filename, char const *uncPrefix, UINT uncLen) {
   bool result = _tcsnicmp(filename.c_str(), uncPrefix, uncLen) == 0;
   if (result) {
-    filename.replace(0, uncLen, "\\");
+    filename.replace(0, uncLen, 1, '\\');
   }
   return result;
 }
