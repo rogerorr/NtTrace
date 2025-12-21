@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 2985 2025-12-21 00:20:59Z roger $";
+    "$Id: SymExplorer.cpp 2988 2025-12-21 09:28:54Z roger $";
 
 #define NOMINMAX
 
@@ -162,9 +162,9 @@ private:
   bool find(std::istream &iss);
   bool children(std::istream &iss);
   bool dec(std::istream &iss);
-  #ifdef DISASM
+#ifdef DISASM
   bool disasm(std::istream &iss);
-  #endif // DISASM
+#endif // DISASM
   bool hex(std::istream &iss);
   bool index(std::istream &iss);
   bool load(std::istream &iss);
@@ -238,7 +238,8 @@ std::ostream &operator<<(std::ostream &os, enum CV_call_e const &rhs) {
     CASE(CV_CALL_M32RCALL);
     CASE(CV_CALL_CLRCALL);
   default:
-    os << "(?""?)";
+    os << "(?"
+          "?)";
     break;
   }
 #undef CASE
@@ -262,7 +263,8 @@ std::ostream &operator<<(std::ostream &os, enum DataKind const &rhs) {
     CASE(DataIsStaticMember);
     CASE(DataIsConstant);
   default:
-    os << "(?""?)";
+    os << "(?"
+          "?)";
     break;
   }
 #undef CASE
@@ -308,9 +310,9 @@ SymExplorer::SymExplorer(const std::string &prompt)
   funcMap_["help"] = &SymExplorer::help;
   funcMap_["children"] = &SymExplorer::children;
   funcMap_["dec"] = &SymExplorer::dec;
-  #ifdef DISASM
+#ifdef DISASM
   funcMap_["disasm"] = &SymExplorer::disasm;
-  #endif // DISASM
+#endif // DISASM
   funcMap_["hex"] = &SymExplorer::hex;
   funcMap_["index"] = &SymExplorer::index;
   funcMap_["load"] = &SymExplorer::load;

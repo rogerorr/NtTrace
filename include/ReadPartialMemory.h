@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2985 $
+  $Revision: 2987 $
 */
 
-// $Id: ReadPartialMemory.h 2985 2025-12-21 00:20:59Z roger $
+// $Id: ReadPartialMemory.h 2987 2025-12-21 09:26:29Z roger $
 
 #include <Windows.h>
 
@@ -61,10 +61,13 @@ ReadPartialProcessMemory(HANDLE hProcess, ///< Handle to process to read (needs
     }
     length--;
 
-    static SYSTEM_INFO SystemInfo;
-    static BOOL b [[maybe_unused]] = (GetSystemInfo(&SystemInfo), TRUE);
+    static DWORD dwPageSize = []() {
+      SYSTEM_INFO SystemInfo;
+      GetSystemInfo(&SystemInfo);
+      return SystemInfo.dwPageSize;
+    }();
 
-    SIZE_T pageOffset = ((ULONG_PTR)address + length) % SystemInfo.dwPageSize;
+    SIZE_T pageOffset = ((ULONG_PTR)address + length) % dwPageSize;
     if (pageOffset > length)
       break;
     length -= pageOffset;
