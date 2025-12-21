@@ -203,7 +203,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  Options::const_iterator it = options.begin();
+  auto it = options.begin();
 
   std::ofstream ofs;
   if (outputFile.length() != 0) {

@@ -319,7 +319,7 @@ bool SymbolEngine::printAddress(DWORD64 address, std::ostream &os) const {
   if (::VirtualQueryEx(GetProcess(), (PVOID)address, &mbInfo, sizeof mbInfo) &&
       ((mbInfo.State & MEM_FREE) == 0) && ((mbInfo.Type & MEM_IMAGE) != 0)) {
     std::ostringstream str;
-    HMODULE const hmod = (HMODULE)mbInfo.AllocationBase;
+    const auto hmod = static_cast<HMODULE>(mbInfo.AllocationBase);
 
     const std::string filename = GetModuleFileNameWrapper(GetProcess(), hmod);
     if (filename.empty()) {
@@ -441,8 +441,7 @@ void SymbolEngine::printInlineAddress(DWORD64 address, DWORD inline_context,
 /////////////////////////////////////////////////////////////////////////////////////
 // Convert address to a string.
 std::string SymbolEngine::addressToName(DWORD64 address) const {
-  std::map<DWORD64, std::string>::iterator it =
-      pImpl_->addressMap.find(address);
+  auto it = pImpl_->addressMap.find(address);
   if (it == pImpl_->addressMap.end()) {
     std::ostringstream oss;
     if (!printAddress(address, oss))
@@ -463,8 +462,7 @@ std::string SymbolEngine::addressToName(PVOID pointer) const {
 std::string SymbolEngine::inlineToName(DWORD64 address,
                                        DWORD inline_context) const {
   std::pair<DWORD64, DWORD> key(address, inline_context);
-  std::map<std::pair<DWORD64, DWORD>, std::string>::iterator it =
-      pImpl_->inlineMap.find(key);
+  auto it = pImpl_->inlineMap.find(key);
   if (it == pImpl_->inlineMap.end()) {
     std::ostringstream oss;
     printInlineAddress(address, inline_context, oss);
@@ -835,7 +833,8 @@ void SymbolEngine::showMsvcThrow(std::ostream &os, PVOID throwInfo,
     return;
   }
 
-  const std::type_info *pType_info = (const std::type_info *)raw_type_info;
+  const auto *pType_info =
+      reinterpret_cast<const std::type_info *>(raw_type_info);
   const char *decorated_name = pType_info->raw_name();
 
   char buffer[1024] = "";
@@ -881,7 +880,7 @@ BOOL SymbolEngine::decorateName(std::string &name, ULONG64 ModBase,
   }
 
   bool bRecurse(false); // set to true to recurse down the type tree
-  enum SymTagEnum tag = (enum SymTagEnum)0;
+  enum SymTagEnum tag {};
   GetTypeInfo(ModBase, TypeIndex, TI_GET_SYMTAG, &tag);
   switch (tag) {
   case SymTagBaseType: {
@@ -1275,9 +1274,8 @@ using fnNtQueryInformationThread = NTSTATUS WINAPI(HANDLE ThreadHandle,
 BOOL getWow64ThreadContext(HANDLE hProcess, HANDLE hThread,
                            CONTEXT const &context, WOW64_CONTEXT *pWowContext) {
   static HMODULE hKernel32 = ::GetModuleHandle("KERNEL32");
-  static fnWow64GetThreadContext *pFn =
-      (fnWow64GetThreadContext *)::GetProcAddress(hKernel32,
-                                                  "Wow64GetThreadContext");
+  static auto *pFn = (fnWow64GetThreadContext *)::GetProcAddress(
+      hKernel32, "Wow64GetThreadContext");
   if (pFn) {
     // Vista and above
     return pFn(hThread, pWowContext);
@@ -1301,14 +1299,14 @@ BOOL getWow64ThreadContext(HANDLE hProcess, HANDLE hThread,
     return true;
   } else {
     static HMODULE hNtDll = ::GetModuleHandle("NTDLL");
-    static fnNtQueryInformationThread *pNtQueryInformationThread =
+    static auto *pNtQueryInformationThread =
         (fnNtQueryInformationThread *)::GetProcAddress(
             hNtDll, "NtQueryInformationThread");
     ULONG_PTR ThreadInfo[6] = {0};
     if (pNtQueryInformationThread &&
         pNtQueryInformationThread(hThread, 0, &ThreadInfo, sizeof(ThreadInfo),
                                   nullptr) == 0) {
-      PVOID *pTls = (PVOID *)(ThreadInfo[1] + TLS_OFFSET);
+      auto *pTls = reinterpret_cast<PVOID *>(ThreadInfo[1] + TLS_OFFSET);
       Wow64_SaveContext saveContext = {0}, *pSaveContext = nullptr;
 
       if (ReadProcessMemory(hProcess, pTls + 1, &pSaveContext,

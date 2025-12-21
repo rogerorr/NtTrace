@@ -588,12 +588,12 @@ bool SymExplorer::index(std::istream &iss) {
                          &info)) {
       switch (type) {
       case TI_GET_SYMTAG: {
-        enum SymTagEnum const tag((enum SymTagEnum)info.value);
+        const auto tag{static_cast<enum SymTagEnum>(info.value)};
         std::cout << "Tag: " << info.value << " " << tag << std::endl;
         break;
       }
       case TI_GET_SYMNAME: {
-        wchar_t *const pName = static_cast<wchar_t *>(info.pointer);
+        auto *const pName = static_cast<wchar_t *>(info.pointer);
         std::cout << "Name: " << or2::strFromWchar(pName) << std::endl;
         LocalFree(pName); // By experiment the memory comes from LocalAlloc!
         break;
@@ -608,7 +608,7 @@ bool SymExplorer::index(std::istream &iss) {
         std::cout << "Type ID: " << info.value << std::endl;
         break;
       case TI_GET_BASETYPE: {
-        enum BasicType const basicType = (enum BasicType)info.value;
+        const auto basicType{static_cast<enum BasicType>(info.value)};
         std::cout << "Base Type: " << info.value << " " << basicType
                   << std::endl;
         break;
@@ -621,7 +621,7 @@ bool SymExplorer::index(std::istream &iss) {
                   << std::endl;
         break;
       case TI_GET_DATAKIND: {
-        enum DataKind const kind((enum DataKind)info.value);
+        const auto kind{static_cast<enum DataKind>(info.value)};
         std::cout << "Data Kind: " << info.value << " " << kind << std::endl;
         break;
       }
@@ -677,7 +677,7 @@ bool SymExplorer::index(std::istream &iss) {
         std::cout << "Equiv To: " << info.value << std::endl;
         break;
       case TI_GET_CALLING_CONVENTION: {
-        enum CV_call_e const call((enum CV_call_e)info.value);
+        const auto call{static_cast<enum CV_call_e>(info.value)};
         std::cout << "Calling Convention: " << info.value << " " << call
                   << std::endl;
         break;
@@ -778,7 +778,8 @@ bool SymExplorer::locals(std::istream &iss) {
   struct CallBack : public SymbolEngine::EnumLocalCallBack {
     CallBack(hexmode mode) : mode_(mode) {}
 
-    bool operator()(SymbolEngine const &symEng, PSYMBOL_INFO pSymInfo) override {
+    bool operator()(SymbolEngine const &symEng,
+                    PSYMBOL_INFO pSymInfo) override {
       std::string name(pSymInfo->Name, pSymInfo->NameLen);
       symEng.decorateName(name, pSymInfo->ModBase, pSymInfo->TypeIndex);
       std::cout << " " << name << " Flags: " << std::hex << pSymInfo->Flags

@@ -640,7 +640,7 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
   }
 
   unsigned char *setssn = nullptr;
-  for (auto pCheck : signatures) {
+  for (const auto *pCheck : signatures) {
     unsigned int offset = 0;
     setssn = nullptr;
     for (; *pCheck != 0; pCheck += 2) {
@@ -787,11 +787,11 @@ void EntryPoint::setReturnType(std::string const &typeName,
       {retULONG_PTR, "ULONG_PTR"}, {retULONG_PTR, "LONG_PTR"},
   };
 
-  Typedefs::const_iterator it = typedefs.find(typeName);
+  const auto it = typedefs.find(typeName);
   std::string const alias = (it == typedefs.end() ? std::string() : it->second);
   ReturnType eRetType = retNTSTATUS;
   bool found(false);
-  for (auto type : retTypes) {
+  for (const auto &type : retTypes) {
     if ((typeName == type.retTypeName_) || (alias == type.retTypeName_)) {
       found = true;
       eRetType = type.eRetType_;
@@ -828,7 +828,8 @@ void EntryPoint::doPreSave(HANDLE hProcess, HANDLE hThread,
   saveArea[1] = Context.Rdx;
   saveArea[2] = Context.R8;
   saveArea[3] = Context.R9;
-  PVOID saveTarget = (PVOID)(Context.Rsp + sizeof(ULONG_PTR));
+  const auto saveTarget =
+      reinterpret_cast<PVOID>(Context.Rsp + sizeof(ULONG_PTR));
   if (!WriteProcessMemory(hProcess, saveTarget, saveArea, sizeof(saveArea),
                           nullptr)) {
     std::cerr << "Can't save register values at " << saveTarget << ": "
@@ -1062,7 +1063,7 @@ std::map<std::string, ArgType> getArgTypes() {
 
   std::map<std::string, ArgType> result;
 
-  for (auto idx : argTypes) {
+  for (const auto &idx : argTypes) {
     result[idx.argTypeName_] = idx.eArgType_;
   }
 
@@ -1104,7 +1105,7 @@ ArgType getArgType(const std::string typeName,
 // win32u implements some "dead export" logic (the functions
 // simply call RaiseFailFastException)
 bool deadExport(unsigned char instruction[], size_t length) {
-  for (auto pCheck : dead_exports) {
+  for (auto *pCheck : dead_exports) {
     unsigned int offset = 0;
     for (; *pCheck != 0; pCheck += 2) {
       if (offset >= length)

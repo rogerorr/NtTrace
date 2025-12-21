@@ -398,8 +398,9 @@ BOOL CALLBACK populateCallback(PSYMBOL_INFO pSymInfo, ULONG /*SymbolSize*/,
       len = end - ptr;
     }
     std::string key(ptr, len);
-    DWORD offset = (DWORD)(pSymInfo->Address - pSymInfo->ModBase);
-    TrapNtDebugger::Offsets &offsets = *(TrapNtDebugger::Offsets *)UserContext;
+    const auto offset =
+        static_cast<DWORD>(pSymInfo->Address - pSymInfo->ModBase);
+    auto &offsets = *static_cast<TrapNtDebugger::Offsets *>(UserContext);
     offsets[key] = offset;
   }
 
@@ -410,7 +411,7 @@ BOOL CALLBACK populateCallback(PSYMBOL_INFO pSymInfo, ULONG /*SymbolSize*/,
 // Populate the 'offsets' collection
 void TrapNtDebugger::populateOffsets() {
   or2::SymbolEngine eng(GetCurrentProcess());
-  DWORD64 baseAddress((DWORD64)TargetDll_);
+  const auto baseAddress(reinterpret_cast<DWORD64>(TargetDll_));
   std::string file_name =
       GetModuleFileNameWrapper(GetCurrentProcess(), TargetDll_);
   if (file_name.empty()) {
@@ -484,9 +485,9 @@ bool TrapNtDebugger::OnBreakpoint(DWORD processId, DWORD threadId,
   it = NtCalls_.find(exceptionAddress);
   if (it != NtCalls_.end()) {
 #ifdef _M_IX86
-    NTSTATUS rc = Context.Eax;
+    const auto rc{static_cast<NTSTATUS>(Context.Eax)};
 #elif _M_X64
-    NTSTATUS rc = NTSTATUS(Context.Rax);
+    const auto rc{static_cast<NTSTATUS>(Context.Rax)};
 #endif
     if (bErrorsOnly && NT_SUCCESS(rc)) {
       // don't trace
@@ -848,7 +849,7 @@ void TrapNtDebugger::SetDllBreakpoints(HANDLE hProcess) {
     }
 
     if (bRequired) {
-      EntryPoint &ep = const_cast<EntryPoint &>(
+      auto &ep = const_cast<EntryPoint &>(
           entryPoint); // set iterator returns const object :-(
       NtCall nt = ep.setNtTrap(hProcess, TargetDll_, bPreTrace,
                                offsets_[ep.getName()], bVerbose);
@@ -1060,7 +1061,7 @@ int main(int argc, char **argv) {
   }
   bNames = !bNoNames; // avoid double negatives
 
-  Options::const_iterator it = options.begin();
+  auto it = options.begin();
 
   std::ofstream ofs;
   if (outputFile.length() != 0) {

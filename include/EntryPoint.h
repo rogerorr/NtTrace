@@ -85,10 +85,10 @@ enum ArgAttributes {
 
 struct Argument {
   Argument() = default;
-  Argument(ArgType argType, std::string argTypeName,
-           std::string name, ArgAttributes attributes)
-      : argType_(argType), argTypeName_(std::move(argTypeName)), name_(std::move(name)),
-        attributes_(attributes) {}
+  Argument(ArgType argType, std::string argTypeName, std::string name,
+           ArgAttributes attributes)
+      : argType_(argType), argTypeName_(std::move(argTypeName)),
+        name_(std::move(name)), attributes_(attributes) {}
 
 #ifdef _M_IX86
   using ARG = DWORD;
@@ -138,8 +138,8 @@ public:
   using Typedefs = std::map<std::string, std::string>;
 
   explicit EntryPoint(std::string name, std::string category)
-      : name_(std::move(name)), category_(std::move(category)), disabled_(category[0] == '-'),
-        optional_(category[0] == '?') {
+      : name_(std::move(name)), category_(std::move(category)),
+        disabled_(category_[0] == '-'), optional_(category_[0] == '?') {
     if (disabled_ || optional_) {
       this->category_.erase(0, 1);
     }

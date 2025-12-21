@@ -90,8 +90,8 @@ DWORD64 CALLBACK GetModuleBase(HANDLE hProcess, DWORD64 dwAddress) {
       // ATLTRACE("showGetModuleBase got addr from SymGetModuleInfo = %x\n",
       // baseAddress);
     } else {
-      baseAddress = (DWORD64)mbInfo.AllocationBase;
-      HMODULE const hmod = (HMODULE)mbInfo.AllocationBase;
+      baseAddress = reinterpret_cast<DWORD64>(mbInfo.AllocationBase);
+      const auto hmod = static_cast<HMODULE>(mbInfo.AllocationBase);
 
       const auto filename = GetModuleFileNameWrapper(hProcess, hmod);
 

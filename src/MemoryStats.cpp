@@ -66,8 +66,12 @@ private:
   std::regex regex_;
 
   struct comma_out : std::numpunct<char> {
-    char do_thousands_sep() const override { return ','; }    // separate with commas
-    std::string do_grouping() const override { return "\3"; } // groups of 3 digit
+    char do_thousands_sep() const override {
+      return ',';
+    } // separate with commas
+    std::string do_grouping() const override {
+      return "\3";
+    } // groups of 3 digit
   };
 
   using ticks = std::chrono::duration<uint64_t, std::ratio<1, 10'000'000>>;

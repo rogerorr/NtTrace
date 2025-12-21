@@ -100,7 +100,7 @@ void defineEnumerator(std::string const &enumeration,
 /** Stream a large integer to an output stream.
  */
 std::ostream &operator<<(std::ostream &os, LARGE_INTEGER const &largeInteger) {
-  double d = static_cast<double>(largeInteger.QuadPart);
+  const auto d = static_cast<double>(largeInteger.QuadPart);
   return os << d;
 }
 
@@ -108,7 +108,7 @@ std::ostream &operator<<(std::ostream &os, LARGE_INTEGER const &largeInteger) {
  */
 std::ostream &operator<<(std::ostream &os,
                          ULARGE_INTEGER const &ulargeInteger) {
-  double d = static_cast<double>(ulargeInteger.QuadPart);
+  const auto d = static_cast<double>(ulargeInteger.QuadPart);
   return os << d;
 }
 
@@ -306,7 +306,7 @@ bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
 
 //////////////////////////////////////////////////////////////////////////
 void showCommandLine(std::ostream &os, HANDLE hProcess) {
-  static NtQueryInformationProcess *pfnNtQueryInformationProcess =
+  static auto *const pfnNtQueryInformationProcess =
       (NtQueryInformationProcess *)::GetProcAddress(
           ::GetModuleHandle("NTDLL"), "NtQueryInformationProcess");
 
@@ -803,7 +803,7 @@ void showThrowType(std::ostream &os, HANDLE hProcess, ULONG_PTR throwInfo,
   // pointers which aren't ours...
   memset(type_info + sizeof(PVOID), 0, sizeof(PVOID));
 
-  const std::type_info *pType_info = (const std::type_info *)type_info;
+  const auto *pType_info = reinterpret_cast<const std::type_info *>(type_info);
   const char *decorated_name = pType_info->raw_name();
 
   char buffer[1024] = "";
@@ -829,7 +829,7 @@ bool isWow(HANDLE hProcess) {
   using IsWow64Process =
       BOOL WINAPI(_In_ HANDLE hProcess, _Out_ PBOOL Wow64Process);
 
-  static IsWow64Process *pfnIsWow64Process = (IsWow64Process *)::GetProcAddress(
+  static auto *const pfnIsWow64Process = (IsWow64Process *)::GetProcAddress(
       ::GetModuleHandle("Kernel32"), "IsWow64Process");
   BOOL result(false);
   if (pfnIsWow64Process)
