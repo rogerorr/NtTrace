@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 2952 2025-12-06 16:21:58Z roger $";
+    "$Id: SymbolEngine.cpp 2985 2025-12-21 00:20:59Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -477,8 +477,8 @@ std::string SymbolEngine::inlineToName(DWORD64 address,
 // StackTrace: try to trace the stack to the given output stream
 void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
                               std::ostream &os) const {
-  STACKFRAME64 stackFrame = {0};
-  CONTEXT rwContext = {0};
+  STACKFRAME64 stackFrame = {};
+  CONTEXT rwContext = {};
   try {
     rwContext = context;
   } catch (...) {

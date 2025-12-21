@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 2971 2025-12-20 13:51:55Z roger $";
+    "$Id: NtTrace.cpp 2985 2025-12-21 00:20:59Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -536,7 +536,9 @@ void TrapNtDebugger::OnException(DWORD processId, DWORD threadId,
                                  HANDLE hProcess, HANDLE hThread,
                                  EXCEPTION_DEBUG_INFO const &Exception,
                                  DWORD *pContinueFlag) {
-  if (Exception.ExceptionRecord.ExceptionCode == STATUS_BREAKPOINT) {
+  const auto status =
+      static_cast<NTSTATUS>(Exception.ExceptionRecord.ExceptionCode);
+  if (status == STATUS_BREAKPOINT) {
     if (OnBreakpoint(processId, threadId, hProcess, hThread,
                      Exception.ExceptionRecord.ExceptionAddress)) {
       *pContinueFlag = DBG_CONTINUE;
@@ -555,14 +557,13 @@ void TrapNtDebugger::OnException(DWORD processId, DWORD threadId,
     // ignore...
   }
 #ifdef _M_X64
-  else if (Exception.ExceptionRecord.ExceptionCode == STATUS_WX86_BREAKPOINT) {
+  else if (status == STATUS_WX86_BREAKPOINT) {
     header(processId, threadId);
     os_ << "WOW64 initialised" << std::endl;
     *pContinueFlag = DBG_CONTINUE;
   }
 #endif // _M_X64
-  else if (Exception.ExceptionRecord.ExceptionCode ==
-           EXCEPTION_ACCESS_VIOLATION) {
+  else if (status == EXCEPTION_ACCESS_VIOLATION) {
     // Only defined contents is for an access violation...
     header(processId, threadId);
     os_ << "Access violation at " << Exception.ExceptionRecord.ExceptionAddress
@@ -574,7 +575,7 @@ void TrapNtDebugger::OnException(DWORD processId, DWORD threadId,
         << std::endl;
     if (bStackTrace)
       EntryPoint::stackTrace(os_, hProcess, hThread);
-  } else if (Exception.ExceptionRecord.ExceptionCode == STATUS_INVALID_HANDLE) {
+  } else if (status == STATUS_INVALID_HANDLE) {
     // CloseHandle raises this exception when a process is being debugged
     header(processId, threadId);
     if (Exception.dwFirstChance) {

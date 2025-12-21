@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 2977 2025-12-20 15:54:07Z roger $";
+    "$Id: SymExplorer.cpp 2985 2025-12-21 00:20:59Z roger $";
 
 #define NOMINMAX
 
@@ -40,7 +40,6 @@ static char const szRCSID[] =
 
 #define WIN32_LEAN_AND_MEAN
 #include <comutil.h>
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #include <fstream>
@@ -239,7 +238,7 @@ std::ostream &operator<<(std::ostream &os, enum CV_call_e const &rhs) {
     CASE(CV_CALL_M32RCALL);
     CASE(CV_CALL_CLRCALL);
   default:
-    os << "(??)";
+    os << "(?""?)";
     break;
   }
 #undef CASE
@@ -263,7 +262,7 @@ std::ostream &operator<<(std::ostream &os, enum DataKind const &rhs) {
     CASE(DataIsStaticMember);
     CASE(DataIsConstant);
   default:
-    os << "(??)";
+    os << "(?""?)";
     break;
   }
 #undef CASE

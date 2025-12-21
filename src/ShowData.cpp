@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 2969 2025-12-20 12:54:11Z roger $";
+    "$Id: ShowData.cpp 2985 2025-12-21 00:20:59Z roger $";
 
 #include "ShowData.h"
 
@@ -313,7 +313,7 @@ void showCommandLine(std::ostream &os, HANDLE hProcess) {
     return;
   }
 
-  PROCESS_BASIC_INFORMATION ProcessInformation = {0};
+  PROCESS_BASIC_INFORMATION ProcessInformation = {};
   pfnNtQueryInformationProcess(hProcess, ProcessBasicInformation,
                                &ProcessInformation, sizeof(ProcessInformation),
                                nullptr);
@@ -322,7 +322,7 @@ void showCommandLine(std::ostream &os, HANDLE hProcess) {
     return;
   }
 
-  PEB peb = {0};
+  PEB peb = {};
   if (!ReadProcessMemory(hProcess, ProcessInformation.PebBaseAddress, &peb,
                          sizeof(peb), nullptr)) {
     return;
@@ -334,7 +334,7 @@ void showCommandLine(std::ostream &os, HANDLE hProcess) {
 //////////////////////////////////////////////////////////////////////////
 void showObjectAttributes(std::ostream &os, HANDLE hProcess,
                           POBJECT_ATTRIBUTES pObjectAttributes) {
-  OBJECT_ATTRIBUTES objectAttributes = {0};
+  OBJECT_ATTRIBUTES objectAttributes = {};
 
   (void)readHelper(hProcess, pObjectAttributes, objectAttributes);
 
@@ -351,7 +351,7 @@ void showUnicodeString(std::ostream &os, HANDLE hProcess,
   if (pTargetUnicodeString == nullptr)
     os << "null";
   else {
-    UNICODE_STRING unicodeString = {0};
+    UNICODE_STRING unicodeString = {};
     (void)readHelper(hProcess, pTargetUnicodeString, unicodeString);
 
     os << '"';
@@ -609,7 +609,7 @@ void showPIoStatus(std::ostream &os, HANDLE hProcess,
                    PIO_STATUS_BLOCK pIoStatusBlock) {
   showPointer(os, hProcess, pIoStatusBlock);
   if (pIoStatusBlock) {
-    IO_STATUS_BLOCK IoStatusBlock = {0};
+    IO_STATUS_BLOCK IoStatusBlock = {};
     readHelper(hProcess, pIoStatusBlock, IoStatusBlock);
 
     os << " [";
@@ -625,7 +625,7 @@ void showPLargeInteger(std::ostream &os, HANDLE hProcess,
                        PLARGE_INTEGER pLargeInteger) {
   showPointer(os, hProcess, pLargeInteger);
   if (pLargeInteger) {
-    LARGE_INTEGER largeInteger = {0};
+    LARGE_INTEGER largeInteger = {};
     readHelper(hProcess, pLargeInteger, largeInteger);
 
     os << " [";
@@ -698,7 +698,7 @@ void showPFileBasicInfo(std::ostream &os, HANDLE hProcess,
                         PFILE_BASIC_INFORMATION pFileBasicInfo) {
   showPointer(os, hProcess, pFileBasicInfo);
   if (pFileBasicInfo) {
-    FILE_BASIC_INFORMATION fileBasicInfo = {0};
+    FILE_BASIC_INFORMATION fileBasicInfo = {};
     readHelper(hProcess, pFileBasicInfo, fileBasicInfo);
 
     os << " [";
@@ -712,7 +712,7 @@ void showPFileNetworkInfo(std::ostream &os, HANDLE hProcess,
                           PFILE_NETWORK_OPEN_INFORMATION pFileNetworkInfo) {
   showPointer(os, hProcess, pFileNetworkInfo);
   if (pFileNetworkInfo) {
-    FILE_NETWORK_OPEN_INFORMATION fileNetworkInfo = {0};
+    FILE_NETWORK_OPEN_INFORMATION fileNetworkInfo = {};
     readHelper(hProcess, pFileNetworkInfo, fileNetworkInfo);
 
     os << " [";
@@ -773,9 +773,9 @@ void showWinError(std::ostream &os, HRESULT hResult) {
 // Convert msvc throw information into a type name
 void showThrowType(std::ostream &os, HANDLE hProcess, ULONG_PTR throwInfo,
                    ULONG_PTR base) {
-  MsvcThrow msvcThrow = {0};
-  MsvcClassHeader msvcClassHeader = {0};
-  MsvcClassInfo msvcClassInfo = {0};
+  MsvcThrow msvcThrow = {};
+  MsvcClassHeader msvcClassHeader = {};
+  MsvcClassInfo msvcClassInfo = {};
   BYTE type_info[sizeof(std::type_info) + 256] = "";
   DWORD offset = 0;
 

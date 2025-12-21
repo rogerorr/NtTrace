@@ -48,7 +48,7 @@ COPYRIGHT
 #pragma comment(lib, "psapi")
 
 static char const szRCSID[] =
-    "$Id: GetModuleBase.cpp 2966 2025-12-15 23:33:07Z roger $";
+    "$Id: GetModuleBase.cpp 2985 2025-12-21 00:20:59Z roger $";
 
 namespace {
 //////////////////////////////////////////////////////////
@@ -82,7 +82,8 @@ DWORD64 CALLBACK GetModuleBase(HANDLE hProcess, DWORD64 dwAddress) {
   if (::VirtualQueryEx(hProcess, (PVOID)dwAddress, &mbInfo, sizeof(mbInfo)) &&
       ((mbInfo.State & MEM_FREE) == 0)) {
     // It is already in the symbol engine?
-    IMAGEHLP_MODULE64 stIHM = {sizeof(IMAGEHLP_MODULE64)};
+    IMAGEHLP_MODULE64 stIHM = {};
+    stIHM.SizeOfStruct = sizeof(IMAGEHLP_MODULE64);
 
     if (::SymGetModuleInfo64(hProcess, dwAddress, &stIHM)) {
       baseAddress = stIHM.BaseOfImage;
