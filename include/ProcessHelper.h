@@ -87,7 +87,8 @@ inline int CreateProcessHelper(
     }
   }
 
-  STARTUPINFO startupInfo = {sizeof(startupInfo)};
+  STARTUPINFO startupInfo{};
+  startupInfo.cb = {sizeof(startupInfo)};
   startupInfo.dwFlags = STARTF_USESHOWWINDOW;
   startupInfo.wShowWindow = SW_SHOWNORMAL; // Assist GUI programs
   PROCESS_INFORMATION ProcessInformation;
@@ -157,7 +158,8 @@ inline int CreateProcessAsUserHelper(
     }
   }
 
-  STARTUPINFO startupInfo = {sizeof(startupInfo)};
+  STARTUPINFO startupInfo{};
+  startupInfo.cb = sizeof(startupInfo);
   startupInfo.dwFlags = STARTF_USESHOWWINDOW;
   startupInfo.wShowWindow = SW_SHOWNORMAL; // Assist GUI programs
   PROCESS_INFORMATION ProcessInformation;

@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3010 $
+  $Revision: 3014 $
 */
 
-// $Id: DbgHelper.h 3010 2025-12-21 18:00:47Z roger $
+// $Id: DbgHelper.h 3014 2025-12-22 11:29:33Z roger $
 
 #include <cvconst.h> //DIA SDK
 #include <windows.h>
@@ -73,6 +73,12 @@ class DbgHelper {
 public:
   /** Construct a helper object. */
   DbgHelper();
+
+  /** Do not copy */
+  DbgHelper(DbgHelper const &) = delete;
+  
+  /** Do not assign */
+  DbgHelper &operator=(DbgHelper const &) = delete;
 
   /** Destroy and clean up. */
   virtual ~DbgHelper();
@@ -184,9 +190,6 @@ public:
 #endif // DBGHELP_6_2_APIS
 
 private:
-  DbgHelper(DbgHelper const &) = delete;
-  DbgHelper &operator=(DbgHelper const &) = delete;
-
   HANDLE m_hProcess{}; // Current process being debugged
 
 #ifdef DBGHELP_6_1_APIS

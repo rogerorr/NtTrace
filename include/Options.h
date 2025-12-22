@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3010 $
+  $Revision: 3014 $
 */
 
-// $Id: Options.h 3010 2025-12-21 18:00:47Z roger $
+// $Id: Options.h 3014 2025-12-22 11:29:33Z roger $
 
 #include <string>
 #include <vector>
@@ -100,6 +100,12 @@ public:
    */
   Options(char const *pRcsId);
 
+  /** Do not copy */
+  Options(Options const &) = delete;
+  
+  /** Do not assign */
+  Options &operator=(Options const &) = delete;
+
   /** Destructor  */
   ~Options();
 
@@ -155,9 +161,6 @@ public:
   const_iterator end() const;
 
 private:
-  Options(Options const &) = delete;
-  Options &operator=(Options const &) = delete;
-
   struct Data;
   Data *pData;
 };

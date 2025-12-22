@@ -28,33 +28,36 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2998 $
+  $Revision: 3016 $
 */
 
-// $Id: MsvcExceptions.h 2998 2025-12-21 15:54:22Z roger $
+// $Id: MsvcExceptions.h 3016 2025-12-22 16:57:02Z roger $
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+enum _msvc_exceptions : DWORD {
+  
 /* Value of ExceptionCode for an MSVC C++ exception ("msc") */
-static DWORD const MSVC_EXCEPTION = 0xe06d7363;
+ MSVC_EXCEPTION = 0xe06d7363,
 
 /* Value of ExceptionCode for an MSVC notification exception (used for
  * 'SetThreadName') */
-static DWORD const MSVC_NOTIFICATION = 0x406d1388;
+MSVC_NOTIFICATION = 0x406d1388,
 
 /* Value of ExceptionCode for an MS CLR exception ("COM") */
-static DWORD const CLR_EXCEPTION = 0xe0434f4d;
+CLR_EXCEPTION = 0xe0434f4d,
 
 /* Value of ExceptionCode for an MS CLR 4 exception ("CCR") */
-static DWORD const CLR_EXCEPTION_V4 = 0xe0434352;
+CLR_EXCEPTION_V4 = 0xe0434352,
 
 /* Value of ExceptionCode for an MS CLR notification */
-static DWORD const CLR_NOTIFICATION = 0x04242420;
+CLR_NOTIFICATION = 0x04242420,
 
 /** Value of ExceptionInformation[0] for an MSVC C++ exception */
-static DWORD const MSVC_MAGIC_NUMBER1 =
-    0x19930520; // ' Name taken from EHSUP.INC (!)
+MSVC_MAGIC_NUMBER1 =
+    0x19930520, // ' Name taken from EHSUP.INC (!)
+};
 
 /*
  * Data passed about with a thrown object in MSVC.

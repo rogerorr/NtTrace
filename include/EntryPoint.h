@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3008 $
+  $Revision: 3014 $
 */
 
-// $Id: EntryPoint.h 3008 2025-12-21 17:53:00Z roger $
+// $Id: EntryPoint.h 3014 2025-12-22 11:29:33Z roger $
 
 #include <windows.h>
 
@@ -163,10 +163,10 @@ public:
 
   Argument const &getArgument(size_t idx) const { return arguments_[idx]; }
 
-  void setArgument(int argNum, ArgType eArgType, std::string const &argType,
+  void setArgument(size_t argNum, ArgType eArgType, std::string const &argType,
                    std::string const &variableName, ArgAttributes attributes);
 
-  void setDummyArgument(int argNum, ArgAttributes attributes);
+  void setDummyArgument(size_t argNum, ArgAttributes attributes);
 
   void setReturnType(std::string const &type, Typedefs const &typedefs);
 

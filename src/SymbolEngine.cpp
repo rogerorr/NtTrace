@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 3010 2025-12-21 18:00:47Z roger $";
+    "$Id: SymbolEngine.cpp 3017 2025-12-22 17:16:39Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -345,9 +345,9 @@ bool SymbolEngine::printAddress(DWORD64 address, std::ostream &os) const {
   // undecorated...
 #ifdef DBGHELP_6_1_APIS
   struct {
-    SYMBOL_INFO symInfo;
+    DbgInit<SYMBOL_INFO> symInfo;
     char name[4 * 256];
-  } SymInfo = {{sizeof(SymInfo.symInfo)}, ""};
+  } SymInfo{};
 
   PSYMBOL_INFO pSym = &SymInfo.symInfo;
   pSym->MaxNameLen = sizeof(SymInfo.name);
@@ -356,9 +356,9 @@ bool SymbolEngine::printAddress(DWORD64 address, std::ostream &os) const {
   if (SymFromAddr(address, &dwDisplacement64, pSym))
 #else
   struct {
-    IMAGEHLP_SYMBOL64 symInfo;
+    DbgInit<IMAGEHLP_SYMBOL64> symInfo;
     char name[4 * 256];
-  } SymInfo = {{sizeof(SymInfo.symInfo)}, ""};
+  } SymInfo{};
 
   PIMAGEHLP_SYMBOL64 pSym = &SymInfo.symInfo;
   pSym->MaxNameLength = sizeof(SymInfo.name);
@@ -402,9 +402,9 @@ void SymbolEngine::printInlineAddress(DWORD64 address, DWORD inline_context,
   // Log the symbol name
 #ifdef DBGHELP_6_2_APIS
   struct {
-    SYMBOL_INFO symInfo;
+    DbgInit<SYMBOL_INFO> symInfo;
     char name[4 * 256];
-  } SymInfo = {{sizeof(SymInfo.symInfo)}, ""};
+  } SymInfo{};
 
   PSYMBOL_INFO pSym = &SymInfo.symInfo;
   pSym->MaxNameLen = sizeof(SymInfo.name);
@@ -511,7 +511,7 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
   stackFrame.AddrStack.Mode = AddrModeFlat;
 
   BOOL bWow64(false);
-  WOW64_CONTEXT wow64_context = {0};
+  WOW64_CONTEXT wow64_context{};
   wow64_context.ContextFlags = WOW64_CONTEXT_FULL;
 
   if (IsWow64Process(GetProcess(), &bWow64) && bWow64) {
@@ -817,9 +817,9 @@ bool SymbolEngine::findMsvcCppHandler(PVOID sehHandler,
 
 void SymbolEngine::showMsvcThrow(std::ostream &os, PVOID throwInfo,
                                  PVOID base) const {
-  MsvcThrow msvcThrow = {0};
-  MsvcClassHeader msvcClassHeader = {0};
-  MsvcClassInfo msvcClassInfo = {0};
+  MsvcThrow msvcThrow{};
+  MsvcClassHeader msvcClassHeader{};
+  MsvcClassInfo msvcClassInfo{};
   BYTE raw_type_info[sizeof(type_info) + 256] = "";
 
   if (!ReadMemory((PVOID)throwInfo, &msvcThrow, sizeof(msvcThrow)) ||
@@ -961,7 +961,7 @@ BOOL SymbolEngine::enumLocalVariables(DWORD64 codeOffset, DWORD64 frameOffset,
                                       EnumLocalCallBack &cb) const {
 #ifdef DBGHELP_6_1_APIS
 
-  IMAGEHLP_STACK_FRAME stackFrame = {0};
+  IMAGEHLP_STACK_FRAME stackFrame{};
   stackFrame.InstructionOffset = codeOffset;
   stackFrame.FrameOffset = frameOffset;
 
@@ -1039,7 +1039,7 @@ bool SymbolEngine::isExecutable(DWORD64 address) const {
                                   PAGE_EXECUTE_READWRITE |
                                   PAGE_EXECUTE_WRITECOPY;
 
-  MEMORY_BASIC_INFORMATION mb = {nullptr};
+  MEMORY_BASIC_INFORMATION mb{};
   if (VirtualQueryEx(GetProcess(), (PVOID)address, &mb, sizeof(mb))) {
     if ((mb.Protect & (AnyExecute)) != 0) {
       ret = true; // executable code
@@ -1307,7 +1307,7 @@ BOOL getWow64ThreadContext(HANDLE hProcess, HANDLE hThread,
         pNtQueryInformationThread(hThread, 0, &ThreadInfo, sizeof(ThreadInfo),
                                   nullptr) == 0) {
       auto *pTls = reinterpret_cast<PVOID *>(ThreadInfo[1] + TLS_OFFSET);
-      Wow64_SaveContext saveContext = {0}, *pSaveContext = nullptr;
+      Wow64_SaveContext saveContext{}, *pSaveContext = nullptr;
 
       if (ReadProcessMemory(hProcess, pTls + 1, &pSaveContext,
                             sizeof(pSaveContext), nullptr) &&

@@ -48,7 +48,7 @@ COPYRIGHT
 #pragma comment(lib, "psapi")
 
 static char const szRCSID[] =
-    "$Id: GetModuleBase.cpp 2999 2025-12-21 16:58:56Z roger $";
+    "$Id: GetModuleBase.cpp 3012 2025-12-22 08:38:30Z roger $";
 
 namespace {
 //////////////////////////////////////////////////////////

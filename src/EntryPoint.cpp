@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 2911 2025-11-05 03:37:29Z roger $";
+    "$Id: EntryPoint.cpp 3014 2025-12-22 11:29:33Z roger $";
 
 #include "EntryPoint.h"
 
@@ -744,19 +744,19 @@ bool EntryPoint::clearNtTrap(HANDLE hProcess, NtCall const &ntCall) const {
 
 //////////////////////////////////////////////////////////////////////////
 // Eg "NtOpenFile", 2, "POBJECT_ATTRIBUTES", "ObjectAttributes", argIN
-void EntryPoint::setArgument(int argNum, ArgType eArgType,
+void EntryPoint::setArgument(size_t argNum, ArgType eArgType,
                              std::string const &argType,
                              std::string const &variableName,
                              ArgAttributes attributes) {
-  if (argNum >= (int)arguments_.size())
+  if (argNum >= arguments_.size())
     arguments_.resize(argNum + 1);
   arguments_[argNum] = Argument(eArgType, argType, variableName, attributes);
 }
 
 //////////////////////////////////////////////////////////////////////////
 // Eg 2nd stack argument for "POINT"
-void EntryPoint::setDummyArgument(int argNum, ArgAttributes attributes) {
-  if (argNum >= (int)arguments_.size())
+void EntryPoint::setDummyArgument(size_t argNum, ArgAttributes attributes) {
+  if (argNum >= arguments_.size())
     arguments_.resize(argNum + 1);
   arguments_[argNum] =
       Argument(argULONG_PTR, std::string(), std::string(), attributes);

@@ -43,7 +43,7 @@ IMPLEMENTATION NOTES
 */
 
 static char const szRCSID[] =
-    "$Id: GetFileNameFromHandle.cpp 3008 2025-12-21 17:53:00Z roger $";
+    "$Id: GetFileNameFromHandle.cpp 3017 2025-12-22 17:16:39Z roger $";
 
 #include <iostream> // DO_NOT_COMMIT
 
@@ -63,7 +63,7 @@ static char const szRCSID[] =
 #pragma comment(lib, "ntdll")
 #pragma comment(lib, "psapi")
 
-#define BUFSIZE 512
+static constexpr int BUFSIZE = 512;
 
 extern "C" {
 

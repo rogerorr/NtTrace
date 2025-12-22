@@ -36,7 +36,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 3006 2025-12-21 17:36:18Z roger $";
+    "$Id: ShowLoaderSnaps.cpp 3012 2025-12-22 08:38:30Z roger $";
 
 #define WIN32_LEAN_AND_MEAN
 

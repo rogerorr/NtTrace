@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 3005 2025-12-21 17:33:52Z roger $";
+    "$Id: ShowData.cpp 3017 2025-12-22 17:16:39Z roger $";
 
 #include "ShowData.h"
 
@@ -594,7 +594,7 @@ void showAccessMask(std::ostream &os, HANDLE /*hProcess*/, ACCESS_MASK argVal,
 void showPClientId(std::ostream &os, HANDLE hProcess, PCLIENT_ID pClientId) {
   showPointer(os, hProcess, pClientId);
   if (pClientId) {
-    CLIENT_ID clientId = {nullptr};
+    CLIENT_ID clientId{};
     (void)readHelper(hProcess, pClientId, clientId);
 
     os << " [";
