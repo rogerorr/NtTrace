@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3014 $
+  $Revision: 3020 $
 */
 
-// $Id: DbgHelper.h 3014 2025-12-22 11:29:33Z roger $
+// $Id: DbgHelper.h 3020 2025-12-22 17:45:15Z roger $
 
 #include <cvconst.h> //DIA SDK
 #include <windows.h>
@@ -76,7 +76,7 @@ public:
 
   /** Do not copy */
   DbgHelper(DbgHelper const &) = delete;
-  
+
   /** Do not assign */
   DbgHelper &operator=(DbgHelper const &) = delete;
 

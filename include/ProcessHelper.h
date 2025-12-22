@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2996 $
+  $Revision: 3018 $
 */
 
-// $Id: ProcessHelper.h 2996 2025-12-21 14:39:04Z roger $
+// $Id: ProcessHelper.h 3018 2025-12-22 17:31:12Z roger $
 
 // clang-format off
 #include <windows.h> // for CreateProcess

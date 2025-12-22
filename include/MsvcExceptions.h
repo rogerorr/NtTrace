@@ -28,35 +28,34 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3016 $
+  $Revision: 3020 $
 */
 
-// $Id: MsvcExceptions.h 3016 2025-12-22 16:57:02Z roger $
+// $Id: MsvcExceptions.h 3020 2025-12-22 17:45:15Z roger $
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 enum _msvc_exceptions : DWORD {
-  
-/* Value of ExceptionCode for an MSVC C++ exception ("msc") */
- MSVC_EXCEPTION = 0xe06d7363,
 
-/* Value of ExceptionCode for an MSVC notification exception (used for
- * 'SetThreadName') */
-MSVC_NOTIFICATION = 0x406d1388,
+  /* Value of ExceptionCode for an MSVC C++ exception ("msc") */
+  MSVC_EXCEPTION = 0xe06d7363,
 
-/* Value of ExceptionCode for an MS CLR exception ("COM") */
-CLR_EXCEPTION = 0xe0434f4d,
+  /* Value of ExceptionCode for an MSVC notification exception (used for
+   * 'SetThreadName') */
+  MSVC_NOTIFICATION = 0x406d1388,
 
-/* Value of ExceptionCode for an MS CLR 4 exception ("CCR") */
-CLR_EXCEPTION_V4 = 0xe0434352,
+  /* Value of ExceptionCode for an MS CLR exception ("COM") */
+  CLR_EXCEPTION = 0xe0434f4d,
 
-/* Value of ExceptionCode for an MS CLR notification */
-CLR_NOTIFICATION = 0x04242420,
+  /* Value of ExceptionCode for an MS CLR 4 exception ("CCR") */
+  CLR_EXCEPTION_V4 = 0xe0434352,
 
-/** Value of ExceptionInformation[0] for an MSVC C++ exception */
-MSVC_MAGIC_NUMBER1 =
-    0x19930520, // ' Name taken from EHSUP.INC (!)
+  /* Value of ExceptionCode for an MS CLR notification */
+  CLR_NOTIFICATION = 0x04242420,
+
+  /** Value of ExceptionInformation[0] for an MSVC C++ exception */
+  MSVC_MAGIC_NUMBER1 = 0x19930520, // ' Name taken from EHSUP.INC (!)
 };
 
 /*

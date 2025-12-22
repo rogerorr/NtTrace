@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 3012 2025-12-22 08:38:30Z roger $";
+    "$Id: NtTrace.cpp 3025 2025-12-22 20:14:03Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -968,7 +968,7 @@ BOOL TrapNtDebugger::CtrlHandler(DWORD fdwCtrlType) {
 }
 
 void TrapNtDebugger::setShowLoaderSnaps(HANDLE hProcess) {
-  static auto *pfn = (NtQueryInformationProcess *)GetProcAddress(
+  static auto *pfn = (NtQueryInformationProcess *)(uintptr_t)GetProcAddress(
       BaseOfNtDll_, "NtQueryInformationProcess");
   if (pfn) {
     PROCESS_BASIC_INFORMATION pbi{};

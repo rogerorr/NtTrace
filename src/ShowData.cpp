@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: ShowData.cpp 3017 2025-12-22 17:16:39Z roger $";
+    "$Id: ShowData.cpp 3027 2025-12-22 21:36:36Z Roger $";
 
 #include "ShowData.h"
 
@@ -307,7 +307,7 @@ bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
 //////////////////////////////////////////////////////////////////////////
 void showCommandLine(std::ostream &os, HANDLE hProcess) {
   static auto *const pfnNtQueryInformationProcess =
-      (NtQueryInformationProcess *)::GetProcAddress(
+      (NtQueryInformationProcess *)(uintptr_t)::GetProcAddress(
           ::GetModuleHandle("NTDLL"), "NtQueryInformationProcess");
 
   if (pfnNtQueryInformationProcess == nullptr) {
@@ -826,14 +826,8 @@ CommandLine::operator std::string() const {
 
 namespace {
 bool isWow(HANDLE hProcess) {
-  using IsWow64Process =
-      BOOL WINAPI(_In_ HANDLE hProcess, _Out_ PBOOL Wow64Process);
-
-  static auto *const pfnIsWow64Process = (IsWow64Process *)::GetProcAddress(
-      ::GetModuleHandle("Kernel32"), "IsWow64Process");
   BOOL result(false);
-  if (pfnIsWow64Process)
-    pfnIsWow64Process(hProcess, &result);
+  IsWow64Process(hProcess, &result);
   return result != 0;
 }
 

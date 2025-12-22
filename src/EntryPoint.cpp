@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 3014 2025-12-22 11:29:33Z roger $";
+    "$Id: EntryPoint.cpp 3028 2025-12-22 22:06:05Z roger $";
 
 #include "EntryPoint.h"
 
@@ -100,17 +100,12 @@ const std::map<std::string, ArgAttributes> sal_attributes = {
 // Module data
 
 extern "C" {
-// Function to convert NT status codes to normal NT error codes
-#ifdef _M_IX86
-using PFNRtlNtStatusToDosError = DWORD(NTAPI *)(DWORD);
-#elif _M_X64
-using PFNRtlNtStatusToDosError = DWORD64(NTAPI *)(DWORD64);
-#endif // _M_IX86
+ULONG
+NTAPI
+RtlNtStatusToDosError (
+   NTSTATUS Status
+   );
 }
-
-static PFNRtlNtStatusToDosError RtlNtStatusToDosError =
-    (PFNRtlNtStatusToDosError)GetProcAddress(GetModuleHandle("NtDll"),
-                                             "RtlNtStatusToDosError");
 
 //////////////////////////////////////////////////////////////////////////
 // The various NtDll signatures
@@ -905,7 +900,7 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
     showDword(os, returnCode);
 
     if (IS_ERROR(returnCode) && retType_ == retNTSTATUS) {
-      showWinError(os, static_cast<HRESULT>(RtlNtStatusToDosError(returnCode)));
+      showWinError(os, static_cast<HRESULT>(RtlNtStatusToDosError(static_cast<NTSTATUS>(returnCode))));
     }
     if (bStackTrace) {
       os << std::endl;

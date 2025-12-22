@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 3017 2025-12-22 17:16:39Z roger $";
+    "$Id: SymbolEngine.cpp 3024 2025-12-22 20:11:51Z roger $";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -217,9 +217,8 @@ void showInlineVariablesAt(std::ostream &os, DWORD64 codeOffset,
 std::string getBaseType(DWORD baseType, ULONG64 length);
 
 #ifdef _M_X64
-// Helper function to delay load Wow64GetThreadContext or emulate on W2K3
-BOOL getWow64ThreadContext(HANDLE hProcess, HANDLE hThread,
-                           CONTEXT const &context, WOW64_CONTEXT *pWowContext);
+// Helper function to delay load Wow64GetThreadContext
+BOOL getWow64ThreadContext(HANDLE hThread, WOW64_CONTEXT *pWowContext);
 #endif // _M_X64
 
 // Wrapper for WideCharToMultiByte
@@ -515,8 +514,7 @@ void SymbolEngine::StackTrace(HANDLE hThread, const CONTEXT &context,
   wow64_context.ContextFlags = WOW64_CONTEXT_FULL;
 
   if (IsWow64Process(GetProcess(), &bWow64) && bWow64) {
-    if (getWow64ThreadContext(GetProcess(), hThread, rwContext,
-                              &wow64_context)) {
+    if (getWow64ThreadContext(hThread, &wow64_context)) {
       machineType = IMAGE_FILE_MACHINE_I386;
       pContext = &wow64_context;
       stackFrame.AddrPC.Offset = wow64_context.Eip;
@@ -1265,58 +1263,14 @@ struct Wow64_SaveContext {
 
 using fnWow64GetThreadContext = BOOL WINAPI(HANDLE, WOW64_CONTEXT *);
 
-using fnNtQueryInformationThread = NTSTATUS WINAPI(HANDLE ThreadHandle,
-                                                   ULONG ThreadInformationClass,
-                                                   PVOID Buffer, ULONG Length,
-                                                   PULONG ReturnLength);
-
 // Helper function to delay load Wow64GetThreadContext or emulate on W2K3
-BOOL getWow64ThreadContext(HANDLE hProcess, HANDLE hThread,
-                           CONTEXT const &context, WOW64_CONTEXT *pWowContext) {
+BOOL getWow64ThreadContext(HANDLE hThread, WOW64_CONTEXT *pWowContext) {
   static HMODULE hKernel32 = ::GetModuleHandle("KERNEL32");
-  static auto *pFn = (fnWow64GetThreadContext *)::GetProcAddress(
+  static auto *pFn = (fnWow64GetThreadContext *)(uintptr_t)::GetProcAddress(
       hKernel32, "Wow64GetThreadContext");
   if (pFn) {
     // Vista and above
     return pFn(hThread, pWowContext);
-  } else if (context.SegCs == WOW64_CS_32BIT) {
-    if (pWowContext->ContextFlags & CONTEXT_CONTROL) {
-      pWowContext->Ebp = (ULONG)context.Rbp;
-      pWowContext->Eip = (ULONG)context.Rip;
-      pWowContext->SegCs = context.SegCs;
-      pWowContext->EFlags = context.EFlags;
-      pWowContext->Esp = (ULONG)context.Rsp;
-      pWowContext->SegSs = context.SegSs;
-    }
-    if (pWowContext->ContextFlags & CONTEXT_INTEGER) {
-      pWowContext->Edi = (ULONG)context.Rdi;
-      pWowContext->Esi = (ULONG)context.Rsi;
-      pWowContext->Ebx = (ULONG)context.Rbx;
-      pWowContext->Edx = (ULONG)context.Rdx;
-      pWowContext->Ecx = (ULONG)context.Rcx;
-      pWowContext->Eax = (ULONG)context.Rax;
-    }
-    return true;
-  } else {
-    static HMODULE hNtDll = ::GetModuleHandle("NTDLL");
-    static auto *pNtQueryInformationThread =
-        (fnNtQueryInformationThread *)::GetProcAddress(
-            hNtDll, "NtQueryInformationThread");
-    ULONG_PTR ThreadInfo[6] = {0};
-    if (pNtQueryInformationThread &&
-        pNtQueryInformationThread(hThread, 0, &ThreadInfo, sizeof(ThreadInfo),
-                                  nullptr) == 0) {
-      auto *pTls = reinterpret_cast<PVOID *>(ThreadInfo[1] + TLS_OFFSET);
-      Wow64_SaveContext saveContext{}, *pSaveContext = nullptr;
-
-      if (ReadProcessMemory(hProcess, pTls + 1, &pSaveContext,
-                            sizeof(pSaveContext), nullptr) &&
-          ReadProcessMemory(hProcess, pSaveContext, &saveContext,
-                            sizeof(saveContext), nullptr)) {
-        *pWowContext = saveContext.context;
-        return true;
-      }
-    }
   }
   return false;
 }

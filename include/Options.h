@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3014 $
+  $Revision: 3020 $
 */
 
-// $Id: Options.h 3014 2025-12-22 11:29:33Z roger $
+// $Id: Options.h 3020 2025-12-22 17:45:15Z roger $
 
 #include <string>
 #include <vector>
@@ -102,7 +102,7 @@ public:
 
   /** Do not copy */
   Options(Options const &) = delete;
-  
+
   /** Do not assign */
   Options &operator=(Options const &) = delete;
 
