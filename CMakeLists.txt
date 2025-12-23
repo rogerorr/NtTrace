@@ -14,6 +14,16 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 add_compile_options(-Wno-unused-const-variable -Wno-microsoft-cast)
 endif()
 
+if("$ENV{VSINSTALLDIR}" STREQUAL "")
+  # We need to locate the install directory to find DIA SDK
+  string(FIND "${CMAKE_CXX_COMPILER}" "/VC/" VC_INDEX REVERSE)
+  if(${VC_INDEX} EQUAL "-1")
+    message(FATAL_ERROR "Please run from a Visual Studio command prompt")
+  endif()
+  string(SUBSTRING "${CMAKE_CXX_COMPILER}" 0 ${VC_INDEX} VSINSTALLDIR)
+  set(ENV{VSINSTALLDIR} "${VSINSTALLDIR}")
+endif()
+
 # Debugging library
 add_library(debugging STATIC
 src/DebugDriver.cpp
