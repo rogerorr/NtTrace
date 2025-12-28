@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: EntryPoint.cpp 3033 2025-12-28 16:20:24Z roger $
+// $Id: EntryPoint.cpp 3040 2025-12-28 18:37:16Z roger $
 
 #include "EntryPoint.h"
 
@@ -436,7 +436,7 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
   if (!ReadProcessMemory(hProcess, address + offset, instruction, 8, nullptr)) {
     std::cerr << "Cannot read instructions for " << name_ << ": "
               << displayError() << std::endl;
-    return NtCall();
+    return {};
   }
 
   switch (instruction[0]) {
@@ -453,7 +453,7 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
                               nullptr)) {
         std::cerr << "Cannot write trap for " << name_ << ": " << displayError()
                   << std::endl;
-        return NtCall();
+        return {};
       }
       nt.trapType_ = NtCall::trapContinue;
     } else {
@@ -463,7 +463,7 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
                               nullptr)) {
         std::cerr << "Cannot write trap for " << name_ << ": " << displayError()
                   << std::endl;
-        return NtCall();
+        return {};
       }
       nt.trapType_ = NtCall::trapReturn;
     }
@@ -478,7 +478,7 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
                             nullptr)) {
       std::cerr << "Cannot write trap for " << name_ << ": " << displayError()
                 << std::endl;
-      return NtCall();
+      return {};
     }
     nt.trapType_ = NtCall::trapReturn0;
     break;
@@ -526,7 +526,7 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
                  "found 0x"
               << std::hex << std::setw(2) << (int)instruction[0] << std::dec
               << ")" << std::endl;
-    return NtCall();
+    return {};
   }
 
   // Now we know the actual argument count...
@@ -557,7 +557,7 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
     if (!WriteProcessMemory(hProcess, setssn, instruction, 5, nullptr)) {
       std::cerr << "Cannot write trap for " << name_ << ": " << displayError()
                 << std::endl;
-      return NtCall();
+      return {};
     }
     setPreSave(setssn);
   }
@@ -593,13 +593,13 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
           if (verbose) {
             std::cout << "Unable to locate " << name_ << "\n";
           }
-          return NtCall();
+          return {};
         }
 
       } else {
         std::cerr << "Cannot resolve " << name_ << ": "
                   << displayError(errorCode) << std::endl;
-        return NtCall();
+        return {};
       }
     }
     address = reinterpret_cast<unsigned char *>(pProc);
@@ -611,7 +611,7 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
                          nullptr)) {
     std::cerr << "Cannot trap " << name_ << " - unable to read memory at "
               << (void *)address << ": " << displayError() << std::endl;
-    return NtCall();
+    return {};
   }
 
   // Check for indirect jump (eg Windows 10 NtUserXxx moved from user32.dll to
@@ -621,14 +621,14 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
   if (instruction[0] == Call && instruction[1] == Indirect) {
     std::cerr << "Cannot trap " << name_
               << " (maybe implemented in another DLL)" << std::endl;
-    return NtCall();
+    return {};
   }
 
   if (optional_ && deadExport(instruction, MAX_PREAMBLE)) {
     if (verbose) {
       std::cout << "Dead export found for: " << name_ << '\n';
     }
-    return NtCall();
+    return {};
   }
 
   unsigned char *setssn = nullptr;
@@ -660,16 +660,16 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
 
   if (instruction[preamble] == BRKPT) {
     std::cerr << "Already trapping: " << name_ << std::endl;
-    return NtCall();
+    return {};
   } else if (preamble == 0) {
     std::cerr << "Cannot trap " << name_
               << " - wrong signature: " << buffToHex(instruction, MAX_PREAMBLE)
               << std::endl;
-    return NtCall();
+    return {};
   } else if (setssn == nullptr) {
     std::cerr << "Cannot trap " << name_
               << " - cannot find system service number" << std::endl;
-    return NtCall();
+    return {};
   }
 
   memcpy(&ssn_, instruction + (setssn - address) + 1, sizeof(ssn_));
@@ -684,7 +684,7 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
 // Attempt to set a trap for the entry point in the target DLL.
 bool EntryPoint::clearNtTrap(HANDLE hProcess, NtCall const &ntCall) const {
   if (preSave_) {
-    char instruction[1 + 4];
+    unsigned char instruction[1 + 4];
     instruction[0] = MOVdwordEax;
     memcpy(instruction + 1, &ssn_, sizeof(ssn_));
     if (!WriteProcessMemory(hProcess, preSave_, instruction, 5, nullptr)) {
@@ -695,7 +695,7 @@ bool EntryPoint::clearNtTrap(HANDLE hProcess, NtCall const &ntCall) const {
   }
 
   if (targetAddress_) {
-    char instruction[4];
+    unsigned char instruction[4];
     int len(0);
 
     switch (ntCall.trapType_) {
@@ -872,9 +872,9 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
   if (getArgumentCount()) {
     std::set<Argument::ARG> args;
     std::vector<Argument::ARG> argv(getArgumentCount());
-    if (!ReadProcessMemory(
-            hProcess, (LPVOID)(stack + sizeof(Argument::ARG)), &argv[0],
-            sizeof(sizeof(Argument::ARG)) * argv.size(), nullptr)) {
+    if (!ReadProcessMemory(hProcess, (LPVOID)(stack + sizeof(Argument::ARG)),
+                           &argv[0], sizeof(Argument::ARG) * argv.size(),
+                           nullptr)) {
       os << "read error: " << GetLastError() << std::endl;
       return;
     }

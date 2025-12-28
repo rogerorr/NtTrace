@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision$
+  $Revision: 3034 $
 */
 
-// $Id$
+// $Id: Utf16ToMbs.h 3034 2025-12-28 16:23:58Z roger $
 
 #include <string>
 #include <vector>

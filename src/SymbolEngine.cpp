@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: SymbolEngine.cpp 3030 2025-12-28 16:15:33Z roger $
+// $Id: SymbolEngine.cpp 3040 2025-12-28 18:37:16Z roger $
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -1085,7 +1085,7 @@ RegInfo getRegInfo(ULONG reg, const CONTEXT &context) {
 #ifdef _M_IX86
 #define CASE(REG, NAME, SRC, MASK)                                             \
   case CV_REG_##REG:                                                           \
-    return RegInfo(NAME, context.SRC & MASK)
+    return {NAME, context.SRC & MASK}
 
     CASE(AL, "al", Eax, 0xff);
     CASE(BL, "bl", Ebx, 0xff);
@@ -1166,16 +1166,16 @@ RegInfo getRegInfo(ULONG reg, const CONTEXT &context) {
     CASE(R15B, "r15b", R15, 0xff);
 
     CASE(R8W, "r8w", R8, 0xffff);
-    CASE(R9W, "r8w", R8, 0xffff);
+    CASE(R9W, "r9w", R9, 0xffff);
     CASE(R10W, "r10w", R10, 0xffff);
-    CASE(R11W, "r10w", R10, 0xffff);
-    CASE(R12W, "r10w", R10, 0xffff);
-    CASE(R13W, "r10w", R10, 0xffff);
-    CASE(R14W, "r10w", R10, 0xffff);
-    CASE(R15W, "r10w", R10, 0xffff);
+    CASE(R11W, "r11w", R11, 0xffff);
+    CASE(R12W, "r12w", R12, 0xffff);
+    CASE(R13W, "r13w", R13, 0xffff);
+    CASE(R14W, "r14w", R14, 0xffff);
+    CASE(R15W, "r15w", R15, 0xffff);
 
     CASE(R8D, "r8d", R8, ~0u);
-    CASE(R9D, "r8d", R8, ~0u);
+    CASE(R9D, "r9d", R9, ~0u);
     CASE(R10D, "r10d", R10, ~0u);
     CASE(R11D, "r11d", R11, ~0u);
     CASE(R12D, "r12d", R12, ~0u);
@@ -1186,7 +1186,7 @@ RegInfo getRegInfo(ULONG reg, const CONTEXT &context) {
   }
 #undef CASE
 
-  return RegInfo("", 0);
+  return {"", 0};
 }
 
 //////////////////////////////////////////////////////////
@@ -1241,18 +1241,6 @@ std::string getBaseType(DWORD baseType, ULONG64 length) {
 }
 
 #ifdef _M_X64
-static DWORD const WOW64_CS_32BIT =
-    0x23; // Wow64 32-bit code segment on Windows 2003
-static DWORD const TLS_OFFSET =
-    0x1480; // offsetof(ntdll!_TEB, TlsSlots) on Windows 2003
-#pragma pack(4)
-struct Wow64_SaveContext {
-  ULONG unknown1;
-  WOW64_CONTEXT context;
-  ULONG unknown2;
-};
-#pragma pack()
-
 using fnWow64GetThreadContext = BOOL WINAPI(HANDLE, WOW64_CONTEXT *);
 
 // Helper function to delay load Wow64GetThreadContext or emulate on W2K3

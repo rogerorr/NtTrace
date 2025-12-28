@@ -27,14 +27,13 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
+// $Id: DebugDriver.cpp 3039 2025-12-28 18:24:19Z roger $
+
 #include "DebugDriver.h"
 
 #include <iostream>
 
 #include "../include/DisplayError.h"
-
-static char const szRCSID[] =
-    "$Id: DebugDriver.cpp 2724 2025-04-24 22:36:40Z roger $";
 
 //////////////////////////////////////////////////////////////////////////
 // Main debugger loop
