@@ -31,8 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-static char const szRCSID[] =
-    "$Id: ShowData.cpp 3027 2025-12-22 21:36:36Z Roger $";
+// $Id: ShowData.cpp 3032 2025-12-28 16:18:01Z roger $
 
 #include "ShowData.h"
 
@@ -51,6 +50,7 @@ static char const szRCSID[] =
 #include "../include/MsvcExceptions.h"
 #include "../include/ProcessInfo.h"
 #include "../include/ReadPartialMemory.h"
+#include "../include/Utf16ToMbs.h"
 
 #pragma comment(lib, "dbghelp.lib") // for UnDecorateSymbolName
 
@@ -70,13 +70,6 @@ BOOL readHelper(HANDLE hProcess, ULONG_PTR remoteAddress, T &theValue) {
 }
 
 bool isWow(HANDLE hProcess);
-
-size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
-                  size_t wc_len) {
-  return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
-                             mb_str, static_cast<int>(mb_size), nullptr,
-                             nullptr);
-}
 
 } // namespace
 
@@ -263,7 +256,8 @@ bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
       nStringLength *= 2;
       chVector.resize(nStringLength + 1);
     }
-    size_t const mbLen = Utf16ToMbs(nullptr, 0, &chVector[0], nStringLength);
+    size_t const mbLen =
+        or2::Utf16ToMbs(nullptr, 0, &chVector[0], nStringLength);
     if (mbLen == 0) {
       for (int i = 0; i != nStringLength + 1; ++i) {
         os << "char " << i << " is " << std::hex << (unsigned int)chVector[i]
@@ -272,7 +266,7 @@ bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
       os << "invalid string: " << GetLastError();
     } else {
       std::vector<char> mbStr(mbLen + 1);
-      Utf16ToMbs(&mbStr[0], mbLen, &chVector[0], nStringLength);
+      (void)or2::Utf16ToMbs(&mbStr[0], mbLen, &chVector[0], nStringLength);
       os << &mbStr[0];
       if (mbLen > 0 && mbStr[mbLen - 1] == '\n') {
         newline = true;

@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 2980 2025-12-20 15:58:41Z roger $
+# $Id: NtTrace.mak 3030 2025-12-28 16:15:33Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
@@ -134,7 +134,8 @@ $(BUILD)\ShowData.obj: \
 	"include/NtDllStruct.h" \
 	"include/ProcessInfo.h" \
 	"include/ReadPartialMemory.h" \
-	"include/ShowData.h"
+	"include/ShowData.h" \
+	"include/Utf16ToMbs.h"
 
 $(BUILD)\ShowLoaderSnaps.obj: \
 	"include/DisplayError.h" \
@@ -146,6 +147,11 @@ $(BUILD)\ShowLoaderSnaps.obj: \
 	"include/DebugDriver.h" \
 	"include/GetModuleBase.h"
 
+$(BUILD)\GetFileNameFromHandle.obj: \
+    "include/GetFileNameFromHandle.h" \
+	"include/NtDllStruct.h" \
+	"include/Utf16ToMbs.h"
+
 $(BUILD)\GetModuleBase.obj: \
 	"include/GetModuleBase.h"
 
@@ -155,7 +161,8 @@ $(BUILD)\SymbolEngine.obj: \
 	"include/DbgHelper.inl" \
 	"include/MSvcExceptions.h" \
 	"include/ReadPartialMemory.h" \
-	"include/StrFromWchar.h"
+	"include/StrFromWchar.h" \
+	"include/Utf16ToMbs.h"
 
 $(BUILD)\SymExplorer.obj: \
 	"include/BasicType.h" \

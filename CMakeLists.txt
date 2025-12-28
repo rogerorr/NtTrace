@@ -38,6 +38,7 @@ add_executable(${PROJECT_NAME} src/${PROJECT_NAME}.cpp src/${PROJECT_NAME}.rc
   src/EntryPoint.cpp
   src/Enumerations.cpp)
 set_source_files_properties(src/${PROJECT_NAME}.rc PROPERTIES INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR})
+set_source_files_properties(src/Enumerations.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION true)
 target_link_libraries(${PROJECT_NAME} PUBLIC debugging)
 
 # Memory Statistics

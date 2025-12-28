@@ -31,6 +31,8 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
+// $Id: GetModuleBase.cpp 3030 2025-12-28 16:15:33Z roger $
+
 #include "GetModuleBase.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -46,9 +48,6 @@ COPYRIGHT
 
 #pragma comment(lib, "dbghelp.lib")
 #pragma comment(lib, "psapi")
-
-static char const szRCSID[] =
-    "$Id: GetModuleBase.cpp 3012 2025-12-22 08:38:30Z roger $";
 
 namespace {
 //////////////////////////////////////////////////////////

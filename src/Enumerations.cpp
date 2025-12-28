@@ -36,8 +36,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-static char const szRCSID[] =
-    "$Id: Enumerations.cpp 3005 2025-12-21 17:33:52Z roger $";
+// $Id: Enumerations.cpp 3030 2025-12-28 16:15:33Z roger $
 
 #include "Enumerations.h"
 

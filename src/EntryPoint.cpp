@@ -31,8 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-static char const szRCSID[] =
-    "$Id: EntryPoint.cpp 3028 2025-12-22 22:06:05Z roger $";
+// $Id: EntryPoint.cpp 3033 2025-12-28 16:20:24Z roger $
 
 #include "EntryPoint.h"
 
@@ -102,9 +101,7 @@ const std::map<std::string, ArgAttributes> sal_attributes = {
 extern "C" {
 ULONG
 NTAPI
-RtlNtStatusToDosError (
-   NTSTATUS Status
-   );
+RtlNtStatusToDosError(NTSTATUS Status);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -573,10 +570,10 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
 //////////////////////////////////////////////////////////////////////////
 // Attempt to set a trap for the entry point in the target DLL.
 NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
-                             bool bPreTrace, DWORD dllOffset, bool verbose) {
+                             bool pre_trace, DWORD dllOffset, bool verbose) {
 #ifdef _M_X64
   // We need the pretrace on X64 to save the volatile registers
-  bPreTrace = true;
+  pre_trace = true;
 #endif // _M_X64
 
   unsigned char *address;
@@ -680,7 +677,7 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
     std::cout << "Instrumenting " << name_ << " at: " << (void *)address
               << ", ssn: 0x" << std::hex << ssn_ << std::dec << "\n";
   }
-  return insertBrkpt(hProcess, address, preamble, bPreTrace ? setssn : nullptr);
+  return insertBrkpt(hProcess, address, preamble, pre_trace ? setssn : nullptr);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -845,8 +842,8 @@ void EntryPoint::doPreSave(HANDLE hProcess, HANDLE hThread,
 //////////////////////////////////////////////////////////////////////////
 // Trace a call to the entry point
 void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
-                       CONTEXT const &Context, bool bNames, bool bStackTrace,
-                       bool before) const {
+                       CONTEXT const &Context, bool with_names,
+                       bool stack_trace, bool before) const {
 #ifdef _M_IX86
   DWORD stack = Context.Esp;
   DWORD returnCode = Context.Eax;
@@ -889,7 +886,7 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
         os << ", ";
       bool const dup = !args.insert(argVal).second;
       argument.showArgument(os, hProcess, argVal, !before && success, dup,
-                            bNames);
+                            with_names);
     }
   }
 
@@ -900,9 +897,10 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
     showDword(os, returnCode);
 
     if (IS_ERROR(returnCode) && retType_ == retNTSTATUS) {
-      showWinError(os, static_cast<HRESULT>(RtlNtStatusToDosError(static_cast<NTSTATUS>(returnCode))));
+      const auto nt = static_cast<NTSTATUS>(returnCode);
+      showWinError(os, static_cast<HRESULT>(RtlNtStatusToDosError(nt)));
     }
-    if (bStackTrace) {
+    if (stack_trace) {
       os << std::endl;
       printStackTrace(os, hProcess, hThread, Context);
     }

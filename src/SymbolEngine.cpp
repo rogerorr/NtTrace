@@ -31,8 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-static char const szRCSID[] =
-    "$Id: SymbolEngine.cpp 3024 2025-12-22 20:11:51Z roger $";
+// $Id: SymbolEngine.cpp 3030 2025-12-28 16:15:33Z roger $
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -60,6 +59,7 @@ static char const szRCSID[] =
 #include "../include/MsvcExceptions.h"
 #include "../include/ReadPartialMemory.h"
 #include "../include/StrFromWchar.h"
+#include "../include/Utf16ToMbs.h"
 
 #include "GetModuleBase.h"
 
@@ -220,14 +220,6 @@ std::string getBaseType(DWORD baseType, ULONG64 length);
 // Helper function to delay load Wow64GetThreadContext
 BOOL getWow64ThreadContext(HANDLE hThread, WOW64_CONTEXT *pWowContext);
 #endif // _M_X64
-
-// Wrapper for WideCharToMultiByte
-size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
-                  size_t wc_len) {
-  return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
-                             mb_str, static_cast<int>(mb_size), nullptr,
-                             nullptr);
-}
 
 } // namespace
 

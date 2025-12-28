@@ -42,8 +42,9 @@ IMPLEMENTATION NOTES
 
 */
 
-static char const szRCSID[] =
-    "$Id: GetFileNameFromHandle.cpp 3017 2025-12-22 17:16:39Z roger $";
+// $Id: GetFileNameFromHandle.cpp 3032 2025-12-28 16:18:01Z roger $
+
+#include "GetFileNameFromHandle.h"
 
 #include <iostream> // DO_NOT_COMMIT
 
@@ -51,6 +52,7 @@ static char const szRCSID[] =
 #include <windows.h>
 
 #include "../include/NtDllStruct.h"
+#include "../include/Utf16ToMbs.h"
 
 #include <cstring>
 #include <string>
@@ -116,13 +118,6 @@ bool resolveUnc(std::string &filename, char const *uncPrefix, UINT uncLen) {
   return result;
 }
 
-size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
-                  size_t wc_len) {
-  return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
-                             mb_str, static_cast<int>(mb_size), nullptr,
-                             nullptr);
-}
-
 std::string getMappedFileName(void *pMem) {
   char filename[MAX_PATH + 1] = {};
   if (GetMappedFileName(GetCurrentProcess(), pMem, filename, MAX_PATH)) {
@@ -150,8 +145,8 @@ std::string getMappedFileName(void *pMem) {
 
   const auto unicode = reinterpret_cast<PUNICODE_STRING>(buffer.data());
   std::vector<char> mbStr(unicode->Length + 1);
-  auto str_len = Utf16ToMbs(mbStr.data(), mbStr.size(), unicode->Buffer,
-                            unicode->Length / sizeof(wchar_t));
+  auto str_len = or2::Utf16ToMbs(mbStr.data(), mbStr.size(), unicode->Buffer,
+                                 unicode->Length / sizeof(wchar_t));
 
   return std::string(mbStr.data(), str_len);
 }
