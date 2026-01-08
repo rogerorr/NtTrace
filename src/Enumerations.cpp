@@ -36,7 +36,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: Enumerations.cpp 3030 2025-12-28 16:15:33Z roger $
+// $Id: Enumerations.cpp 3041 2026-01-08 22:07:46Z roger $
 
 #include "Enumerations.h"
 
@@ -1446,7 +1446,7 @@ EnumMap SECTION_INFORMATION_CLASS_MAP[] = {
     DEF(SectionRelocationInformation),    DEF(SectionOriginalBaseInformation),
     DEF(SectionInternalImageInformation), {0, nullptr}};
 
-enum SECURITY_INFORMATION { // (not found in pdb files)
+enum SECURITY_INFORMATION : unsigned { // (not found in pdb files)
   OWNER_SECURITY_INFORMATION = 0x00000001,
   GROUP_SECURITY_INFORMATION = 0x00000002,
   DACL_SECURITY_INFORMATION = 0x00000004,

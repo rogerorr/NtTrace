@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: ShowData.cpp 3032 2025-12-28 16:18:01Z roger $
+// $Id: ShowData.cpp 3041 2026-01-08 22:07:46Z roger $
 
 #include "ShowData.h"
 
@@ -148,7 +148,7 @@ std::ostream &operator<<(std::ostream &os, FILETIME const &fileTime) {
 
 //////////////////////////////////////////////////////////////////////////
 void showDword(std::ostream &os, ULONG_PTR value) {
-  LONG_PTR iValue(value);
+  const auto iValue{static_cast<LONG_PTR>(value)};
   if ((iValue < 10) && (iValue > -10))
     os << iValue;
   else if (value < 0x10000)
