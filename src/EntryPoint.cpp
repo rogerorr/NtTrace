@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: EntryPoint.cpp 3040 2025-12-28 18:37:16Z roger $
+// $Id: EntryPoint.cpp 3043 2026-01-08 22:38:20Z roger $
 
 #include "EntryPoint.h"
 
@@ -106,7 +106,7 @@ RtlNtStatusToDosError(NTSTATUS Status);
 
 //////////////////////////////////////////////////////////////////////////
 // The various NtDll signatures
-
+namespace {
 #ifdef _M_IX86
 
 // Check for basic NT4/W2K signature...
@@ -115,8 +115,8 @@ RtlNtStatusToDosError(NTSTATUS Status);
 //  CD 2E                int         2Eh
 //  C2 20 00             ret         20h      // or just 'ret'
 
-static unsigned char const signature1[] = {MOVdwordEax, 5, LEA, 4,
-                                           INTn,        2, 0,   0}; // 11 bytes
+unsigned char const signature1[] = {MOVdwordEax, 5, LEA, 4,
+                                    INTn,        2, 0,   0}; // 11 bytes
 
 // Check for basic W2K3 signature...
 //  B8 1E 00 00 00       mov         eax,1Eh
@@ -124,8 +124,8 @@ static unsigned char const signature1[] = {MOVdwordEax, 5, LEA, 4,
 //  FF D2                call        edx
 //  C2 0C 00             ret         0Ch
 
-static unsigned char const signature2[] = {
-    MOVdwordEax, 5, MOVdwordEdx, 5, Call, 2, 0, 0}; // 12 bytes
+unsigned char const signature2[] = {MOVdwordEax, 5, MOVdwordEdx, 5,
+                                    Call,        2, 0,           0}; // 12 bytes
 
 // Check for basic W2K8/64 32-bit signature...
 //  B8 1E 00 00 00       mov         eax,1Eh
@@ -134,7 +134,7 @@ static unsigned char const signature2[] = {
 //  64 FF 15 C0 00 00 00 call        fs:[0c0h]
 //  C2 0C 00             ret         0Ch
 
-static unsigned char const signature3[] = {
+unsigned char const signature3[] = {
     MOVdwordEax, 5, MOVdwordEcx, 5, LEA, 4, FS, 1, Call, 6, 0, 0}; // 21 bytes
 
 // Check for type-2 W2K8/64 32-bit signature...
@@ -144,16 +144,16 @@ static unsigned char const signature3[] = {
 //  64 FF 15 C0 00 00 00 call        fs:[0c0h]
 //  C2 0C 00             ret         0Ch
 
-static unsigned char const signature4[] = {
-    MOVdwordEax, 5, XOR, 2, LEA, 4, FS, 1, Call, 6, 0, 0}; // 18 bytes
+unsigned char const signature4[] = {MOVdwordEax, 5,    XOR, 2, LEA, 4, FS,
+                                    1,           Call, 6,   0, 0}; // 18 bytes
 
 // Check for Windows 8.1 32bit signature
 // b8 0e 00 03 00        mov     eax,0x3000e
 // 64 ff 15 c0 00 00 00  call    dword ptr fs:[000000c0]
 // c2 04 00              ret     0x4
 
-static unsigned char const signature5[] = {MOVdwordEax, 5, FS, 1,
-                                           Call,        6, 0,  0}; // 12 bytes
+unsigned char const signature5[] = {MOVdwordEax, 5, FS, 1,
+                                    Call,        6, 0,  0}; // 12 bytes
 
 // Check for Windows 10 NtQueryInformationProcess (and trap the
 // Wow64SystemServiceCall) ntdll!NtQueryInformationProcess:
@@ -169,7 +169,7 @@ static unsigned char const signature5[] = {MOVdwordEax, 5, FS, 1,
 // ff d2                 call    edx c2
 // 14 00                 ret     14h
 
-static unsigned char const signature6[] = {
+unsigned char const signature6[] = {
     MOVdwordEax, 5, 0xe8, 5 + 4, 0x5a, 1, 0x80, 4, 0x75, 2, FS, 1,
     Call,        6, 0xc2, 3,     0xba, 5, Call, 2, 0,    0}; // 38 bytes
 
@@ -187,11 +187,11 @@ static unsigned char const signature6[] = {
 // ff d2                 call    edx
 // c2 14 00              ret     14h
 
-static unsigned char const signature6b[] = {
+unsigned char const signature6b[] = {
     MOVdwordEax, 5, 0xe8, 5,     0x5a, 1, 0x80, 4, 0x75, 2, FS, 1,
     Call,        6, 0xc2, 3 + 4, 0xba, 5, Call, 2, 0,    0}; // 38 bytes
 
-static unsigned char const *signatures[] = {
+unsigned char const *const signatures[] = {
     signature1, signature2, signature3,  signature4,
     signature5, signature6, signature6b,
 };
@@ -201,20 +201,20 @@ static unsigned char const *signatures[] = {
 // c2 08 00             ret     0x8
 // cc                   int     3
 
-static unsigned char const dead_export1[] = {0xe8, 5, 0xc2, 3, 0xcc, 1, 0, 0};
+unsigned char const dead_export1[] = {0xe8, 5, 0xc2, 3, 0xcc, 1, 0, 0};
 
 // Dead Export from Win32u.dll for example for NtUserYieldTask
 // e9 a1 ff ff ff       jmp     DeadExport
 // cc                   int     3
 
-static unsigned char const dead_export2[] = {0xe9, 5, 0xcc, 1, 0, 0};
+unsigned char const dead_export2[] = {0xe9, 5, 0xcc, 1, 0, 0};
 
-static unsigned char const *dead_exports[] = {
+unsigned char const *const dead_exports[] = {
     dead_export1,
     dead_export2,
 };
 
-static unsigned int const MAX_PREAMBLE(38);
+unsigned int const MAX_PREAMBLE(38);
 
 #elif _M_X64
 
@@ -224,8 +224,8 @@ static unsigned int const MAX_PREAMBLE(38);
 //  0f 05                syscall
 //  C3                   ret
 
-static unsigned char const signature1[] = {0x4c, 3, MOVdwordEax, 5,
-                                           0x0f, 2, 0,           0}; // 10 bytes
+unsigned char const signature1[] = {0x4c, 3, MOVdwordEax, 5,
+                                    0x0f, 2, 0,           0}; // 10 bytes
 
 // Check for W10 update 1 64-bit signature...
 // Note: we don't currently trap on the older 'int' case.
@@ -238,15 +238,15 @@ static unsigned char const signature1[] = {0x4c, 3, MOVdwordEax, 5,
 // cd 2e                   int     2Eh
 // c3                      ret
 
-static unsigned char const signature2[] = {
-    0x4c, 3, MOVdwordEax, 5, 0xf6, 8, 0x75, 2, 0x0f, 2, 0, 0}; // 21 bytes
+unsigned char const signature2[] = {0x4c, 3,    MOVdwordEax, 5, 0xf6, 8, 0x75,
+                                    2,    0x0f, 2,           0, 0}; // 21 bytes
 
-static unsigned char const *signatures[] = {
+unsigned char const *const signatures[] = {
     signature1,
     signature2,
 };
 
-static unsigned int const MAX_PREAMBLE(21);
+unsigned int const MAX_PREAMBLE(21);
 
 // Dead Export from Win32u.dll for example for NtUserCallHwnd
 // 48 83 ec 28           sub     rsp,28h
@@ -255,14 +255,15 @@ static unsigned int const MAX_PREAMBLE(21);
 // 33 c9                 xor     ecx,ecx
 // 48 ff 15 2e c1 00 00  call    qword ptr [win32u!_imp_RaiseFailFastException]
 
-static unsigned char const dead_export1[] = {0x48, 4, 0x45, 3, 0x33, 2, 0x33, 2,
-                                             0x48, 1, 0xff, 7, 0,    0};
+unsigned char const dead_export1[] = {0x48, 4,    0x45, 3,    0x33, 2, 0x33,
+                                      2,    0x48, 1,    0xff, 7,    0, 0};
 
-static unsigned char const *dead_exports[] = {
+unsigned char const *const dead_exports[] = {
     dead_export1,
 };
 
 #endif // _M_IX86
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // Show the argument for the given process with the specified value.
@@ -1114,8 +1115,6 @@ bool deadExport(unsigned char instruction[], size_t length) {
   return false;
 }
 
-} // namespace
-
 // Process a typedef line (starting after the 'typedef')
 void processTypedef(std::string lbuf, EntryPoint::Typedefs &typedefs) {
   std::string::size_type space = lbuf.find(' ');
@@ -1143,6 +1142,9 @@ void processUsing(std::string lbuf, EntryPoint::Typedefs &typedefs) {
 
   typedefs[lbuf.substr(0, equals)] = lbuf.substr(equals + strlen(" = "));
 }
+
+} // namespace
+
 //////////////////////////////////////////////////////////////////////////
 //
 // Read set of entry points from a configuration file with lines like:-

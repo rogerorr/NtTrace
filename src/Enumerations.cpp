@@ -36,11 +36,14 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: Enumerations.cpp 3041 2026-01-08 22:07:46Z roger $
+// $Id: Enumerations.cpp 3042 2026-01-08 22:28:25Z roger $
 
 #include "Enumerations.h"
 
 namespace Enumerations {
+
+namespace {
+
 #define DEF(X) {(unsigned long)X, #X}
 
 enum ALPC_MESSAGE_INFORMATION_CLASS {
@@ -2473,6 +2476,7 @@ EnumMap WORKERFACTORYINFOCLASS_MAP[] = {DEF(WorkerFactoryTimeout),
                                         {0, nullptr}};
 
 #undef DEF
+} // namespace
 
 ////////////////////////////////////////////////////////////////////
 
