@@ -42,7 +42,7 @@ IMPLEMENTATION NOTES
 
 */
 
-// $Id: GetFileNameFromHandle.cpp 3032 2025-12-28 16:18:01Z roger $
+// $Id: GetFileNameFromHandle.cpp 3044 2026-01-10 18:03:08Z roger $
 
 #include "GetFileNameFromHandle.h"
 
@@ -82,10 +82,10 @@ NtQueryVirtualMemory(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress,
 }
 
 namespace {
-static char const lanman[] = R"(\Device\LanmanRedirector)";
-static char const mup[] = R"(\Device\Mup)";
-static char const dfs[] = R"(\Device\WinDfs)";
-static char const dfsUnc[] = R"(\Device\WinDfs\Root)";
+char const lanman[] = R"(\Device\LanmanRedirector)";
+char const mup[] = R"(\Device\Mup)";
+char const dfs[] = R"(\Device\WinDfs)";
+char const dfsUnc[] = R"(\Device\WinDfs\Root)";
 
 /* Check for net use using the provided uncPrefix and target device name and
  * drive name */

@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: GetModuleBase.cpp 3030 2025-12-28 16:15:33Z roger $
+// $Id: GetModuleBase.cpp 3044 2026-01-10 18:03:08Z roger $
 
 #include "GetModuleBase.h"
 
@@ -71,63 +71,55 @@ void fixSymSrv() {
 /// address. NOTES: This function is needed because we are using FALSE for the
 /// last parameter of SymInitialize(), which prevents ALL modules being
 /// automatically loaded and so dramatically improves the speed of the stack
-/// walk We check whether the address is valid first because some invalid
+/// walk. We check whether the address is valid first because some invalid
 /// addresses cause access violations inside DbgHelp.dll
 ///
 DWORD64 CALLBACK GetModuleBase(HANDLE hProcess, DWORD64 dwAddress) {
-  DWORD64 baseAddress = 0;
-
   MEMORY_BASIC_INFORMATION mbInfo;
-  if (::VirtualQueryEx(hProcess, (PVOID)dwAddress, &mbInfo, sizeof(mbInfo)) &&
-      ((mbInfo.State & MEM_FREE) == 0)) {
-    // It is already in the symbol engine?
-    IMAGEHLP_MODULE64 stIHM{};
-    stIHM.SizeOfStruct = sizeof(IMAGEHLP_MODULE64);
+  if (!::VirtualQueryEx(hProcess, (PVOID)dwAddress, &mbInfo, sizeof(mbInfo)) ||
+      (mbInfo.State & MEM_FREE)) {
+    // Not a valid address
+    return 0;
+  }
 
-    if (::SymGetModuleInfo64(hProcess, dwAddress, &stIHM)) {
-      baseAddress = stIHM.BaseOfImage;
-      // ATLTRACE("showGetModuleBase got addr from SymGetModuleInfo = %x\n",
-      // baseAddress);
-    } else {
-      baseAddress = reinterpret_cast<DWORD64>(mbInfo.AllocationBase);
-      const auto hmod = static_cast<HMODULE>(mbInfo.AllocationBase);
+  IMAGEHLP_MODULE64 stIHM{};
+  stIHM.SizeOfStruct = sizeof(IMAGEHLP_MODULE64);
 
-      const auto filename = GetModuleFileNameWrapper(hProcess, hmod);
+  if (::SymGetModuleInfo64(hProcess, dwAddress, &stIHM)) {
+    // It is already in the symbol engine
+    return stIHM.BaseOfImage;
+  }
 
-      if (!filename.empty()) {
-        bool bPathSet(false);
-        std::vector<char> searchpath(1024);
-        if (::SymGetSearchPath(hProcess, &searchpath[0], 1024)) {
-          // symbol files often stored with binary image
-          const auto index = filename.find_last_of('\\');
-          if (index != std::string::npos) {
-            std::string fullpath(filename.substr(0, index));
-            fullpath += ";";
-            fullpath += &searchpath[0];
-            ::SymSetSearchPath(
-                hProcess, const_cast<char *>(
-                              fullpath.c_str())); // Some versions of DbgHelp.h
-                                                  // not const-correct
-            bPathSet = true;
-          }
-        }
-        // We do not need to pass a file handle - trapNtCalls reveals that
-        // DbgHelp simply opens the file if we don't provide a handle or
-        // duplicates the handle if we do.
-        if (!::SymLoadModule64(hProcess, nullptr, filename.c_str(), nullptr,
-                               baseAddress, 0)) {
-          // ATLTRACE("SymLoadModule, failed for %s\n", filename.c_str());
-        }
-        fixSymSrv();
-        if (bPathSet) {
-          ::SymSetSearchPath(hProcess, const_cast<char *>(&searchpath[0]));
-        }
-      } else {
-        // ATLTRACE("Module not found at %X\n", baseAddress);
+  const DWORD64 baseAddress = reinterpret_cast<DWORD64>(mbInfo.AllocationBase);
+  const auto hmod = static_cast<HMODULE>(mbInfo.AllocationBase);
+
+  const auto filename = GetModuleFileNameWrapper(hProcess, hmod);
+
+  if (!filename.empty()) {
+    bool bPathSet(false);
+    std::vector<char> searchpath(1024);
+    if (::SymGetSearchPath(hProcess, &searchpath[0], 1024)) {
+      // symbol files often stored with binary image
+      const auto index = filename.find_last_of('\\');
+      if (index != std::string::npos) {
+        std::string fullpath(filename.substr(0, index));
+        fullpath += ";";
+        fullpath += &searchpath[0];
+        ::SymSetSearchPath(
+            hProcess,
+            const_cast<char *>(fullpath.c_str())); // Some versions of DbgHelp.h
+                                                   // not const-correct
+        bPathSet = true;
       }
-
-      // ATLTRACE("GetModuleBase got addr from VirtualQueryEx = %x\n",
-      // baseAddress);
+    }
+    // We do not need to pass a file handle - NtTrace reveals that
+    // DbgHelp simply opens the file if we don't provide a handle or
+    // duplicates the handle if we do.
+    (void)::SymLoadModule64(hProcess, nullptr, filename.c_str(), nullptr,
+                            baseAddress, 0);
+    fixSymSrv();
+    if (bPathSet) {
+      ::SymSetSearchPath(hProcess, const_cast<char *>(&searchpath[0]));
     }
   }
 

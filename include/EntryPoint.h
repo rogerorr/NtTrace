@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3014 $
+  $Revision: 3046 $
 */
 
-// $Id: EntryPoint.h 3014 2025-12-22 11:29:33Z roger $
+// $Id: EntryPoint.h 3046 2026-01-10 18:41:52Z roger $
 
 #include <windows.h>
 
@@ -197,6 +197,10 @@ public:
 
   void doPreSave(HANDLE hProcess, HANDLE hThread, CONTEXT const &Context);
 
+  void countCall() { ++total_; }
+
+  size_t getTotal() const { return total_; }
+
   void trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
              CONTEXT const &Context, bool bNames, bool bStackTrace,
              bool before) const;
@@ -218,6 +222,7 @@ private:
   unsigned char *preSave_{}; // address of pre-save (for X64 fast-call)
   DWORD ssn_{};              // System Service Number
                              // Used to set Eax/Rax to pre-call breakpoint
+  size_t total_{}; // total call count
 
   NtCall insertBrkpt(HANDLE hProcess, unsigned char *address,
                      unsigned int offset, unsigned char *setssn);

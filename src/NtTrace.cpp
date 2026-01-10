@@ -10,7 +10,7 @@ AUTHOR
   Bug reports, comments, and suggestions are always welcome.
 
 COPYRIGHT
-  Copyright (C) 2002, 2025 under the MIT license:
+  Copyright (C) 2002, 2026 under the MIT license:
 
   "Permission is hereby granted, free of charge, to any person obtaining a
   copy of this software and associated documentation files (the "Software"),
@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 3025 2025-12-22 20:14:03Z roger $";
+    "$Id: NtTrace.cpp 3046 2026-01-10 18:41:52Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -180,6 +180,8 @@ public:
   /** Set orderly close down on Ctrl+C */
   void setCtrlC();
 
+  /** Print totals */
+  void ShowTotals() const;
 private:
   bool bLogDlls_{true};
   bool bNoExcept_{false};
@@ -484,6 +486,7 @@ bool TrapNtDebugger::OnBreakpoint(DWORD processId, DWORD threadId,
   }
   it = NtCalls_.find(exceptionAddress);
   if (it != NtCalls_.end()) {
+    it->second.entryPoint_->countCall();
 #ifdef _M_IX86
     const auto rc{static_cast<NTSTATUS>(Context.Eax)};
 #elif _M_X64
@@ -987,6 +990,26 @@ void TrapNtDebugger::setShowLoaderSnaps(HANDLE hProcess) {
   }
 }
 
+/** Print totals */
+void TrapNtDebugger::ShowTotals() const {
+  std::string category;
+  size_t grand_total{};
+  os_ << "\nTotal calls\n";
+  for (const auto& entry : entryPoints_) {
+    if (entry.getTotal() != 0) {
+      if (category != entry.getCategory()) {
+        category = entry.getCategory();
+        os_ << "[" << category << "]\n";
+      }
+      os_ << entry.getName() << ": " << entry.getTotal() << '\n';
+      grand_total += entry.getTotal();
+    }
+  }
+  if (grand_total) {
+    os_ << "Grand total: " << grand_total << '\n';
+  }
+}
+
 void setErrorCodes(std::string const &codeFilter) {
   std::vector<std::string> codes;
 
@@ -1019,6 +1042,7 @@ int main(int argc, char **argv) {
   bool noDebugHeap(false);
   bool bNoNames(false);
   bool bShowLoaderSnaps(false);
+  bool bTotals(false);
 
   Options options(szRCSID);
   options.set(
@@ -1053,6 +1077,7 @@ int main(int argc, char **argv) {
   options.set("tid", &bTid, "show thread ID");
   options.set("nl", &bNewline, "force newline on OutputDebugString");
   options.set("sls", &bShowLoaderSnaps, "Show Loader Snaps");
+  options.set("totals", &bTotals, "Show Totals");
 
   options.setArgs(1, -1, "[pid | cmd <args>]");
   if (!options.process(argc, argv,
@@ -1174,6 +1199,10 @@ int main(int argc, char **argv) {
   if (havePid && !debugger.Active()) {
     // We've detached from all targets, so don't kill them on exit
     DebugSetProcessKillOnExit(false);
+  }
+
+  if (bTotals) {
+    debugger.ShowTotals();
   }
 
   return 0;

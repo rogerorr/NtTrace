@@ -31,13 +31,14 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: EntryPoint.cpp 3043 2026-01-08 22:38:20Z roger $
+// $Id: EntryPoint.cpp 3045 2026-01-10 18:09:04Z roger $
 
 #include "EntryPoint.h"
 
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -59,7 +60,7 @@ namespace {
 void printStackTrace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
                      CONTEXT const &Context);
 std::string buffToHex(unsigned char *buffer, size_t length);
-ArgType getArgType(const std::string typeName,
+ArgType getArgType(const std::string &typeName,
                    EntryPoint::Typedefs const &typedefs);
 bool deadExport(unsigned char instruction[], size_t length);
 
@@ -935,15 +936,14 @@ void EntryPoint::stackTrace(std::ostream &os, HANDLE hProcess, HANDLE hThread) {
 namespace {
 void printStackTrace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
                      CONTEXT const &Context) {
-  static std::map<HANDLE, or2::SymbolEngine *> engines;
+  static std::map<HANDLE, std::unique_ptr<or2::SymbolEngine>> engines;
 
-  or2::SymbolEngine *pEngine = engines[hProcess];
-  if (pEngine == nullptr) {
-    pEngine = new or2::SymbolEngine(hProcess);
+  auto &pEngine = engines[hProcess];
+  if (!pEngine) {
+    pEngine = std::make_unique<or2::SymbolEngine>(hProcess);
     // Ensure ntdll.dll is in place (early on dbghelp doesn't find it)
     pEngine->LoadModule64(nullptr, "ntdll.dll", nullptr,
                           (DWORD64)GetModuleHandle("ntdll.dll"), 0);
-    engines[hProcess] = pEngine;
   }
   pEngine->StackTrace(hThread, Context, os);
 }
@@ -1073,7 +1073,7 @@ std::map<std::string, ArgType> getArgTypes() {
   return result;
 }
 
-ArgType getArgType(const std::string typeName,
+ArgType getArgType(const std::string &typeName,
                    EntryPoint::Typedefs const &typedefs) {
   static const std::map<std::string, ArgType> argTypes = getArgTypes();
 
