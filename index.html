@@ -48,7 +48,7 @@ Process 2428 exit code: 0
 </pre></code>
 
 <b>Syntax:</b><br>
-&nbsp; nttrace [-a] [-e] [-v] [-config *] [-errors *] [-export *] [-filter *] [-category *] [-hd] [-nonames] [-nodlls] [-noexcept] [-nothread] [-only] [-out *] [-pre] [-stack] [-time] [-delta] [-pid] [-tid] [-nl] [-sls] [pid | cmd &lt;args&gt;]
+&nbsp; nttrace [-a] [-e] [-v] [-config *] [-errors *] [-export *] [-filter *] [-category *] [-hd] [-nonames] [-nodlls] [-noexcept] [-nothread] [-only] [-out *] [-pre] [-stack] [-time] [-delta] [-pid] [-tid] [-nl] [-sls] [-totals] [pid | cmd &lt;args&gt;]
 <p>
 Options:<br>
 <table border=0>
@@ -75,6 +75,7 @@ Options:<br>
 <tr><td>  -tid      </td><td> show thread ID </td></tr>
 <tr><td>  -nl       </td><td> force newline on OutputDebugString </td></tr>
 <tr><td>  -sls      </td><td> Show Loader Snaps </td></tr>
+<tr><td>  -totals   </td><td> Show Totals </td></tr>
 
 </table>
 <p>
@@ -101,6 +102,13 @@ Build the appropriate binary (32-bit or 64-bit) for your target program.
 <p>
 (See Readme.txt for full details. Currently supports building with Visual Studio versions 2015 - 2026)
 <p>
+
+<hr>
+Version 3046 - 2026-01-10<br>
+Recent changes:
+<ul>
+<li>Added <code>-totals</code> command line option to NtTrace
+</ul>
 
 <hr>
 Version 3025 - 2025-12-22<br>
