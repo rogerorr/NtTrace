@@ -1,4 +1,4 @@
-# $Id: NtTrace.mak 3030 2025-12-28 16:15:33Z roger $
+# $Id: NtTrace.mak 3064 2026-01-11 22:57:38Z roger $
 
 #
 # This makefile requires Microsoft Visual Studio 2010 and above,
@@ -144,6 +144,7 @@ $(BUILD)\ShowLoaderSnaps.obj: \
 	"include/Options.inl" \
 	"include/ProcessHelper.h" \
 	"include/ReadInt.h" \
+	"include/Utf16ToMbs.h" \
 	"include/DebugDriver.h" \
 	"include/GetModuleBase.h"
 

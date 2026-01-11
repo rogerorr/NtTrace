@@ -36,7 +36,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 3059 2026-01-10 23:46:11Z roger $";
+    "$Id: ShowLoaderSnaps.cpp 3064 2026-01-11 22:57:38Z roger $";
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -51,6 +51,7 @@ static char const szRCSID[] =
 #include "../include/DisplayError.h"
 #include "../include/Options.h"
 #include "../include/ProcessHelper.h"
+#include "../include/Utf16ToMbs.h"
 
 #include "DebugDriver.h"
 #include "GetModuleBase.h"
@@ -58,16 +59,6 @@ static char const szRCSID[] =
 using namespace or2;
 
 #pragma comment(lib, "ntdll")
-
-//////////////////////////////////////////////////////////////////////////
-namespace {
-size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
-                  size_t wc_len) {
-  return WideCharToMultiByte(CP_UTF8, 0, wc_str, static_cast<int>(wc_len),
-                             mb_str, static_cast<int>(mb_size), nullptr,
-                             nullptr);
-}
-} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 /** Debugger event handler for showing loader snaps entry points */
