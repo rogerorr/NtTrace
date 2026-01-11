@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: EntryPoint.cpp 3045 2026-01-10 18:09:04Z roger $
+// $Id: EntryPoint.cpp 3058 2026-01-10 23:45:41Z roger $
 
 #include "EntryPoint.h"
 
@@ -526,23 +526,23 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *address,
     std::cerr << "Cannot trap " << name_
               << " - wrong signature (expecting 'ret' 0xC2/0xC3 or 'jmp' 0xE9, "
                  "found 0x"
-              << std::hex << std::setw(2) << (int)instruction[0] << std::dec
-              << ")" << std::endl;
+              << std::hex << std::setw(2) << static_cast<int>(instruction[0])
+              << std::dec << ")" << std::endl;
     return {};
   }
 
   // Now we know the actual argument count...
-  size_t nKnown(getArgumentCount());
+  size_t const nKnown(getArgumentCount());
   if (nt.nArgs_ > nKnown) {
     setArgumentCount(nt.nArgs_);
     if (nKnown) {
-      size_t nExtra = nt.nArgs_ - nKnown;
+      size_t const nExtra = nt.nArgs_ - nKnown;
       std::cerr << "Warning: " << nExtra << " additional argument"
                 << (nExtra == 1 ? "" : "s") << " for " << name_ << std::endl;
     }
   } else if (nt.nArgs_ < nKnown) {
     if (nt.nArgs_ > 0) {
-      size_t nExtra = nKnown - nt.nArgs_;
+      size_t const nExtra = nKnown - nt.nArgs_;
       std::cerr << "Warning: " << nExtra << " spurious argument"
                 << (nExtra == 1 ? "" : "s") << " for " << name_ << std::endl;
     }
@@ -584,7 +584,7 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
   } else {
     FARPROC pProc = GetProcAddress(hTargetDll, name_.c_str());
     if (nullptr == pProc) {
-      DWORD errorCode = GetLastError();
+      DWORD const errorCode = GetLastError();
       if (errorCode == ERROR_PROC_NOT_FOUND) {
         if (!exported_.empty() &&
             (pProc = GetProcAddress(hTargetDll, exported_.c_str())) !=
@@ -850,8 +850,8 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
   DWORD stack = Context.Esp;
   DWORD returnCode = Context.Eax;
 #elif _M_X64
-  DWORD64 stack = Context.Rsp;
-  DWORD64 returnCode = Context.Rax;
+  DWORD64 const stack = Context.Rsp;
+  DWORD64 const returnCode = Context.Rax;
 #endif
   os << getName() << "(";
 
@@ -862,7 +862,7 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
     success = NT_SUCCESS(returnCode);
     break;
   case retULONG:
-    success = ((ULONG)returnCode != 0);
+    success = (static_cast<ULONG>(returnCode) != 0);
     break;
   case retULONG_PTR:
     success = (returnCode != 0);
@@ -882,7 +882,7 @@ void EntryPoint::trace(std::ostream &os, HANDLE hProcess, HANDLE hThread,
     }
 
     for (size_t i = 0, end = getArgumentCount(); i < end; i++) {
-      Argument::ARG argVal = argv[i];
+      Argument::ARG const argVal = argv[i];
       Argument const &argument = getArgument(i);
       if (i)
         os << ", ";
@@ -957,7 +957,7 @@ std::string buffToHex(unsigned char *buffer, size_t length) {
   std::ostringstream oss;
   oss << std::setfill('0') << std::hex << '[';
   for (size_t idx = 0; idx != length; ++idx) {
-    unsigned int value = buffer[idx];
+    unsigned int const value = buffer[idx];
     if (idx)
       oss << " ";
     oss << std::setw(2) << value;
@@ -1117,7 +1117,7 @@ bool deadExport(unsigned char instruction[], size_t length) {
 
 // Process a typedef line (starting after the 'typedef')
 void processTypedef(std::string lbuf, EntryPoint::Typedefs &typedefs) {
-  std::string::size_type space = lbuf.find(' ');
+  std::string::size_type const space = lbuf.find(' ');
   if (space == std::string::npos) {
     std::cerr << "invalid typedef '" << lbuf << "'" << std::endl;
     return;
@@ -1131,7 +1131,7 @@ void processTypedef(std::string lbuf, EntryPoint::Typedefs &typedefs) {
 
 // Process a using declaration (starting after the 'using')
 void processUsing(std::string lbuf, EntryPoint::Typedefs &typedefs) {
-  std::string::size_type equals = lbuf.find(" = ");
+  std::string::size_type const equals = lbuf.find(" = ");
   if (equals == std::string::npos) {
     std::cerr << "invalid using '" << lbuf << "'" << std::endl;
     return;
@@ -1213,7 +1213,7 @@ bool EntryPoint::readEntryPoints(std::istream &cfgFile,
         processUsing(lbuf.substr(strlen("using") + 1), typedefs);
         continue;
       }
-      std::string::size_type idx = lbuf.find('(');
+      std::string::size_type const idx = lbuf.find('(');
       if (idx == std::string::npos) {
         // only a name
         if (lastTypeName.empty()) {
@@ -1254,7 +1254,7 @@ bool EntryPoint::readEntryPoints(std::istream &cfgFile,
         bEnded = true;
         lbuf.resize(closing_bracket);
       }
-      std::string::size_type idx = lbuf.find(',');
+      std::string::size_type const idx = lbuf.find(',');
       if (idx != std::string::npos) {
         lbuf.resize(idx);
       }
@@ -1288,7 +1288,7 @@ bool EntryPoint::readEntryPoints(std::istream &cfgFile,
 
         const ArgType eArgType = getArgType(typeName, typedefs);
         currEntryPoint->setArgument(argNum, eArgType, typeName, variableName,
-                                    (ArgAttributes)attributes);
+                                    static_cast<ArgAttributes>(attributes));
 #ifdef _M_IX86
         if (eArgType == argULONGLONG) {
           // Insert an unnamed dummy argument for the high dword

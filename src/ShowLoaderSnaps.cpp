@@ -36,7 +36,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: ShowLoaderSnaps.cpp 3012 2025-12-22 08:38:30Z roger $";
+    "$Id: ShowLoaderSnaps.cpp 3059 2026-01-10 23:46:11Z roger $";
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -74,7 +74,7 @@ size_t Utf16ToMbs(char *mb_str, size_t mb_size, const wchar_t *wc_str,
 class ShowLoaderSnaps : public DebuggerAdapter {
 public:
   // Constructor: output will be written to `os`
-  ShowLoaderSnaps(std::ostream &os) : os_(os) {}
+  explicit ShowLoaderSnaps(std::ostream &os) : os_(os) {}
 
   // Set minimal output
   void SetQuiet();
@@ -113,7 +113,7 @@ void ShowLoaderSnaps::SetShowLoaderSnaps(HANDLE hProcess) {
 #ifdef _WIN64
     // GlobalFlag is not officially documented
     // Offsets obtained from PDB file for ntdll.dll
-    PVOID pGlobalFlag = ((char *)pbi.PebBaseAddress) + 188;
+    PVOID pGlobalFlag = (reinterpret_cast<char *>(pbi.PebBaseAddress)) + 188;
 #else
     PVOID pGlobalFlag = ((char *)pbi.PebBaseAddress) + 104;
 #endif // _WIN64
@@ -175,7 +175,7 @@ std::string ShowLoaderSnaps::ReadString(HANDLE hProcess, LPVOID lpString,
 
 //////////////////////////////////////////////////////////////////////////
 void ShowLoaderSnaps::DecodeBase(HANDLE hProcess, const std::string &message) {
-  size_t base = message.find("base 0x");
+  size_t const base = message.find("base 0x");
   if (base == std::string::npos) {
     return;
   }
@@ -223,9 +223,9 @@ int main(int argc, char **argv) {
   (void)_putenv("_NO_DEBUG_HEAP=1");
 
   PROCESS_INFORMATION ProcessInformation;
-  int ret = CreateProcessHelper(options.begin(), options.end(),
-                                DEBUG_PROCESS | CREATE_SUSPENDED,
-                                &ProcessInformation);
+  int const ret = CreateProcessHelper(options.begin(), options.end(),
+                                      DEBUG_PROCESS | CREATE_SUSPENDED,
+                                      &ProcessInformation);
 
   if (ret != 0) {
     std::cerr << "CreateProcess failed with " << displayError() << std::endl;

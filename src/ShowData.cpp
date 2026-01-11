@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: ShowData.cpp 3041 2026-01-08 22:07:46Z roger $
+// $Id: ShowData.cpp 3055 2026-01-10 23:42:42Z roger $
 
 #include "ShowData.h"
 
@@ -54,6 +54,8 @@ COPYRIGHT
 
 #pragma comment(lib, "dbghelp.lib") // for UnDecorateSymbolName
 
+namespace showData {
+
 namespace {
 /** Read an object of type 'T' at remoteAddress in the specified process */
 template <typename T>
@@ -70,24 +72,6 @@ BOOL readHelper(HANDLE hProcess, ULONG_PTR remoteAddress, T &theValue) {
 }
 
 bool isWow(HANDLE hProcess);
-
-} // namespace
-
-namespace showData {
-
-//////////////////////////////////////////////////////////////////////////
-// Data for enumerations
-using Enumerators = std::vector<std::pair<std::string, unsigned long>>;
-using EnumMap = std::map<std::string, Enumerators>;
-EnumMap enumMap;
-
-//////////////////////////////////////////////////////////////////////////
-/** define an enumerator value for an enumeration */
-void defineEnumerator(std::string const &enumeration,
-                      std::string const &enumerator, unsigned long value) {
-  auto &entry = enumMap[enumeration];
-  entry.push_back(std::make_pair(enumerator, value));
-}
 
 //////////////////////////////////////////////////////////////////////////
 /** Stream a large integer to an output stream.
@@ -113,7 +97,8 @@ std::ostream &operator<<(std::ostream &os, FILETIME const &fileTime) {
                                       "May", "Jun", "Jul", "Aug", "Sep",
                                       "Oct", "Nov", "Dec"};
 
-  static ULONGLONG const OneYear = (ULONGLONG)365 * 86400 * 1000000000 / 100;
+  static ULONGLONG const OneYear =
+      static_cast<ULONGLONG>(365) * 86400 * 1000000000 / 100;
 
   ULARGE_INTEGER ulFileTime;
   ulFileTime.LowPart = fileTime.dwLowDateTime;
@@ -144,6 +129,22 @@ std::ostream &operator<<(std::ostream &os, FILETIME const &fileTime) {
     os << ulFileTime;
   }
   return os;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Data for enumerations
+using Enumerators = std::vector<std::pair<std::string, unsigned long>>;
+using EnumMap = std::map<std::string, Enumerators>;
+EnumMap enumMap;
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+/** define an enumerator value for an enumeration */
+void defineEnumerator(std::string const &enumeration,
+                      std::string const &enumerator, unsigned long value) {
+  auto &entry = enumMap[enumeration];
+  entry.emplace_back(enumerator, value);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -260,8 +261,8 @@ bool showString(std::ostream &os, HANDLE hProcess, LPCVOID lpString,
         or2::Utf16ToMbs(nullptr, 0, &chVector[0], nStringLength);
     if (mbLen == 0) {
       for (int i = 0; i != nStringLength + 1; ++i) {
-        os << "char " << i << " is " << std::hex << (unsigned int)chVector[i]
-           << std::dec << '\n';
+        os << "char " << i << " is " << std::hex
+           << static_cast<unsigned int>(chVector[i]) << std::dec << '\n';
       }
       os << "invalid string: " << GetLastError();
     } else {
@@ -740,14 +741,14 @@ void showWinError(std::ostream &os, HRESULT hResult) {
   char *pszMsg = nullptr;
   HMODULE hmod = nullptr;
 
-  DWORD hmodFlags(hmod ? FORMAT_MESSAGE_FROM_HMODULE : 0);
+  DWORD const hmodFlags(hmod ? FORMAT_MESSAGE_FROM_HMODULE : 0);
   FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
                     FORMAT_MESSAGE_IGNORE_INSERTS | hmodFlags,
                 hmod, hResult, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                (LPTSTR)&pszMsg, 0, nullptr);
+                reinterpret_cast<LPTSTR>(&pszMsg), 0, nullptr);
 
   if (pszMsg != nullptr) {
-    size_t nLen = strlen(pszMsg);
+    size_t const nLen = strlen(pszMsg);
     if (nLen > 1 && pszMsg[nLen - 1] == '\n') {
       pszMsg[nLen - 1] = 0;
       if (pszMsg[nLen - 2] == '\r') {
@@ -816,8 +817,6 @@ CommandLine::operator std::string() const {
   return oss.str();
 }
 
-} // namespace showData
-
 namespace {
 bool isWow(HANDLE hProcess) {
   BOOL result(false);
@@ -826,3 +825,5 @@ bool isWow(HANDLE hProcess) {
 }
 
 } // namespace
+
+} // namespace showData

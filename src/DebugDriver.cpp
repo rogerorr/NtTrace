@@ -27,7 +27,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: DebugDriver.cpp 3039 2025-12-28 18:24:19Z roger $
+// $Id: DebugDriver.cpp 3047 2026-01-10 20:55:38Z roger $
 
 #include "DebugDriver.h"
 
@@ -106,7 +106,7 @@ void or2::DebugDriver::Loop(Debugger &debugger) {
     } break;
 
     case EXIT_PROCESS_DEBUG_EVENT: {
-      ProcessEntry &entry = processMap_[DebugEvent.dwProcessId];
+      ProcessEntry const &entry = processMap_[DebugEvent.dwProcessId];
       debugger.OnExitProcess(DebugEvent.dwProcessId, DebugEvent.dwThreadId,
                              entry.hProcess_, DebugEvent.u.ExitProcess);
 

@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2968 $
+  $Revision: 3048 $
 */
 
-// $Id: ShowData.h 2968 2025-12-17 11:24:42Z roger $
+// $Id: ShowData.h 3048 2026-01-10 22:25:52Z roger $
 
 #include <ostream>
 #include <windows.h>
@@ -88,8 +88,11 @@ void showObjectAttributes(std::ostream &os, HANDLE hProcess,
 void showUnicodeString(std::ostream &os, HANDLE hProcess,
                        PUNICODE_STRING pTargetUnicodeString);
 
-/** show a generic pointer from the debuggee */
+/** show a generic pointer from the debuggee, encoded as ULONG_PTR */
 void showPointer(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal);
+
+/** show a generic pointer from the debuggee */
+void showPointer(std::ostream &os, HANDLE hProcess, const void *argVal);
 
 /** show a pointer to handle from the debuggee */
 void showPHandle(std::ostream &os, HANDLE hProcess, ULONG_PTR argVal);

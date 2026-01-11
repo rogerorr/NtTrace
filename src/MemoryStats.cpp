@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: MemoryStats.cpp 3012 2025-12-22 08:38:30Z roger $";
+    "$Id: MemoryStats.cpp 3047 2026-01-10 20:55:38Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -131,10 +131,10 @@ void MemoryStats::OnExitProcess(DWORD processId, DWORD /*threadId*/,
     FILETIME UserTime;
     if (GetProcessTimes(hProcess, &CreationTime, &ExitTime, &KernelTime,
                         &UserTime)) {
-      ticks elapsed_time =
+      ticks const elapsed_time =
           FileTimeToTicks(ExitTime) - FileTimeToTicks(CreationTime);
-      ticks kernel_time = FileTimeToTicks(KernelTime);
-      ticks user_time = FileTimeToTicks(UserTime);
+      ticks const kernel_time = FileTimeToTicks(KernelTime);
+      ticks const user_time = FileTimeToTicks(UserTime);
       os_ << ": " << TicksToMS(elapsed_time) << "ms elapsed, ";
       os_ << TicksToMS(kernel_time) << "ms kernel, ";
       os_ << TicksToMS(user_time) << "ms user";
@@ -180,7 +180,7 @@ int main(int argc, char **argv) {
   (void)_putenv("_NO_DEBUG_HEAP=1");
 
   PROCESS_INFORMATION ProcessInformation;
-  int ret = or2::CreateProcessHelper(
+  int const ret = or2::CreateProcessHelper(
       options.begin(), options.end(),
       bOnly ? DEBUG_ONLY_THIS_PROCESS : DEBUG_PROCESS, &ProcessInformation);
 

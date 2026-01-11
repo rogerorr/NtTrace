@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: GetModuleBase.cpp 3044 2026-01-10 18:03:08Z roger $
+// $Id: GetModuleBase.cpp 3054 2026-01-10 23:26:12Z roger $
 
 #include "GetModuleBase.h"
 
@@ -90,7 +90,7 @@ DWORD64 CALLBACK GetModuleBase(HANDLE hProcess, DWORD64 dwAddress) {
     return stIHM.BaseOfImage;
   }
 
-  const DWORD64 baseAddress = reinterpret_cast<DWORD64>(mbInfo.AllocationBase);
+  const auto baseAddress = reinterpret_cast<DWORD64>(mbInfo.AllocationBase);
   const auto hmod = static_cast<HMODULE>(mbInfo.AllocationBase);
 
   const auto filename = GetModuleFileNameWrapper(hProcess, hmod);

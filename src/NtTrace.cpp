@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 3046 2026-01-10 18:41:52Z roger $";
+    "$Id: NtTrace.cpp 3059 2026-01-10 23:46:11Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -92,7 +92,7 @@ public:
    * Construct a debugger
    * @param os the output stream to write to
    */
-  TrapNtDebugger(std::ostream &os) : os_(os) {}
+  explicit TrapNtDebugger(std::ostream &os) : os_(os) {}
 
   // callbacks on events
   void OnException(DWORD processId, DWORD threadId, HANDLE hProcess,
@@ -115,6 +115,11 @@ public:
   OnOutputDebugString(DWORD processId, DWORD threadId, HANDLE hProcess,
                       OUTPUT_DEBUG_STRING_INFO const &DebugString) override;
   bool Active() override { return bActive_; }
+
+  /**
+   * Set the error codes to be displayed
+   */
+  void setErrorCodes(std::string const &codeFilter);
 
   /**
    * Set the 'log dlls' flag.
@@ -218,6 +223,7 @@ private:
       filters_; // If not empty, filter for 'active' entry points
 
   std::set<DWORD> initialised_processes_;
+  std::set<NTSTATUS> errorCodes_;
 
   std::map<DWORD, std::map<PVOID, std::string>> dll_names_;
 
@@ -296,22 +302,22 @@ std::string delta() {
 
 //////////////////////////////////////////////////////////////////////////
 // Local data
+namespace {
+bool bErrorsOnly(false);
+bool bVerbose(false);
 
-static bool bErrorsOnly(false);
-static bool bVerbose(false);
+bool bNames(false);
+bool bPreTrace(false);
+bool bStackTrace(false);
+bool bTimestamp(false);
+bool bDelta(false);
+bool bPid(false);
+bool bTid(false);
+bool bNewline(false);
+std::string configFile; // override default config file
 
-static std::set<NTSTATUS> errorCodes;
-static bool bNames(false);
-static bool bPreTrace(false);
-static bool bStackTrace(false);
-static bool bTimestamp(false);
-static bool bDelta(false);
-static bool bPid(false);
-static bool bTid(false);
-static bool bNewline(false);
-static std::string configFile; // override default config file
-
-static std::string exportFile; // Export symbols here once loaded
+std::string exportFile; // Export symbols here once loaded
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // Set things up...
@@ -384,6 +390,7 @@ bool TrapNtDebugger::initialise() {
 }
 
 //////////////////////////////////////////////////////////////////////////
+namespace {
 BOOL CALLBACK populateCallback(PSYMBOL_INFO pSymInfo, ULONG /*SymbolSize*/,
                                PVOID UserContext) {
   if (pSymInfo->NameLen <= 3)
@@ -395,11 +402,11 @@ BOOL CALLBACK populateCallback(PSYMBOL_INFO pSymInfo, ULONG /*SymbolSize*/,
     --len;
   }
   if (ptr[0] == 'N' && ptr[1] == 't') {
-    char const *end = (char const *)memchr(ptr, '@', len);
+    char const *end = static_cast<char const *>(memchr(ptr, '@', len));
     if (end) {
       len = end - ptr;
     }
-    std::string key(ptr, len);
+    std::string const key(ptr, len);
     const auto offset =
         static_cast<DWORD>(pSymInfo->Address - pSymInfo->ModBase);
     auto &offsets = *static_cast<TrapNtDebugger::Offsets *>(UserContext);
@@ -408,11 +415,12 @@ BOOL CALLBACK populateCallback(PSYMBOL_INFO pSymInfo, ULONG /*SymbolSize*/,
 
   return TRUE;
 }
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // Populate the 'offsets' collection
 void TrapNtDebugger::populateOffsets() {
-  or2::SymbolEngine eng(GetCurrentProcess());
+  or2::SymbolEngine const eng(GetCurrentProcess());
   const auto baseAddress(reinterpret_cast<DWORD64>(TargetDll_));
   std::string file_name =
       GetModuleFileNameWrapper(GetCurrentProcess(), TargetDll_);
@@ -494,7 +502,7 @@ bool TrapNtDebugger::OnBreakpoint(DWORD processId, DWORD threadId,
 #endif
     if (bErrorsOnly && NT_SUCCESS(rc)) {
       // don't trace
-    } else if (errorCodes.empty() || (errorCodes.count(rc) > 0)) {
+    } else if (errorCodes_.empty() || (errorCodes_.count(rc) > 0)) {
       header(processId, threadId);
 
       it->second.entryPoint_->trace(os_, hProcess, hThread, Context, bNames,
@@ -604,7 +612,7 @@ void TrapNtDebugger::OnException(DWORD processId, DWORD threadId,
           Exception.ExceptionRecord.ExceptionInformation[2] == 0) {
         os_ << " rethrow";
       } else {
-        ULONG_PTR base =
+        ULONG_PTR const base =
             Exception.ExceptionRecord.NumberParameters == 3
                 ? 0
                 : static_cast<ULONG_PTR>(
@@ -622,7 +630,8 @@ void TrapNtDebugger::OnException(DWORD processId, DWORD threadId,
              Exception.ExceptionRecord.ExceptionCode == CLR_EXCEPTION_V4) {
     header(processId, threadId);
     os_ << "CLR exception, HR: " << std::hex
-        << (HRESULT)Exception.ExceptionRecord.ExceptionInformation[0]
+        << static_cast<HRESULT>(
+               Exception.ExceptionRecord.ExceptionInformation[0])
         << std::dec << std::endl;
   } else if (Exception.ExceptionRecord.ExceptionCode == MSVC_NOTIFICATION) {
     if (Exception.ExceptionRecord.ExceptionInformation[0] == 0x1000) {
@@ -789,7 +798,7 @@ void TrapNtDebugger::showModuleNameEx(HANDLE hProcess, PVOID lpModuleBase,
     hProcess = GetCurrentProcess();
 
   std::string file_name =
-      GetModuleFileNameWrapper(hProcess, (HMODULE)lpModuleBase);
+      GetModuleFileNameWrapper(hProcess, static_cast<HMODULE>(lpModuleBase));
   if (file_name.empty()) {
     if (hFile) {
       file_name = GetFileNameFromHandle(hFile);
@@ -854,8 +863,8 @@ void TrapNtDebugger::SetDllBreakpoints(HANDLE hProcess) {
     if (bRequired) {
       auto &ep = const_cast<EntryPoint &>(
           entryPoint); // set iterator returns const object :-(
-      NtCall nt = ep.setNtTrap(hProcess, TargetDll_, bPreTrace,
-                               offsets_[ep.getName()], bVerbose);
+      NtCall const nt = ep.setNtTrap(hProcess, TargetDll_, bPreTrace,
+                                     offsets_[ep.getName()], bVerbose);
       if (nt.entryPoint_ != nullptr) {
         NtCalls_[ep.getAddress()] = nt;
         if (ep.getPreSave()) {
@@ -1010,7 +1019,7 @@ void TrapNtDebugger::ShowTotals() const {
   }
 }
 
-void setErrorCodes(std::string const &codeFilter) {
+void TrapNtDebugger::setErrorCodes(std::string const &codeFilter) {
   std::vector<std::string> codes;
 
   SimpleTokenizer(codeFilter, &codes, ',');
@@ -1024,7 +1033,7 @@ void setErrorCodes(std::string const &codeFilter) {
       throw std::runtime_error("Unrecognised error code value '" + it + "'");
     }
 #pragma warning(pop)
-    errorCodes.insert(static_cast<NTSTATUS>(code));
+    errorCodes_.insert(static_cast<NTSTATUS>(code));
   }
 }
 
@@ -1097,11 +1106,11 @@ int main(int argc, char **argv) {
     }
   }
 
-  if (codeFilter.length())
-    setErrorCodes(codeFilter);
-
   TrapNtDebugger debugger((outputFile.length() != 0) ? (std::ostream &)ofs
                                                      : std::cout);
+
+  if (codeFilter.length())
+    debugger.setErrorCodes(codeFilter);
   debugger.setLogDlls(!bNoDlls);
   debugger.setNoException(bNoExcept);
   debugger.setNoThread(bNoThread);
@@ -1154,7 +1163,7 @@ int main(int argc, char **argv) {
       return 1;
     }
 
-    BOOL rc = DebugActiveProcess(pid);
+    BOOL const rc = DebugActiveProcess(pid);
     if (!rc) {
       std::cerr << "DebugActiveProcess failed with " << displayError()
                 << std::endl;
@@ -1166,7 +1175,7 @@ int main(int argc, char **argv) {
     }
 
     PROCESS_INFORMATION ProcessInformation;
-    int ret = CreateProcessHelper(
+    int const ret = CreateProcessHelper(
         options.begin(), options.end(),
         bOnly ? DEBUG_ONLY_THIS_PROCESS : DEBUG_PROCESS, &ProcessInformation);
 

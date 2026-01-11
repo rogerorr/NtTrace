@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: SymbolEngine.cpp 3040 2025-12-28 18:37:16Z roger $
+// $Id: SymbolEngine.cpp 3055 2026-01-10 23:42:42Z roger $
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -101,7 +101,7 @@ struct EngineCallBack {
   static BOOL CALLBACK enumSymbolsProc(PSYMBOL_INFO pSymInfo,
                                        ULONG /*SymbolSize*/,
                                        PVOID UserContext) {
-    EngineCallBack &thisCb = *(EngineCallBack *)UserContext;
+    EngineCallBack &thisCb = *static_cast<EngineCallBack *>(UserContext);
 
     return thisCb.cb_(thisCb.eng_, pSymInfo);
   }
@@ -162,9 +162,11 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
     } else {
       opf << " [" << reg_info.name;
       if (pSymInfo->Address > 0x7fffffff)
-        opf << "-" << std::hex << -(int)pSymInfo->Address << std::dec;
+        opf << "-" << std::hex << -static_cast<int>(pSymInfo->Address)
+            << std::dec;
       else
-        opf << "+" << std::hex << (int)pSymInfo->Address << std::dec;
+        opf << "+" << std::hex << static_cast<int>(pSymInfo->Address)
+            << std::dec;
       opf << "]";
 
       if (pSymInfo->Size == sizeof(char)) {
@@ -174,7 +176,7 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
         if (isprint(data))
           opf << " = '" << data << '\'';
         else
-          opf << " = " << (int)data;
+          opf << " = " << static_cast<int>(data);
       } else if (pSymInfo->Size == sizeof(short)) {
         unsigned short data;
         eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
@@ -185,12 +187,12 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
         eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
                        sizeof(data));
         opf << " = 0x" << std::hex << data << std::dec;
-      } else if ((pSymInfo->Size == 8) && (name.compare(0, 6, "double") == 0)) {
+      } else if ((pSymInfo->Size == sizeof(double)) && (name.compare(0, 6, "double") == 0)) {
         double data;
         eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
                        sizeof(data));
         opf << " = " << data;
-      } else if (pSymInfo->Size == 8) {
+      } else if (pSymInfo->Size == sizeof(LONGLONG)) {
         LONGLONG data;
         eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
                        sizeof(data));
@@ -360,7 +362,7 @@ bool SymbolEngine::printAddress(DWORD64 address, std::ostream &os) const {
   {
     os << " " << pSym->Name;
     if (dwDisplacement64 != 0) {
-      int displacement = static_cast<int>(dwDisplacement64);
+      int const displacement = static_cast<int>(dwDisplacement64);
       if (displacement < 0)
         os << " - " << -displacement;
       else
@@ -404,7 +406,7 @@ void SymbolEngine::printInlineAddress(DWORD64 address, DWORD inline_context,
   if (FromInlineContext(address, inline_context, &dwDisplacement64, pSym)) {
     os << pSym->Name;
     if (dwDisplacement64 != 0) {
-      int displacement = static_cast<int>(dwDisplacement64);
+      int const displacement = static_cast<int>(dwDisplacement64);
       if (displacement < 0)
         os << " - " << -displacement;
       else
@@ -452,7 +454,7 @@ std::string SymbolEngine::addressToName(PVOID pointer) const {
 // Convert inline address to a string.
 std::string SymbolEngine::inlineToName(DWORD64 address,
                                        DWORD inline_context) const {
-  std::pair<DWORD64, DWORD> key(address, inline_context);
+  std::pair<DWORD64, DWORD> const key(address, inline_context);
   auto it = pImpl_->inlineMap.find(key);
   if (it == pImpl_->inlineMap.end()) {
     std::ostringstream oss;
@@ -686,7 +688,8 @@ void(WINAPI *SymbolEngine::GetCurrentThreadContext)(PCONTEXT pContext) =
 void SymbolEngine::SEHTrace(PVOID ExceptionList, std::ostream &os) const {
   // Got the first entry of the exception stack
   for (int i = 0; (maxSehDepth_ < 0) || (i < maxSehDepth_); ++i) {
-    if (ExceptionList == (PVOID)(INT_PTR)-1 || ExceptionList == nullptr)
+    if (ExceptionList == (PVOID) static_cast<INT_PTR>(-1) ||
+        ExceptionList == nullptr)
       break;
 
     struct Frame {
@@ -704,7 +707,7 @@ void SymbolEngine::SEHTrace(PVOID ExceptionList, std::ostream &os) const {
     os << "\n";
 
     PVOID catchHandler = nullptr;
-    bool isMsvcHandler = findMsvcCppHandler(frame.handler, &catchHandler);
+    bool const isMsvcHandler = findMsvcCppHandler(frame.handler, &catchHandler);
 
     if (showParams_) {
       struct {
@@ -770,7 +773,7 @@ bool SymbolEngine::findMsvcCppHandler(PVOID sehHandler,
   }
 
   // deref and read FrameHandler
-  bufptr = (PVOID *)(buffer + 1);
+  bufptr = reinterpret_cast<PVOID *>(buffer + 1);
   PVOID pFrameHandler = *bufptr;
   MsvcFrameHandler frameHandler;
   if (!ReadMemory(pFrameHandler, (PVOID)&frameHandler, sizeof(frameHandler)))
@@ -812,7 +815,7 @@ void SymbolEngine::showMsvcThrow(std::ostream &os, PVOID throwInfo,
   MsvcClassInfo msvcClassInfo{};
   BYTE raw_type_info[sizeof(type_info) + 256] = "";
 
-  if (!ReadMemory((PVOID)throwInfo, &msvcThrow, sizeof(msvcThrow)) ||
+  if (!ReadMemory(throwInfo, &msvcThrow, sizeof(msvcThrow)) ||
       !ReadMemory((PVOID)((ULONG_PTR)base + msvcThrow.pClassHeader),
                   &msvcClassHeader, sizeof(msvcClassHeader)) ||
       !ReadMemory((PVOID)((ULONG_PTR)base + msvcClassHeader.Info[0]),
@@ -1236,7 +1239,7 @@ std::string getBaseType(DWORD baseType, ULONG64 length) {
 
   // Unlisted type - use the data values and then fix the code (!)
   std::ostringstream oss;
-  oss << "pdb type: " << baseType << "/" << (DWORD)length;
+  oss << "pdb type: " << baseType << "/" << static_cast<DWORD>(length);
   return oss.str();
 }
 

@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3012 2025-12-22 08:38:30Z roger $";
+    "$Id: SymExplorer.cpp 3061 2026-01-10 23:56:57Z roger $";
 
 #define NOMINMAX
 
@@ -127,7 +127,7 @@ std::string expandFlags(DWORD flags) {
 
 class SymExplorer {
 public:
-  SymExplorer(std::string prompt);
+  explicit SymExplorer(std::string prompt);
 
   // Called by Debug engine for each public/global symbol
   BOOL enumSymbolsCallback(std::string const &SymbolName,
@@ -331,7 +331,7 @@ SymExplorer::SymExplorer(std::string prompt)
 BOOL CALLBACK SymExplorer::enumSymbolsCallback(PSYMBOL_INFO pSym,
                                                ULONG /*SymbolSize*/,
                                                PVOID thisObject) {
-  return ((SymExplorer *)thisObject)
+  return (static_cast<SymExplorer *>(thisObject))
       ->enumSymbolsCallback(std::string(pSym->Name, pSym->NameLen),
                             pSym->Address);
 }
@@ -361,7 +361,7 @@ BOOL SymExplorer::enumSymbolsCallback(std::string const &SymbolName,
 BOOL CALLBACK SymExplorer::enumTypesCallback(PSYMBOL_INFO pSym,
                                              ULONG /*SymbolSize*/,
                                              PVOID thisObject) {
-  return ((SymExplorer *)thisObject)
+  return (static_cast<SymExplorer *>(thisObject))
       ->enumTypesCallback(std::string(pSym->Name, pSym->NameLen), pSym->Index,
                           pSym->Size);
 }
@@ -485,9 +485,9 @@ bool SymExplorer::children(std::istream &iss) {
     std::cout << "No children for " << index << std::endl;
   } else {
     TI_FINDCHILDREN_PARAMS *children;
-    size_t length = offsetof(TI_FINDCHILDREN_PARAMS, ChildId) +
-                    sizeof(children->ChildId) * childCount;
-    children = (TI_FINDCHILDREN_PARAMS *)::operator new(length);
+    size_t const length = offsetof(TI_FINDCHILDREN_PARAMS, ChildId) +
+                          sizeof(children->ChildId) * childCount;
+    children = static_cast<TI_FINDCHILDREN_PARAMS *>(::operator new(length));
     children->Count = childCount;
     children->Start = 0;
     if (eng_.GetTypeInfo(baseAddress_, index, TI_FINDCHILDREN, children)) {
@@ -750,7 +750,7 @@ bool SymExplorer::load(std::string const &module) {
   const std::string file_name =
       GetModuleFileNameWrapper(GetCurrentProcess(), hMod_);
 
-  bool bRet =
+  bool const bRet =
       eng_.LoadModule64(nullptr, file_name.c_str(), nullptr, baseAddress_, 0);
   if (bRet) {
     std::cout << "Loaded " << module << " at " << hMod_;
@@ -776,7 +776,7 @@ bool SymExplorer::locals(std::istream &iss) {
   DWORD64 const address = getSymbolAddress(iss);
 
   struct CallBack : public SymbolEngine::EnumLocalCallBack {
-    CallBack(hexmode mode) : mode_(mode) {}
+    explicit CallBack(hexmode mode) : mode_(mode) {}
 
     bool operator()(SymbolEngine const &symEng,
                     PSYMBOL_INFO pSymInfo) override {
@@ -807,7 +807,7 @@ bool SymExplorer::locals(std::istream &iss) {
  */
 bool SymExplorer::symopt(std::istream &iss) {
   bool result(true);
-  DWORD options = SymGetOptions();
+  DWORD const options = SymGetOptions();
   DWORD newoptions(options);
 
   char op('\0');
@@ -963,7 +963,8 @@ bool SymExplorer::udt(std::istream &iss) {
     }
     std::cout << '\n';
   } else {
-    std::cout << "Not a UDT type: " << (enum SymTagEnum)tag << std::endl;
+    std::cout << "Not a UDT type: " << static_cast<enum SymTagEnum>(tag)
+              << std::endl;
     return result;
   }
 
@@ -978,9 +979,9 @@ bool SymExplorer::udt(std::istream &iss) {
                        &childCount) &&
       childCount != 0) {
     TI_FINDCHILDREN_PARAMS *children;
-    size_t length = offsetof(TI_FINDCHILDREN_PARAMS, ChildId) +
-                    sizeof(children->ChildId) * childCount;
-    children = (TI_FINDCHILDREN_PARAMS *)::operator new(length);
+    size_t const length = offsetof(TI_FINDCHILDREN_PARAMS, ChildId) +
+                          sizeof(children->ChildId) * childCount;
+    children = static_cast<TI_FINDCHILDREN_PARAMS *>(::operator new(length));
     children->Count = childCount;
     children->Start = 0;
     if (eng_.GetTypeInfo(baseAddress_, index, TI_FINDCHILDREN, children)) {
@@ -1139,20 +1140,20 @@ int SymExplorer::run(std::istream &is) {
 
   std::string lbufr;
   int ret(0);
-  SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE);
+  SetConsoleCtrlHandler(reinterpret_cast<PHANDLER_ROUTINE>(CtrlHandler), TRUE);
   while (std::cout << prompt_, std::getline(is, lbufr)) {
     std::istringstream iss(lbufr);
     iss.unsetf(std::ios::dec); // Allow oct, dec and hex input
     std::string command;
     if (iss >> command) {
-      FuncMap::const_iterator it = funcMap_.find(command);
+      FuncMap::const_iterator const it = funcMap_.find(command);
       if (it == funcMap_.end()) {
         std::cout << "Command not found -- use help" << std::endl;
         ++ret;
       } else if (it->second == 0) {
         break;
       } else {
-        PFunc pFunc = it->second;
+        PFunc const pFunc = it->second;
         try {
           ctrlc_ = false;
           if (!(this->*pFunc)(iss))

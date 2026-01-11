@@ -42,7 +42,7 @@ IMPLEMENTATION NOTES
 
 */
 
-// $Id: GetFileNameFromHandle.cpp 3044 2026-01-10 18:03:08Z roger $
+// $Id: GetFileNameFromHandle.cpp 3047 2026-01-10 20:55:38Z roger $
 
 #include "GetFileNameFromHandle.h"
 
@@ -111,7 +111,7 @@ bool resolveNetUse(std::string &filename, char const *uncPrefix, size_t uncLen,
 
 /* Check for unresolved UNC prefix and replace with a backslash designator */
 bool resolveUnc(std::string &filename, char const *uncPrefix, UINT uncLen) {
-  bool result = _tcsnicmp(filename.c_str(), uncPrefix, uncLen) == 0;
+  bool const result = _tcsnicmp(filename.c_str(), uncPrefix, uncLen) == 0;
   if (result) {
     filename.replace(0, uncLen, 1, '\\');
   }
@@ -157,7 +157,7 @@ std::string GetFileNameFromHandle(HANDLE hFile) {
 
   // Get the file size.
   DWORD dwFileSizeHi = 0;
-  DWORD dwFileSizeLo = GetFileSize(hFile, &dwFileSizeHi);
+  DWORD const dwFileSizeLo = GetFileSize(hFile, &dwFileSizeHi);
 
   if (dwFileSizeLo == INVALID_FILE_SIZE && GetLastError() != NO_ERROR) {
     SetLastError(ERROR_FILE_INVALID);
@@ -192,7 +192,7 @@ std::string GetFileNameFromHandle(HANDLE hFile) {
 
             // Look up each device name
             if (QueryDosDevice(szDrive, szName, MAX_PATH)) {
-              size_t uNameLen = _tcslen(szName);
+              size_t const uNameLen = _tcslen(szName);
 
               if (uNameLen < MAX_PATH) {
                 if (_tcsnicmp(szName, lanman, sizeof(lanman) - 1) == 0) {
