@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3061 2026-01-10 23:56:57Z roger $";
+    "$Id: SymExplorer.cpp 3077 2026-01-23 23:24:48Z roger $";
 
 #define NOMINMAX
 
@@ -46,6 +46,7 @@ static char const szRCSID[] =
 #include <iostream>
 #include <map>
 #include <regex>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -137,6 +138,9 @@ public:
   BOOL enumTypesCallback(std::string const &SymbolName, ULONG Index,
                          ULONG Size);
 
+  // Called by Debug engine during ODR detection
+  BOOL odrCallback(std::string const &SymbolName, ULONG Size);
+
   int run(std::istream &iss);
 
   // Load a module, unoading any existing one
@@ -148,12 +152,15 @@ private:
   DWORD64 baseAddress_{0};
   std::string prompt_;
   hexmode mode_{eDec};
+  std::map<std::string, std::set<ULONG>> odr_;
 
   // Callback helpers
   static BOOL CALLBACK enumSymbolsCallback(PSYMBOL_INFO pSym, ULONG SymbolSize,
                                            PVOID thisObject);
   static BOOL CALLBACK enumTypesCallback(PSYMBOL_INFO pSym, ULONG SymbolSize,
                                          PVOID thisObject);
+  static BOOL CALLBACK odrCallback(PSYMBOL_INFO pSym, ULONG SymbolSize,
+                                   PVOID thisObject);
   regex enumRegex;
 
   // User interface functions
@@ -169,6 +176,7 @@ private:
   bool index(std::istream &iss);
   bool load(std::istream &iss);
   bool locals(std::istream &iss);
+  bool odr(std::istream &iss);
   bool showModule(std::istream &iss);
   bool symopt(std::istream &iss);
   bool type(std::istream &iss);
@@ -176,6 +184,8 @@ private:
 
   using FuncMap = std::map<std::string, PFunc>;
   FuncMap funcMap_;
+  using HelpMap = std::map<std::string, std::string>;
+  HelpMap helpMap_;
 
   // Read type index
   DWORD getTypeIndex(std::istream &is);
@@ -304,23 +314,36 @@ SymExplorer::SymExplorer(std::string prompt)
         "Variables not available - requires DbgHelp.dll 6.1 or higher");
   }
 
-  funcMap_["exit"] = nullptr;
-  funcMap_["quit"] = nullptr;
-  funcMap_["find"] = &SymExplorer::find;
-  funcMap_["help"] = &SymExplorer::help;
-  funcMap_["children"] = &SymExplorer::children;
-  funcMap_["dec"] = &SymExplorer::dec;
+  auto define = [this](const char *name, PFunc func, const char *help) {
+    funcMap_[name] = func;
+    helpMap_[name] = help;
+  };
+
+  define("exit", nullptr, "Exit the program");
+  define("quit", nullptr, "Exit the program");
+  define("find", &SymExplorer::find,
+         "Find the functions matching <pattern> in the target");
+  define("help", &SymExplorer::help, "Get help");
+  define("children", &SymExplorer::children,
+         "Show child items for supplied symbol");
+  define("dec", &SymExplorer::dec, "Select decimal number format");
 #ifdef DISASM
-  funcMap_["disasm"] = &SymExplorer::disasm;
+  define("disasm", &SymExplorer::disasm,
+         "Disassemble code at <address> for <length>");
 #endif // DISASM
-  funcMap_["hex"] = &SymExplorer::hex;
-  funcMap_["index"] = &SymExplorer::index;
-  funcMap_["load"] = &SymExplorer::load;
-  funcMap_["locals"] = &SymExplorer::locals;
-  funcMap_["show"] = &SymExplorer::showModule;
-  funcMap_["symopt"] = &SymExplorer::symopt;
-  funcMap_["type"] = &SymExplorer::type;
-  funcMap_["udt"] = &SymExplorer::udt;
+  define("hex", &SymExplorer::hex, "Select hexadecimal number format");
+  define("index", &SymExplorer::index, "Display data for symbol <index>");
+  define("load", &SymExplorer::load, "Load the specified binary");
+  define("locals", &SymExplorer::locals, "Shoe local variables for <function>");
+  define("odr", &SymExplorer::odr,
+         "Look for ODR violation in types matching <pattern>. May have false "
+         "positives, especially for incremental linking.");
+  define("show", &SymExplorer::showModule, "Show details of the loaded image");
+  define("symopt", &SymExplorer::symopt,
+         "Set symbol options: +<n> to add, -<n> to remove, or <n> to set");
+  define("type", &SymExplorer::type,
+         "Show types matching <pattern> in the target");
+  define("udt", &SymExplorer::udt, "Display a user defined type in C++ format");
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -375,6 +398,30 @@ BOOL SymExplorer::enumTypesCallback(std::string const &SymbolName, ULONG Index,
   return !ctrlc_;
 }
 
+////////////////////////////////////////////////////////////////////////////////////
+// odrCallback
+//
+// Called by Debug engine during ODR detection
+
+BOOL CALLBACK SymExplorer::odrCallback(PSYMBOL_INFO pSym, ULONG /*SymbolSize*/,
+                                       PVOID thisObject) {
+  if (pSym->Tag != SymTagUDT)
+    return true;
+
+  return (static_cast<SymExplorer *>(thisObject))
+      ->odrCallback(std::string(pSym->Name, pSym->NameLen), pSym->Size);
+}
+
+BOOL SymExplorer::odrCallback(std::string const &SymbolName, ULONG Size) {
+  if (regex_search(SymbolName, enumRegex)) {
+    auto &set = odr_[SymbolName];
+    if (set.insert(Size).second && set.size() == 2) {
+      std::cout << SymbolName << std::endl;
+    }
+  }
+  return !ctrlc_;
+}
+
 // Display a base type in the canonical form
 std::ostream &operator<<(std::ostream &os, enum BasicType const &rhs) {
   switch (rhs) {
@@ -407,6 +454,27 @@ std::ostream &operator<<(std::ostream &os, enum BasicType const &rhs) {
     break;
   }
   return os;
+}
+
+/**
+ * Look for One Definition Rule (odr) violations
+ */
+bool SymExplorer::odr(std::istream &iss) {
+  bool result = false;
+  std::string pattern;
+  if (iss >> pattern && pattern[0] == '"') {
+    appendQuotedString(pattern, iss);
+  }
+  try {
+    enumRegex.assign(pattern);
+
+    odr_.clear();
+    result = eng_.EnumTypes(baseAddress_, odrCallback, (PVOID)this);
+  } catch (std::exception &ex) {
+    std::cout << "Error: " << ex.what() << std::endl;
+    result = false;
+  }
+  return result;
 }
 
 //*************************************************************************************//
@@ -462,8 +530,20 @@ bool SymExplorer::showModule(std::istream & /* iss */) {
 /**
  *
  */
-bool SymExplorer::help(std::istream & /*iss*/) {
-  std::cout << "help -- the following commands are available:" << std::endl;
+bool SymExplorer::help(std::istream &iss) {
+  std::string command;
+  if (iss >> command) {
+    const auto &cmd_it = helpMap_.find(command);
+    if (cmd_it == helpMap_.end()) {
+      std::cout << "No help available for " << command << '\n';
+      return false;
+    } else {
+      std::cout << cmd_it->second << '\n';
+      return true;
+    }
+  }
+
+  std::cout << "help -- the following commands are available:" << '\n';
   for (const auto &it : funcMap_) {
     std::cout << " " << it.first;
   }

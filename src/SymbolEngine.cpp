@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: SymbolEngine.cpp 3055 2026-01-10 23:42:42Z roger $
+// $Id: SymbolEngine.cpp 3074 2026-01-23 23:23:52Z roger $
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4511 4512) // copy constructor/assignment operator
@@ -187,7 +187,8 @@ struct VariableCallBack : public SymbolEngine::EnumLocalCallBack {
         eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
                        sizeof(data));
         opf << " = 0x" << std::hex << data << std::dec;
-      } else if ((pSymInfo->Size == sizeof(double)) && (name.compare(0, 6, "double") == 0)) {
+      } else if ((pSymInfo->Size == sizeof(double)) &&
+                 (name.compare(0, 6, "double") == 0)) {
         double data;
         eng.ReadMemory((PVOID)(reg_info.value + pSymInfo->Address), &data,
                        sizeof(data));
