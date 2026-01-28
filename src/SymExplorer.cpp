@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3077 2026-01-23 23:24:48Z roger $";
+    "$Id: SymExplorer.cpp 3080 2026-01-28 00:10:30Z roger $";
 
 #define NOMINMAX
 
@@ -139,7 +139,7 @@ public:
                          ULONG Size);
 
   // Called by Debug engine during ODR detection
-  BOOL odrCallback(std::string const &SymbolName, ULONG Size);
+  BOOL odrCallback(std::string const &SymbolName, ULONG Size, ULONG Index);
 
   int run(std::istream &iss);
 
@@ -281,6 +281,26 @@ std::ostream &operator<<(std::ostream &os, enum DataKind const &rhs) {
   return os;
 }
 
+std::ostream &operator<<(std::ostream &os, enum UdtKind const &rhs) {
+#define CASE(X)                                                                \
+  case Udt##X:                                                                 \
+    os << #X;                                                                  \
+    break;
+  switch (rhs) {
+    CASE(Struct);
+    CASE(Class);
+    CASE(Union);
+    CASE(Interface);
+    CASE(TaggedUnion);
+  default:
+    os << "(?"
+          "?)";
+    break;
+  }
+#undef CASE
+  return os;
+}
+
 // We've read a string starting with a double quote - read the whole thing
 void appendQuotedString(std::string &name, std::istream &iss) {
   name.erase(0, 1);
@@ -409,14 +429,20 @@ BOOL CALLBACK SymExplorer::odrCallback(PSYMBOL_INFO pSym, ULONG /*SymbolSize*/,
     return true;
 
   return (static_cast<SymExplorer *>(thisObject))
-      ->odrCallback(std::string(pSym->Name, pSym->NameLen), pSym->Size);
+      ->odrCallback(std::string(pSym->Name, pSym->NameLen), pSym->Size,
+                    pSym->Index);
 }
 
-BOOL SymExplorer::odrCallback(std::string const &SymbolName, ULONG Size) {
+BOOL SymExplorer::odrCallback(std::string const &SymbolName, ULONG Size,
+                              ULONG Index) {
   if (regex_search(SymbolName, enumRegex)) {
     auto &set = odr_[SymbolName];
     if (set.insert(Size).second && set.size() == 2) {
-      std::cout << SymbolName << std::endl;
+      if (SymbolName.compare(0, 9, "<unnamed-") != 0) {
+        DWORD64 nested{};
+        (void)eng_.GetTypeInfo(baseAddress_, Index, TI_GET_NESTED, &nested);
+        std::cout << SymbolName << (nested ? " (nested)" : "") << std::endl;
+      }
     }
   }
   return !ctrlc_;
@@ -750,9 +776,11 @@ bool SymExplorer::index(std::istream &iss) {
       case TI_GET_THISADJUST:
         std::cout << "This Adjust: " << info.value << std::endl;
         break;
-      case TI_GET_UDTKIND:
-        std::cout << "UDT Kind: " << info.value << std::endl;
+      case TI_GET_UDTKIND: {
+        const auto kind{static_cast<UdtKind>(info.value)};
+        std::cout << "UDT Kind: " << info.value << " " << kind << std::endl;
         break;
+      }
       case TI_IS_EQUIV_TO:
         std::cout << "Equiv To: " << info.value << std::endl;
         break;
@@ -1017,13 +1045,13 @@ bool SymExplorer::udt(std::istream &iss) {
     DWORD64 udtKind(0);
     eng_.GetTypeInfo(baseAddress_, index, TI_GET_UDTKIND, &udtKind);
     switch (udtKind) {
-    case 0:
+    case UdtStruct:
       std::cout << "struct ";
       break;
-    case 1:
+    case UdtClass:
       std::cout << "class ";
       break;
-    case 2:
+    case UdtUnion:
       std::cout << "union ";
       break;
     default:
