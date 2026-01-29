@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3080 2026-01-28 00:10:30Z roger $";
+    "$Id: SymExplorer.cpp 3084 2026-01-29 23:36:26Z roger $";
 
 #define NOMINMAX
 
@@ -291,7 +291,9 @@ std::ostream &operator<<(std::ostream &os, enum UdtKind const &rhs) {
     CASE(Class);
     CASE(Union);
     CASE(Interface);
+#if _MSC_VER >= 1930
     CASE(TaggedUnion);
+#endif
   default:
     os << "(?"
           "?)";
