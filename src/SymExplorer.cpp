@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3084 2026-01-29 23:36:26Z roger $";
+    "$Id: SymExplorer.cpp 3086 2026-02-05 19:55:12Z roger $";
 
 #define NOMINMAX
 
@@ -161,6 +161,8 @@ private:
                                          PVOID thisObject);
   static BOOL CALLBACK odrCallback(PSYMBOL_INFO pSym, ULONG SymbolSize,
                                    PVOID thisObject);
+  static bool odrFalsePositive(PSYMBOL_INFO pSym);
+
   regex enumRegex;
 
   // User interface functions
@@ -430,6 +432,9 @@ BOOL CALLBACK SymExplorer::odrCallback(PSYMBOL_INFO pSym, ULONG /*SymbolSize*/,
   if (pSym->Tag != SymTagUDT)
     return true;
 
+  if (odrFalsePositive(pSym)) {
+    return true;
+  }
   return (static_cast<SymExplorer *>(thisObject))
       ->odrCallback(std::string(pSym->Name, pSym->NameLen), pSym->Size,
                     pSym->Index);
@@ -440,14 +445,25 @@ BOOL SymExplorer::odrCallback(std::string const &SymbolName, ULONG Size,
   if (regex_search(SymbolName, enumRegex)) {
     auto &set = odr_[SymbolName];
     if (set.insert(Size).second && set.size() == 2) {
-      if (SymbolName.compare(0, 9, "<unnamed-") != 0) {
-        DWORD64 nested{};
-        (void)eng_.GetTypeInfo(baseAddress_, Index, TI_GET_NESTED, &nested);
-        std::cout << SymbolName << (nested ? " (nested)" : "") << std::endl;
-      }
+      DWORD64 nested{};
+      (void)eng_.GetTypeInfo(baseAddress_, Index, TI_GET_NESTED, &nested);
+      std::cout << SymbolName << (nested ? " (nested)" : "") << std::endl;
     }
   }
   return !ctrlc_;
+}
+
+bool SymExplorer::odrFalsePositive(PSYMBOL_INFO pSym) {
+  static const std::string prefixes[] = {"<unnamed-",
+                                         "`anonymous-namespace'::"};
+
+  for (const auto &prefix : prefixes) {
+    if ((pSym->NameLen > prefix.size()) &&
+        (prefix.compare(0, prefix.size(), pSym->Name, prefix.size()) == 0)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // Display a base type in the canonical form
