@@ -51,7 +51,7 @@ Process 2428 exit code: 0
 &nbsp; nttrace [-a] [-e] [-v] [-config *] [-errors *] [-export *] [-filter *] [-category *] [-hd] [-nonames] [-nodlls] [-noexcept] [-nothread] [-only] [-out *] [-pre] [-stack] [-time] [-delta] [-pid] [-tid] [-nl] [-sls] [-totals] [pid | cmd &lt;args&gt;]
 <p>
 Options:<br>
-<table border=0>
+<table border="0">
 <tr><td>  -a        </td><td> attach to existing process &lt;pid or cmd&gt; rather than starting a fresh &lt;cmd&gt; </td></tr>
 <tr><td>  -e        </td><td> Only log errors </td></tr>
 <tr><td>  -v        </td><td> More verbose logging</td></tr>
@@ -76,7 +76,6 @@ Options:<br>
 <tr><td>  -nl       </td><td> force newline on OutputDebugString </td></tr>
 <tr><td>  -sls      </td><td> Show Loader Snaps </td></tr>
 <tr><td>  -totals   </td><td> Show Totals </td></tr>
-
 </table>
 <p>
 * the full list of categories is soft-configured from NtTrace.cfg.  As supplied the list is:
@@ -102,6 +101,72 @@ Build the appropriate binary (32-bit or 64-bit) for your target program.
 <p>
 (See Readme.txt for full details. Currently supports building with Visual Studio versions 2015 - 2026)
 <p>
+
+<hr>
+<h3>MemoryStats</h3>
+<b>Syntax:</b><br>
+&nbsp; MemoryStats.exe [-filter *] [-out *] [-only] cmd [args]<br>
+<p>
+Options:<br>
+<table border="0">
+<tr><td>  -filter </td><td> Regular expression filter on command lines of processes to trace (default: .*)</td></tr>
+<tr><td>  -out    </td><td>Output file</td></tr>
+<tr><td>  -only   </td><td>Only debug the first process, don't debug child processes</td></tr>
+</table>
+<p>
+Display memory statistics for child process(es)
+
+<hr>
+<h3>SymExplorer</h3>
+<b>Syntax:</b><br>
+&nbsp; SymExplorer.exe [-prompt *] &lt;image_name&gt;<br>
+<p>
+Options:<br>
+<table>
+  <tr><td>-prompt </td><td>prompt to use for input (default: cmd> )</td></tr>
+</table>
+<p>
+Provides access to symbols in the module specified.<p>
+Commands available:<br>
+<table>
+<tr><td> child </td><td>Show child items for supplied symbol</td></tr>
+<tr><td> dec </td><td>Select decimal number format</td></tr>
+<tr><td> exit </td><td>Exit the program</td></tr>
+<tr><td> find [&lt;pattern&gt] </td><td>Find the functions matching &lt;pattern&gt; in the target (default pattern is 'match all')</td></tr>
+<tr><td> help </td><td>Get help</td></tr>
+<tr><td> hex </td><td>Select hexadecimal number format</td></tr>
+<tr><td> index </td><td>Display data for symbol <index></td></tr>
+<tr><td> load </td><td>Load the specified binary</td></tr>
+<tr><td> locals </td><td>Show local variables for <function></td></tr>
+<tr><td style="vertical-align: text-top"> odr [&lt;pattern&gt|-reset] </td><td>Look for new ODR violation in types matching &lt;pattern&gt; (default pattern is 'match all', use -reset to reset).<br>
+(Note: May have false positives, especially for incremental linking.)</td></tr>
+<tr><td> quit </td><td>Exit the program</td></tr>
+<tr><td> show </td><td>Show details of the loaded image</td></tr>
+<tr><td> symopt [+|-]n </td><td>Set symbol options: +&lt;n&gt; to add, -&lt;n&gt; to remove, or &lt;n&gt; to set</td></tr>
+<tr><td> type [&lt;pattern&gt]</td><td>Show types matching &lt;pattern&gt; in the target (default pattern is 'match all')</td></tr>
+<tr><td> udt </td><td>Display a user defined type in C++ format</td></tr>
+</table>
+
+<hr>
+<h3>ShowLoaderSnaps</h3>
+<b>Syntax:</b><br>
+&nbsp; ShowLoaderSnaps.exe [-out *] [-q] [pid | cmd &lt;args&gt;]<br>
+<p>
+Options:<br>
+<table border=0>
+  <tr><td>-out </td><td>Output file</td></tr>
+  <tr><td>-q   </td><td>quiet output (suppress 'normal' messages)</td></tr>
+</table>
+<p>
+Show Loader Snaps from executing the target program
+
+<hr>
+Version 3107 - 2026-02-14<br>
+Recent changes:
+<ul>
+<li>Added brief description of the additional tools
+<li>Extend SymExplorer 'odr' command to work across binaries
+</ul>
 
 <hr>
 Version 3046 - 2026-01-10<br>
