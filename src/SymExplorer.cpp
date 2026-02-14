@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3105 2026-02-14 16:50:21Z roger $";
+    "$Id: SymExplorer.cpp 3106 2026-02-14 17:17:59Z roger $";
 
 #define NOMINMAX
 
@@ -139,9 +139,14 @@ private:
   SymbolEngine eng_;
   HMODULE hMod_{nullptr};
   DWORD64 baseAddress_{0};
+  std::string module_;
   std::string prompt_;
   hexmode mode_{eDec};
-  std::map<std::string, std::set<ULONG>> odr_;
+  struct OdrInfo {
+    std::string module;
+    std::set<ULONG> sizes;
+  };
+  std::map<std::string, OdrInfo> odr_;
 
   // Callback helpers
   static BOOL CALLBACK enumSymbolsCallback(PSYMBOL_INFO pSym, ULONG SymbolSize,
@@ -361,10 +366,11 @@ SymExplorer::SymExplorer(std::string prompt)
   define("index", &SymExplorer::index, "Display data for symbol <index>");
   define("load", &SymExplorer::load, "Load the specified binary");
   define("locals", &SymExplorer::locals, "Show local variables for <function>");
-  define("odr", &SymExplorer::odr,
-         "Look for ODR violation in types matching <pattern> (default pattern "
-         "is 'match all').\n"
-         "May have false positives, especially for incremental linking.");
+  define(
+      "odr", &SymExplorer::odr,
+      "Look for new ODR violation in types matching <pattern> (default pattern "
+      "is 'match all', use -reset to reset).\n"
+      "May have false positives, especially for incremental linking.");
   define("show", &SymExplorer::showModule, "Show details of the loaded image");
   define("symopt", &SymExplorer::symopt,
          "Set symbol options: +<n> to add, -<n> to remove, or <n> to set");
@@ -443,10 +449,18 @@ BOOL CALLBACK SymExplorer::odrCallback(PSYMBOL_INFO pSym, ULONG /*SymbolSize*/,
 
 BOOL SymExplorer::odrCallback(std::string const &symbol_name, ULONG size) {
   if (regex_search(symbol_name, enumRegex)) {
-    auto &set = odr_[symbol_name];
-    if (set.insert(size).second && set.size() == 2) {
-      std::cout << symbol_name << " has changed size (" << *set.rbegin()
-                << " != " << *set.begin() << ")" << std::endl;
+    auto &odr_info = odr_[symbol_name];
+    if (odr_info.sizes.insert(size).second) {
+      if (odr_info.module.empty())
+        odr_info.module = module_;
+      auto &sizes = odr_info.sizes;
+      if (sizes.size() == 2) {
+        if (module_ != odr_info.module) {
+          std::cout << odr_info.module << "::";
+        }
+        std::cout << symbol_name << " has changed size (" << *sizes.rbegin()
+                  << " != " << *sizes.begin() << ")" << std::endl;
+      }
     }
   }
   return !ctrlc_;
@@ -523,10 +537,13 @@ bool SymExplorer::odr(std::istream &iss) {
   if (iss >> pattern && pattern[0] == '"') {
     appendQuotedString(pattern, iss);
   }
+  if (pattern == "-reset") {
+    odr_.clear();
+    return true;
+  }
   try {
     enumRegex.assign(pattern);
 
-    odr_.clear();
     result = eng_.EnumTypes(baseAddress_, odrCallback, (PVOID)this);
   } catch (std::exception &ex) {
     std::cout << "Error: " << ex.what() << std::endl;
@@ -901,6 +918,7 @@ bool SymExplorer::load(std::string const &module) {
     else if (!ModuleInfo.TypeInfo)
       std::cout << " (no types)";
     std::cout << endl;
+    module_.assign(ModuleInfo.ModuleName);
   } else {
     std::cout << "Unable to load module information" << std::endl;
   }
