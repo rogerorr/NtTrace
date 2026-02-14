@@ -10,7 +10,7 @@ AUTHOR
   Bug reports, comments, and suggestions are always welcome.
 
 COPYRIGHT
-  Copyright (C) 2002,2003 under the MIT license:
+  Copyright (C) 2002,2026 under the MIT license:
 
   "Permission is hereby granted, free of charge, to any person obtaining a
   copy of this software and associated documentation files (the "Software"),
@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3097 2026-02-14 13:56:19Z roger $";
+    "$Id: SymExplorer.cpp 3103 2026-02-14 16:20:17Z roger $";
 
 #define NOMINMAX
 
@@ -130,17 +130,6 @@ class SymExplorer {
 public:
   explicit SymExplorer(std::string prompt);
 
-  // Called by Debug engine for each public/global symbol
-  BOOL enumSymbolsCallback(std::string const &SymbolName,
-                           DWORD64 SymbolAddress);
-
-  // Called by Debug engine for each type
-  BOOL enumTypesCallback(std::string const &SymbolName, ULONG Index,
-                         ULONG Size);
-
-  // Called by Debug engine during ODR detection
-  BOOL odrCallback(std::string const &SymbolName, ULONG size);
-
   int run(std::istream &iss);
 
   // Load a module, unoading any existing one
@@ -161,7 +150,19 @@ private:
                                          PVOID thisObject);
   static BOOL CALLBACK odrCallback(PSYMBOL_INFO pSym, ULONG SymbolSize,
                                    PVOID thisObject);
-  bool odrFalsePositive(PSYMBOL_INFO pSym);
+
+  // Called by Debug engine for each public/global symbol
+  BOOL enumSymbolsCallback(std::string const &symbol_name,
+                           DWORD64 symbol_address);
+
+  // Called by Debug engine for each type
+  BOOL enumTypesCallback(std::string const &symbol_name, ULONG index,
+                         ULONG size);
+
+  // Called by Debug engine during ODR detection
+  BOOL odrCallback(std::string const &symbol_name, ULONG size);
+
+  bool odrFalsePositive(const SYMBOL_INFO &sym);
 
   regex enumRegex;
 
@@ -383,15 +384,15 @@ BOOL CALLBACK SymExplorer::enumSymbolsCallback(PSYMBOL_INFO pSym,
                             pSym->Address);
 }
 
-BOOL SymExplorer::enumSymbolsCallback(std::string const &SymbolName,
-                                      DWORD64 SymbolAddress) {
-  if (regex_search(SymbolName, enumRegex)) {
-    std::cout << SymbolName;
-    std::cout << " at " << (PVOID)SymbolAddress;
+BOOL SymExplorer::enumSymbolsCallback(std::string const &symbol_name,
+                                      DWORD64 symbol_address) {
+  if (regex_search(symbol_name, enumRegex)) {
+    std::cout << symbol_name;
+    std::cout << " at " << (PVOID)symbol_address;
 
     DbgInit<IMAGEHLP_LINE64> lineInfo;
     DWORD dwDisplacement;
-    if (eng_.GetLineFromAddr64(SymbolAddress, &dwDisplacement, &lineInfo)) {
+    if (eng_.GetLineFromAddr64(symbol_address, &dwDisplacement, &lineInfo)) {
       std::cout << "   " << lineInfo.FileName << "(" << lineInfo.LineNumber
                 << ")";
     }
@@ -413,10 +414,10 @@ BOOL CALLBACK SymExplorer::enumTypesCallback(PSYMBOL_INFO pSym,
                           pSym->Size);
 }
 
-BOOL SymExplorer::enumTypesCallback(std::string const &SymbolName, ULONG Index,
-                                    ULONG Size) {
-  if (regex_search(SymbolName, enumRegex)) {
-    std::cout << SymbolName << " index: " << Index << " size: " << Size
+BOOL SymExplorer::enumTypesCallback(std::string const &symbol_name, ULONG index,
+                                    ULONG size) {
+  if (regex_search(symbol_name, enumRegex)) {
+    std::cout << symbol_name << " index: " << index << " size: " << size
               << std::endl;
   }
   return !ctrlc_;
@@ -429,42 +430,46 @@ BOOL SymExplorer::enumTypesCallback(std::string const &SymbolName, ULONG Index,
 
 BOOL CALLBACK SymExplorer::odrCallback(PSYMBOL_INFO pSym, ULONG /*SymbolSize*/,
                                        PVOID thisObject) {
-  if (pSym->Tag != SymTagUDT)
-    return true;
-
   auto *pThis = static_cast<SymExplorer *>(thisObject);
 
-  if (pThis->odrFalsePositive(pSym)) {
+  if (pThis->odrFalsePositive(*pSym)) {
     return true;
   }
 
   return pThis->odrCallback(std::string(pSym->Name, pSym->NameLen), pSym->Size);
 }
 
-BOOL SymExplorer::odrCallback(std::string const &SymbolName, ULONG size) {
-  if (regex_search(SymbolName, enumRegex)) {
-    auto &set = odr_[SymbolName];
+BOOL SymExplorer::odrCallback(std::string const &symbol_name, ULONG size) {
+  if (regex_search(symbol_name, enumRegex)) {
+    auto &set = odr_[symbol_name];
     if (set.insert(size).second && set.size() == 2) {
-      std::cout << SymbolName << " has changed size (" << *set.rbegin()
+      std::cout << symbol_name << " has changed size (" << *set.rbegin()
                 << " != " << *set.begin() << ")" << std::endl;
     }
   }
   return !ctrlc_;
 }
 
-bool SymExplorer::odrFalsePositive(PSYMBOL_INFO pSym) {
+bool SymExplorer::odrFalsePositive(const SYMBOL_INFO &sym) {
   static const std::string prefixes[] = {"<unnamed-",
                                          "`anonymous-namespace'::"};
 
+  if (sym.Tag != SymTagUDT)
+    return true;
+
+  // Checlk for an incomplete type
+  if (sym.Size == 0)
+    return true;
+
   for (const auto &prefix : prefixes) {
-    if ((pSym->NameLen > prefix.size()) &&
-        (prefix.compare(0, prefix.size(), pSym->Name, prefix.size()) == 0)) {
+    if ((sym.NameLen > prefix.size()) &&
+        (prefix.compare(0, prefix.size(), sym.Name, prefix.size()) == 0)) {
       return true;
     }
   }
 
   DWORD64 nested{};
-  (void)eng_.GetTypeInfo(baseAddress_, pSym->Index, TI_GET_NESTED, &nested);
+  (void)eng_.GetTypeInfo(baseAddress_, sym.Index, TI_GET_NESTED, &nested);
   if (nested) {
     // There will also be an entry with the fully qualified name
     return true;
