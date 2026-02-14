@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3046 $
+  $Revision: 3100 $
 */
 
-// $Id: EntryPoint.h 3046 2026-01-10 18:41:52Z roger $
+// $Id: EntryPoint.h 3100 2026-02-14 13:57:33Z roger $
 
 #include <windows.h>
 
@@ -222,7 +222,7 @@ private:
   unsigned char *preSave_{}; // address of pre-save (for X64 fast-call)
   DWORD ssn_{};              // System Service Number
                              // Used to set Eax/Rax to pre-call breakpoint
-  size_t total_{}; // total call count
+  size_t total_{};           // total call count
 
   NtCall insertBrkpt(HANDLE hProcess, unsigned char *address,
                      unsigned int offset, unsigned char *setssn);

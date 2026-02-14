@@ -2,7 +2,7 @@
 //
 // $Id: NtTrace.rc 3060 2026-01-10 23:46:19Z roger $
 
-#define MINOR_VERSION 3059
+#define MINOR_VERSION 3100
 #define DESCRIPTION "Trace Native API calls made by a process"
 #define APPLICATION
 

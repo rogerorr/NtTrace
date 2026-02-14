@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3086 2026-02-05 19:55:12Z roger $";
+    "$Id: SymExplorer.cpp 3097 2026-02-14 13:56:19Z roger $";
 
 #define NOMINMAX
 
@@ -139,7 +139,7 @@ public:
                          ULONG Size);
 
   // Called by Debug engine during ODR detection
-  BOOL odrCallback(std::string const &SymbolName, ULONG Size, ULONG Index);
+  BOOL odrCallback(std::string const &SymbolName, ULONG size);
 
   int run(std::istream &iss);
 
@@ -161,7 +161,7 @@ private:
                                          PVOID thisObject);
   static BOOL CALLBACK odrCallback(PSYMBOL_INFO pSym, ULONG SymbolSize,
                                    PVOID thisObject);
-  static bool odrFalsePositive(PSYMBOL_INFO pSym);
+  bool odrFalsePositive(PSYMBOL_INFO pSym);
 
   regex enumRegex;
 
@@ -432,22 +432,21 @@ BOOL CALLBACK SymExplorer::odrCallback(PSYMBOL_INFO pSym, ULONG /*SymbolSize*/,
   if (pSym->Tag != SymTagUDT)
     return true;
 
-  if (odrFalsePositive(pSym)) {
+  auto *pThis = static_cast<SymExplorer *>(thisObject);
+
+  if (pThis->odrFalsePositive(pSym)) {
     return true;
   }
-  return (static_cast<SymExplorer *>(thisObject))
-      ->odrCallback(std::string(pSym->Name, pSym->NameLen), pSym->Size,
-                    pSym->Index);
+
+  return pThis->odrCallback(std::string(pSym->Name, pSym->NameLen), pSym->Size);
 }
 
-BOOL SymExplorer::odrCallback(std::string const &SymbolName, ULONG Size,
-                              ULONG Index) {
+BOOL SymExplorer::odrCallback(std::string const &SymbolName, ULONG size) {
   if (regex_search(SymbolName, enumRegex)) {
     auto &set = odr_[SymbolName];
-    if (set.insert(Size).second && set.size() == 2) {
-      DWORD64 nested{};
-      (void)eng_.GetTypeInfo(baseAddress_, Index, TI_GET_NESTED, &nested);
-      std::cout << SymbolName << (nested ? " (nested)" : "") << std::endl;
+    if (set.insert(size).second && set.size() == 2) {
+      std::cout << SymbolName << " has changed size (" << *set.rbegin()
+                << " != " << *set.begin() << ")" << std::endl;
     }
   }
   return !ctrlc_;
@@ -463,6 +462,14 @@ bool SymExplorer::odrFalsePositive(PSYMBOL_INFO pSym) {
       return true;
     }
   }
+
+  DWORD64 nested{};
+  (void)eng_.GetTypeInfo(baseAddress_, pSym->Index, TI_GET_NESTED, &nested);
+  if (nested) {
+    // There will also be an entry with the fully qualified name
+    return true;
+  }
+
   return false;
 }
 

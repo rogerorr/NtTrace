@@ -5,7 +5,7 @@
 
 /** Enumerations extracted from CvConst.h in "Visual Studio SDKs\DIA SDK" */
 
-// $Id: BasicType.h 3081 2026-01-28 00:11:57Z roger $
+// $Id: BasicType.h 3099 2026-02-14 13:56:56Z roger $
 
 /** Enumeration for function call type */
 enum CV_call_e {
@@ -55,14 +55,7 @@ enum DataKind {
 };
 
 /** TI_GET_UDTKIND values */
-enum UdtKind
-{
-    UdtStruct,
-    UdtClass,
-    UdtUnion,
-    UdtInterface,
-    UdtTaggedUnion
-};
+enum UdtKind { UdtStruct, UdtClass, UdtUnion, UdtInterface, UdtTaggedUnion };
 
 /** Basic types */
 enum BasicType {

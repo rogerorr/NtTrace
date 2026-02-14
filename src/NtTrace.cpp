@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 3059 2026-01-10 23:46:11Z roger $";
+    "$Id: NtTrace.cpp 3100 2026-02-14 13:57:33Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -187,6 +187,7 @@ public:
 
   /** Print totals */
   void ShowTotals() const;
+
 private:
   bool bLogDlls_{true};
   bool bNoExcept_{false};
@@ -1004,7 +1005,7 @@ void TrapNtDebugger::ShowTotals() const {
   std::string category;
   size_t grand_total{};
   os_ << "\nTotal calls\n";
-  for (const auto& entry : entryPoints_) {
+  for (const auto &entry : entryPoints_) {
     if (entry.getTotal() != 0) {
       if (category != entry.getCategory()) {
         category = entry.getCategory();
