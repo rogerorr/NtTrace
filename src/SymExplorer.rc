@@ -2,7 +2,7 @@
 //
 // $Id: SymExplorer.rc 3104 2026-02-14 16:20:27Z roger $
 
-#define MINOR_VERSION 3103
+#define MINOR_VERSION 3105
 #define DESCRIPTION "Explore the debugging symbols for a module"
 #define APPLICATION
 

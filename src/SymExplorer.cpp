@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3103 2026-02-14 16:20:17Z roger $";
+    "$Id: SymExplorer.cpp 3105 2026-02-14 16:50:21Z roger $";
 
 #define NOMINMAX
 
@@ -347,7 +347,8 @@ SymExplorer::SymExplorer(std::string prompt)
   define("exit", nullptr, "Exit the program");
   define("quit", nullptr, "Exit the program");
   define("find", &SymExplorer::find,
-         "Find the functions matching <pattern> in the target");
+         "Find the functions matching <pattern> in the target (default pattern "
+         "is 'match all')");
   define("help", &SymExplorer::help, "Get help");
   define("children", &SymExplorer::children,
          "Show child items for supplied symbol");
@@ -359,10 +360,11 @@ SymExplorer::SymExplorer(std::string prompt)
   define("hex", &SymExplorer::hex, "Select hexadecimal number format");
   define("index", &SymExplorer::index, "Display data for symbol <index>");
   define("load", &SymExplorer::load, "Load the specified binary");
-  define("locals", &SymExplorer::locals, "Shoe local variables for <function>");
+  define("locals", &SymExplorer::locals, "Show local variables for <function>");
   define("odr", &SymExplorer::odr,
-         "Look for ODR violation in types matching <pattern>. May have false "
-         "positives, especially for incremental linking.");
+         "Look for ODR violation in types matching <pattern> (default pattern "
+         "is 'match all').\n"
+         "May have false positives, especially for incremental linking.");
   define("show", &SymExplorer::showModule, "Show details of the loaded image");
   define("symopt", &SymExplorer::symopt,
          "Set symbol options: +<n> to add, -<n> to remove, or <n> to set");
@@ -457,7 +459,7 @@ bool SymExplorer::odrFalsePositive(const SYMBOL_INFO &sym) {
   if (sym.Tag != SymTagUDT)
     return true;
 
-  // Checlk for an incomplete type
+  // Check for an incomplete type
   if (sym.Size == 0)
     return true;
 
