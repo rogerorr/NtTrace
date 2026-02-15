@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3106 2026-02-14 17:17:59Z roger $";
+    "$Id: SymExplorer.cpp 3112 2026-02-15 16:44:29Z roger $";
 
 #define NOMINMAX
 
@@ -70,6 +70,23 @@ static char const szRCSID[] =
 using namespace std;
 using namespace or2;
 
+// Work arounds for various versions of DbgHelp.h
+#ifdef SYMFLAG_COMPLEX
+#define HAS_TI_GET_DISCRIMINATEDUNION // proxy for some newer elements of the enumeration
+#endif
+#ifndef SYMFLAG_REGREL_ALIASINDIR
+#define SYMFLAG_REGREL_ALIASINDIR (SYMFLAG_PUBLIC_CODE + 1)
+#endif // SYMFLAG_REGREL_ALIASINDIR
+#ifndef SYMFLAG_FIXUP_ARM64X
+#define SYMFLAG_FIXUP_ARM64X (SYMFLAG_REGREL_ALIASINDIR + 1)
+#endif // SYMFLAG_FIXUP_ARM64X
+#ifndef SYMFLAG_GLOBAL
+#define SYMFLAG_GLOBAL (SYMFLAG_FIXUP_ARM64X + 1)
+#endif // SYMFLAG_GLOBAL
+#ifndef SYMFLAG_COMPLEX
+#define SYMFLAG_COMPLEX (SYMFLAG_GLOBAL + 1)
+#endif // SYMFLAG_COMPLEX
+
 enum hexmode { eDec, eHex };
 
 std::ostream &operator<<(std::ostream &os, hexmode const &mode) {
@@ -86,10 +103,7 @@ std::ostream &operator<<(std::ostream &os, hexmode const &mode) {
 
 namespace {
 std::string expandFlags(DWORD flags) {
-#ifndef SYMFLAG_REGREL_ALIASINDIR
-// Absent from older DbgHelp.h
-#define SYMFLAG_REGREL_ALIASINDIR (SYMFLAG_PUBLIC_CODE + 1)
-#endif // SYMFLAG_REGREL_ALIASINDIR
+
 #define DEF(X)                                                                 \
   {                                                                            \
     SYMFLAG_##X, #X                                                            \
@@ -109,7 +123,8 @@ std::string expandFlags(DWORD flags) {
       DEF(CLR_TOKEN),      DEF(NULL),
       DEF(FUNC_NO_RETURN), DEF(SYNTHETIC_ZEROBASE),
       DEF(PUBLIC_CODE),    DEF(REGREL_ALIASINDIR),
-      {0, nullptr},
+      DEF(FIXUP_ARM64X),   DEF(GLOBAL),
+      DEF(COMPLEX),        {0, nullptr},
   };
 #undef DEF
 
@@ -158,11 +173,11 @@ private:
 
   // Called by Debug engine for each public/global symbol
   BOOL enumSymbolsCallback(std::string const &symbol_name,
-                           DWORD64 symbol_address);
+                           DWORD64 symbol_address, enum SymTagEnum tag_type);
 
   // Called by Debug engine for each type
   BOOL enumTypesCallback(std::string const &symbol_name, ULONG index,
-                         ULONG size);
+                         ULONG size, enum SymTagEnum tag_type);
 
   // Called by Debug engine during ODR detection
   BOOL odrCallback(std::string const &symbol_name, ULONG size);
@@ -389,14 +404,16 @@ BOOL CALLBACK SymExplorer::enumSymbolsCallback(PSYMBOL_INFO pSym,
                                                PVOID thisObject) {
   return (static_cast<SymExplorer *>(thisObject))
       ->enumSymbolsCallback(std::string(pSym->Name, pSym->NameLen),
-                            pSym->Address);
+                            pSym->Address,
+                            static_cast<enum SymTagEnum>(pSym->Tag));
 }
 
 BOOL SymExplorer::enumSymbolsCallback(std::string const &symbol_name,
-                                      DWORD64 symbol_address) {
+                                      DWORD64 symbol_address,
+                                      enum SymTagEnum tag_type) {
   if (regex_search(symbol_name, enumRegex)) {
-    std::cout << symbol_name;
-    std::cout << " at " << (PVOID)symbol_address;
+    std::cout << symbol_name << " type: " << tag_type << " at "
+              << (PVOID)symbol_address;
 
     DbgInit<IMAGEHLP_LINE64> lineInfo;
     DWORD dwDisplacement;
@@ -419,14 +436,14 @@ BOOL CALLBACK SymExplorer::enumTypesCallback(PSYMBOL_INFO pSym,
                                              PVOID thisObject) {
   return (static_cast<SymExplorer *>(thisObject))
       ->enumTypesCallback(std::string(pSym->Name, pSym->NameLen), pSym->Index,
-                          pSym->Size);
+                          pSym->Size, static_cast<enum SymTagEnum>(pSym->Tag));
 }
 
 BOOL SymExplorer::enumTypesCallback(std::string const &symbol_name, ULONG index,
-                                    ULONG size) {
+                                    ULONG size, enum SymTagEnum tag_type) {
   if (regex_search(symbol_name, enumRegex)) {
     std::cout << symbol_name << " index: " << index << " size: " << size
-              << std::endl;
+              << " type: " << tag_type << std::endl;
   }
   return !ctrlc_;
 }
@@ -863,7 +880,28 @@ bool SymExplorer::index(std::istream &iss) {
       case TI_GET_VIRTUALBASETABLETYPE:
         std::cout << "Virtual Base Table Type: " << info.value << std::endl;
         break;
-#endif // TI_GET_VIRTUALBASETABLETYPE
+#endif                 // TI_GET_VIRTUALBASETABLETYPE
+#ifdef HAS_TI_GET_DISCRIMINATEDUNION
+      case TI_GET_OBJECTPOINTERTYPE:
+        std::cout << "Object Pointer Type: " << info.value << std::endl;
+        break;
+      case TI_GET_DISCRIMINATEDUNION_TAG_TYPEID:
+        std::cout << "Discriminated Union Tag Typeid: " << info.value
+                  << std::endl;
+        break;
+      case TI_GET_DISCRIMINATEDUNION_TAG_OFFSET:
+        std::cout << "Discriminated Union Tag Offset: " << info.value
+                  << std::endl;
+        break;
+      case TI_GET_DISCRIMINATEDUNION_TAG_RANGESCOUNT:
+        std::cout << "Discriminated Union Tag Ranges Count: " << info.value
+                  << std::endl;
+        break;
+      case TI_GET_DISCRIMINATEDUNION_TAG_RANGES:
+        std::cout << "Discriminated Union Tag Ranges: " << info.value
+                  << std::endl;
+        break;
+#endif // HAS_TI_GET_DISCRIMINATEDUNION
       default:
         std::cout << "Result(" << type << "): " << info.value << std::endl;
         break;
