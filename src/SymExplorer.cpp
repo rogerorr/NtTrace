@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3112 2026-02-15 16:44:29Z roger $";
+    "$Id: SymExplorer.cpp 3115 2026-02-19 21:55:29Z roger $";
 
 #define NOMINMAX
 
@@ -484,8 +484,8 @@ BOOL SymExplorer::odrCallback(std::string const &symbol_name, ULONG size) {
 }
 
 bool SymExplorer::odrFalsePositive(const SYMBOL_INFO &sym) {
-  static const std::string prefixes[] = {"<unnamed-",
-                                         "`anonymous-namespace'::"};
+  static const std::string components[] = {"<unnamed-",
+                                           "`anonymous-namespace'::"};
 
   if (sym.Tag != SymTagUDT)
     return true;
@@ -494,9 +494,13 @@ bool SymExplorer::odrFalsePositive(const SYMBOL_INFO &sym) {
   if (sym.Size == 0)
     return true;
 
-  for (const auto &prefix : prefixes) {
-    if ((sym.NameLen > prefix.size()) &&
-        (prefix.compare(0, prefix.size(), sym.Name, prefix.size()) == 0)) {
+#if _MSC_VER > 1900
+  const std::string_view name{sym.Name, sym.NameLen};
+#else
+  const std::string name{sym.Name, sym.NameLen};
+#endif
+  for (const auto &component : components) {
+    if (name.find(component) != std::string::npos) {
       return true;
     }
   }
@@ -504,7 +508,7 @@ bool SymExplorer::odrFalsePositive(const SYMBOL_INFO &sym) {
   DWORD64 nested{};
   (void)eng_.GetTypeInfo(baseAddress_, sym.Index, TI_GET_NESTED, &nested);
   if (nested) {
-    // There will also be an entry with the fully qualified name
+    // There will also be an unnested entry with the fully qualified name
     return true;
   }
 
