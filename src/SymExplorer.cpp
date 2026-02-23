@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3115 2026-02-19 21:55:29Z roger $";
+    "$Id: SymExplorer.cpp 3124 2026-02-23 09:50:12Z roger $";
 
 #define NOMINMAX
 
@@ -49,6 +49,9 @@ static char const szRCSID[] =
 #include <set>
 #include <sstream>
 #include <string>
+#if _MSC_VER > 1900
+#include <string_view>
+#endif
 #include <vector>
 
 #ifdef DISASM
@@ -72,7 +75,8 @@ using namespace or2;
 
 // Work arounds for various versions of DbgHelp.h
 #ifdef SYMFLAG_COMPLEX
-#define HAS_TI_GET_DISCRIMINATEDUNION // proxy for some newer elements of the enumeration
+#define HAS_TI_GET_DISCRIMINATEDUNION // proxy for some newer elements of the
+                                      // enumeration
 #endif
 #ifndef SYMFLAG_REGREL_ALIASINDIR
 #define SYMFLAG_REGREL_ALIASINDIR (SYMFLAG_PUBLIC_CODE + 1)
@@ -157,6 +161,7 @@ private:
   std::string module_;
   std::string prompt_;
   hexmode mode_{eDec};
+  bool echo_;
   struct OdrInfo {
     std::string module;
     std::set<ULONG> sizes;
@@ -195,6 +200,7 @@ private:
 #ifdef DISASM
   bool disasm(std::istream &iss);
 #endif // DISASM
+  bool echo(std::istream &iss);
   bool hex(std::istream &iss);
   bool index(std::istream &iss);
   bool load(std::istream &iss);
@@ -377,6 +383,7 @@ SymExplorer::SymExplorer(std::string prompt)
   define("disasm", &SymExplorer::disasm,
          "Disassemble code at <address> for <length>");
 #endif // DISASM
+  define("echo", &SymExplorer::echo, "Toggle command echoing");
   define("hex", &SymExplorer::hex, "Select hexadecimal number format");
   define("index", &SymExplorer::index, "Display data for symbol <index>");
   define("load", &SymExplorer::load, "Load the specified binary");
@@ -484,9 +491,6 @@ BOOL SymExplorer::odrCallback(std::string const &symbol_name, ULONG size) {
 }
 
 bool SymExplorer::odrFalsePositive(const SYMBOL_INFO &sym) {
-  static const std::string components[] = {"<unnamed-",
-                                           "`anonymous-namespace'::"};
-
   if (sym.Tag != SymTagUDT)
     return true;
 
@@ -499,17 +503,28 @@ bool SymExplorer::odrFalsePositive(const SYMBOL_INFO &sym) {
 #else
   const std::string name{sym.Name, sym.NameLen};
 #endif
-  for (const auto &component : components) {
-    if (name.find(component) != std::string::npos) {
-      return true;
-    }
+
+  // Check for types in anonymous namespaces
+  static const std::string anonymous{"`anonymous-namespace'::"};
+  if (name.find(anonymous) != std::string::npos) {
+    return true;
   }
 
-  DWORD64 nested{};
-  (void)eng_.GetTypeInfo(baseAddress_, sym.Index, TI_GET_NESTED, &nested);
-  if (nested) {
-    // There will also be an unnested entry with the fully qualified name
+  // Check for unnamed types
+  const auto last_colon = name.find_last_of(':');
+  static const std::string unnamed{"<unnamed-"};
+  if (name.compare(last_colon + 1, unnamed.size(), unnamed) == 0) {
     return true;
+  }
+
+  // Check for unqualified entry for qualified types
+  if (last_colon == std::string::npos) {
+    DWORD64 nested{};
+    (void)eng_.GetTypeInfo(baseAddress_, sym.Index, TI_GET_NESTED, &nested);
+    if (nested) {
+      // There will also be an unnested entry with the fully qualified name
+      return true;
+    }
   }
 
   return false;
@@ -732,6 +747,14 @@ bool SymExplorer::find(std::istream &iss) {
 }
 
 /**
+ * Toggle command echoing
+ */
+bool SymExplorer::echo(std::istream & /*iss*/) {
+  echo_ = !echo_;
+  return true;
+}
+
+/**
  * Set hex output mode
  */
 bool SymExplorer::hex(std::istream & /*iss*/) {
@@ -884,7 +907,7 @@ bool SymExplorer::index(std::istream &iss) {
       case TI_GET_VIRTUALBASETABLETYPE:
         std::cout << "Virtual Base Table Type: " << info.value << std::endl;
         break;
-#endif                 // TI_GET_VIRTUALBASETABLETYPE
+#endif // TI_GET_VIRTUALBASETABLETYPE
 #ifdef HAS_TI_GET_DISCRIMINATEDUNION
       case TI_GET_OBJECTPOINTERTYPE:
         std::cout << "Object Pointer Type: " << info.value << std::endl;
@@ -1342,6 +1365,8 @@ int SymExplorer::run(std::istream &is) {
   int ret(0);
   SetConsoleCtrlHandler(reinterpret_cast<PHANDLER_ROUTINE>(CtrlHandler), TRUE);
   while (std::cout << prompt_, std::getline(is, lbufr)) {
+    if (echo_)
+      std::cout << lbufr << '\n';
     std::istringstream iss(lbufr);
     iss.unsetf(std::ios::dec); // Allow oct, dec and hex input
     std::string command;
