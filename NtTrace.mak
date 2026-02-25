@@ -44,7 +44,7 @@ clean :
 	@-del NtTrace.exe NtTrace.res *.pdb
 	@-rd /q /s $(BUILD)
 
-CCFLAGS = /nologo /MD /W3 /WX /Zi /Iinclude /I "$(VSINSTALLDIR)\DIA SDK\include" /permissive-
+CCFLAGS = /nologo /MD /W3 /WX /Zi /Iinclude /I "$(VSINSTALLDIR)\DIA SDK\include" /permissive- /std:c++latest /Zc:__cplusplus
 LINKFLAGS = /link /opt:ref,icf
 
 {src}.cpp{$(BUILD)}.obj::
