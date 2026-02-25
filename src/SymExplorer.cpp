@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3124 2026-02-23 09:50:12Z roger $";
+    "$Id: SymExplorer.cpp 3127 2026-02-25 00:23:00Z roger $";
 
 #define NOMINMAX
 
@@ -161,7 +161,7 @@ private:
   std::string module_;
   std::string prompt_;
   hexmode mode_{eDec};
-  bool echo_;
+  bool echo_{};
   struct OdrInfo {
     std::string module;
     std::set<ULONG> sizes;
