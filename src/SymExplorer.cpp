@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3130 2026-03-01 15:45:27Z roger $";
+    "$Id: SymExplorer.cpp 3132 2026-03-01 16:54:45Z roger $";
 
 #define NOMINMAX
 
@@ -468,6 +468,16 @@ BOOL CALLBACK SymExplorer::odrCallback(PSYMBOL_INFO pSym, ULONG /*SymbolSize*/,
     return true;
   }
 
+  if (pSym->NameLen == MAX_SYM_NAME - 1) {
+    // The name is truncated, so we need to explicitly fetch the full name
+    wchar_t *p_name{};
+    if (pThis->eng_.GetTypeInfo(pThis->baseAddress_, pSym->Index, TI_GET_SYMNAME,
+                         &p_name)) {
+      const auto full_name{or2::strFromWchar(p_name)};
+      LocalFree(p_name);
+      return pThis->odrCallback(full_name, pSym->Size);
+    }   
+  }
   return pThis->odrCallback(std::string(pSym->Name, pSym->NameLen), pSym->Size);
 }
 
