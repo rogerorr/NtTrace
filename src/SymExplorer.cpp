@@ -32,7 +32,7 @@ COPYRIGHT
 */
 
 static char const szRCSID[] =
-    "$Id: SymExplorer.cpp 3127 2026-02-25 00:23:00Z roger $";
+    "$Id: SymExplorer.cpp 3130 2026-03-01 15:45:27Z roger $";
 
 #define NOMINMAX
 
@@ -481,6 +481,9 @@ BOOL SymExplorer::odrCallback(std::string const &symbol_name, ULONG size) {
       if (sizes.size() == 2) {
         if (module_ != odr_info.module) {
           std::cout << odr_info.module << "::";
+        }
+        if (symbol_name.size() == MAX_SYM_NAME - 1) {
+          std::cout << "(note: name truncated) ";
         }
         std::cout << symbol_name << " has changed size (" << *sizes.rbegin()
                   << " != " << *sizes.begin() << ")" << std::endl;
