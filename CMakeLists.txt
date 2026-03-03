@@ -11,7 +11,7 @@ else() # either clang or gcc
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-add_compile_options(-Wno-unused-const-variable -Wno-microsoft-cast)
+  add_compile_options(-Wno-unused-const-variable -Wno-microsoft-cast)
 endif()
 
 if("$ENV{VSINSTALLDIR}" STREQUAL "")
@@ -26,11 +26,11 @@ endif()
 
 # Debugging library
 add_library(debugging STATIC
-src/DebugDriver.cpp
-src/GetFileNameFromHandle.cpp
-src/GetModuleBase.cpp
-src/ShowData.cpp
-src/SymbolEngine.cpp)
+  src/DebugDriver.cpp
+  src/GetFileNameFromHandle.cpp
+  src/GetModuleBase.cpp
+  src/ShowData.cpp
+  src/SymbolEngine.cpp)
 target_include_directories(debugging PUBLIC include "$ENV{VSINSTALLDIR}/DIA SDK/include")
 
 # Nt Trace
@@ -52,3 +52,5 @@ target_link_libraries(ShowLoaderSnaps PUBLIC debugging)
 # Symbol Explorer
 add_executable(SymExplorer src/SymExplorer.cpp)
 target_link_libraries(SymExplorer PUBLIC debugging)
+
+install(TARGETS ${PROJECT_NAME} MemoryStats ShowLoaderSnaps SymExplorer)
