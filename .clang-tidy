@@ -1,0 +1,5 @@
+---
+Checks:          'clang-diagnostic-*,-clang-diagnostic-microsoft-cast,clang-analyzer-*'
+FormatStyle:     llvm
+...
+
