@@ -27,10 +27,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3141 $
+  $Revision: 3148 $
 */
 
-// $Id: DbgHelper.inl 3141 2026-04-10 20:01:15Z roger $
+// $Id: DbgHelper.inl 3148 2026-04-10 20:41:33Z roger $
 
 #include <iostream>
 
@@ -183,7 +183,7 @@ inline FARPROC DbgHelper::GetProc(char const *name) {
 }
 
 #define DYN_LOAD(SYMBOL)                                                       \
-  static SYMBOL *pfn##SYMBOL = (SYMBOL *)(uintptr_t)GetProc(#SYMBOL);
+  static auto *pfn##SYMBOL = (SYMBOL *)(uintptr_t)GetProc(#SYMBOL);
 
 /** Get symbol for specific address */
 inline BOOL DbgHelper::SymFromAddr(DWORD64 Address, PDWORD64 Displacement,

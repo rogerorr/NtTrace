@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3141 $
+  $Revision: 3148 $
 */
 
-// $Id: Options.inl 3141 2026-04-10 20:01:15Z roger $
+// $Id: Options.inl 3148 2026-04-10 20:41:33Z roger $
 
 #include <iomanip>
 #include <iostream>
@@ -264,7 +264,7 @@ inline bool Options::process(
           for (const auto &option : pData->options) {
             std::cerr << "  -" << option.option;
             if (option.helpString.length()) {
-              std::streamsize const width(static_cast<std::streamsize>(
+              auto const width(static_cast<std::streamsize>(
                   maxWidth + 1 - option.option.length()));
               std::cerr << std::setw(width) << " " << option.helpString;
             }
