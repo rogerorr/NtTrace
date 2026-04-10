@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2767 $
+  $Revision: 3141 $
 */
 
-// $Id: Options.inl 2767 2025-04-29 23:05:46Z roger $
+// $Id: Options.inl 3141 2026-04-10 20:01:15Z roger $
 
 #include <iomanip>
 #include <iostream>
@@ -151,7 +151,7 @@ inline bool Options::process(
 
   while (argNum < argc) {
     char const *pArg = argv[argNum];
-    char firstCh = *pArg++;
+    const char firstCh = *pArg++;
     if ((firstCh != '-') && (firstCh != '/'))
       break;
     argNum++; // skip this argument
@@ -224,7 +224,7 @@ inline bool Options::process(
     }
 
     if (!bFound) {
-      std::string arg(pArg);
+      const std::string arg(pArg);
       if (arg == "ver") {
         std::cerr << pData->rcsId;
       } else if ((arg == "h") || (arg == "?") || (arg == "help")) {
@@ -272,32 +272,32 @@ inline bool Options::process(
             case Data::eBool:
               break;
             case Data::eInt: {
-              int def = *((int *)(option.pValue));
+              const int def = *((int *)(option.pValue));
               if (def)
                 std::cerr << " (default: " << def << ")";
             } break;
             case Data::eUInt: {
-              unsigned int def = *((unsigned int *)(option.pValue));
+              const unsigned int def = *((unsigned int *)(option.pValue));
               if (def)
                 std::cerr << " (default: " << def << ")";
             } break;
             case Data::eLong: {
-              long def = *((long *)(option.pValue));
+              const long def = *((long *)(option.pValue));
               if (def)
                 std::cerr << " (default: " << def << ")";
             } break;
             case Data::eULong: {
-              unsigned long def = *((unsigned long *)(option.pValue));
+              const unsigned long def = *((unsigned long *)(option.pValue));
               if (def)
                 std::cerr << " (default: " << def << ")";
             } break;
             case Data::eDouble: {
-              double def = *((double *)(option.pValue));
+              const double def = *((double *)(option.pValue));
               if (def)
                 std::cerr << " (default: " << def << ")";
             } break;
             case Data::eString: {
-              std::string def = *((std::string *)(option.pValue));
+              const std::string def = *((std::string *)(option.pValue));
               if (def.length())
                 std::cerr << " (default: " << def << ")";
             } break;

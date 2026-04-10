@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3018 $
+  $Revision: 3141 $
 */
 
-// $Id: ProcessHelper.h 3018 2025-12-22 17:31:12Z roger $
+// $Id: ProcessHelper.h 3141 2026-04-10 20:01:15Z roger $
 
 // clang-format off
 #include <windows.h> // for CreateProcess
@@ -73,7 +73,7 @@ inline int CreateProcessHelper(
 
   std::string cmdLine;
   for (; it != end; ++it) {
-    std::string curr(*it);
+    const std::string curr(*it);
 
     if (cmdLine.length())
       cmdLine += " ";
@@ -144,7 +144,7 @@ inline int CreateProcessAsUserHelper(
 
   std::string cmdLine;
   for (; it != end; ++it) {
-    std::string curr(*it);
+    const std::string curr(*it);
 
     if (cmdLine.length())
       cmdLine += " ";
@@ -218,8 +218,8 @@ inline std::vector<DWORD> FindProcesses(
 
   std::string lowerPattern(pattern == nullptr ? "" : pattern);
   // avoid C4244 warning from tolower
-  struct lcase {
-    char operator()(char ch) { return static_cast<char>(tolower(ch)); }
+  const struct lcase {
+    char operator()(char ch) const { return static_cast<char>(tolower(ch)); }
   } lcase;
 
   std::transform(lowerPattern.begin(), lowerPattern.end(), lowerPattern.begin(),

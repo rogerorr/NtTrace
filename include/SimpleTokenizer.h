@@ -28,7 +28,7 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2675 $
+  $Revision: 3141 $
 */
 
 #include <string>
@@ -57,7 +57,7 @@ SimpleTokenizer(std::string const &str,            ///< string to tokenize
                 char delim = ',')                  ///< delimiter for strings
 {
   std::string::size_type pos = 0;
-  std::string::size_type len = str.size();
+  const std::string::size_type len = str.size();
 
   while (pos < len) {
     std::string::size_type nextpos = str.find(delim, pos);

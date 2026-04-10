@@ -27,10 +27,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3021 $
+  $Revision: 3141 $
 */
 
-// $Id: DbgHelper.inl 3021 2025-12-22 20:03:38Z roger $
+// $Id: DbgHelper.inl 3141 2026-04-10 20:01:15Z roger $
 
 #include <iostream>
 
@@ -43,7 +43,7 @@ inline std::ostream &operator<<(std::ostream &os, enum SymTagEnum const value) {
     X, #X                                                                      \
   }
 
-  static struct {
+  static const struct {
     int value;
     char const *name;
   } enumValues[] = {DEF(SymTagNull),
@@ -114,7 +114,7 @@ inline DbgHelper::~DbgHelper() { Cleanup(); }
 
 /** Initialise (only called once) */
 inline BOOL DbgHelper::Initialise(HANDLE hProcess) {
-  BOOL bRet = ::SymInitialize(hProcess, nullptr, false);
+  const BOOL bRet = ::SymInitialize(hProcess, nullptr, false);
   if (bRet) {
     m_hProcess = hProcess;
   }

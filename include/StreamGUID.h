@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2997 $
+  $Revision: 3146 $
 */
 
-// $Id: StreamGUID.h 2997 2025-12-21 15:47:53Z roger $
+// $Id: StreamGUID.h 3146 2026-04-10 20:26:11Z roger $
 
 #include <iomanip>
 #include <ostream>
@@ -48,7 +48,7 @@ std::ostream &operator<<(std::ostream &os, GUID const &rhs) {
   for (int idx = 0; idx != sizeof(rhs.Data4); ++idx) {
     if (idx == 2)
       oss << "-";
-    unsigned int ch = rhs.Data4[idx];
+    const unsigned int ch = rhs.Data4[idx];
     oss << std::setw(2) << ch;
   }
   os << oss.str();

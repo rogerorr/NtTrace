@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2998 $
+  $Revision: 3141 $
 */
 
-// $Id: AdjustPriv.h 2998 2025-12-21 15:54:22Z roger $
+// $Id: AdjustPriv.h 3141 2026-04-10 20:01:15Z roger $
 
 #include <iostream>
 #define WIN32_LEAN_AND_MEAN
@@ -86,7 +86,7 @@ BOOL inline EnableNamedPriv(
   // The return value of AdjustTokenPrivileges couldn't be tested on older NT
   // versions
   //
-  DWORD lastError = GetLastError();
+  const DWORD lastError = GetLastError();
   if (lastError != ERROR_SUCCESS) {
     if (lastError == ERROR_NOT_ALL_ASSIGNED) {
       // Can't enable permission we haven't got
