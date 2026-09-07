@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3190 $
+  $Revision: 3198 $
 */
 
-// $Id: EntryPoint.h 3190 2026-09-05 19:49:04Z roger $
+// $Id: EntryPoint.h 3198 2026-09-07 16:10:06Z roger $
 
 #include <windows.h>
 
@@ -133,6 +133,8 @@ enum ReturnType {
   retULONG_PTR,
 };
 
+enum PreType { preNone = 0, preMov, preJne };
+
 class EntryPoint {
 public:
   using Typedefs = std::map<std::string, std::string>;
@@ -207,7 +209,8 @@ private:
   size_t total_{};                  // total call count
 
   NtCall insertBrkpt(HANDLE hProcess, unsigned char *address,
-                     unsigned int offset, DWORD ssn, unsigned char *setssn);
+                     unsigned int offset, PreType pre_type,
+                     unsigned char *pre_address, INT32 pre_arg);
 
   void setActive() { inactive_ = false; }
 };
@@ -221,14 +224,15 @@ struct NtCall {
 
   size_t nArgs_{}; // Number of arguments
 
+  unsigned char *targetAddress_{};
   enum TrapType { trapContinue, trapReturn, trapReturn0, trapJump };
   TrapType trapType_{};
-  DWORD jumpTarget_{}; // used for trapJump
+  INT32 jumpTarget_{}; // used for trapJump
 
-  unsigned char *targetAddress_{};
   unsigned char *preSave_{}; // address of pre-save (for X64 fast-call)
-  DWORD ssn_{};              // System Service Number
-                             // Used to set Eax/Rax to pre-call breakpoint
+  PreType preType_{};
+  INT32 ssn_{}; // System Service Number for preMov
+                // Used to set Eax/Rax to pre-call breakpoint
 
   void setAddress(unsigned char *brkptAddress) {
     targetAddress_ = brkptAddress;

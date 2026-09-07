@@ -49,6 +49,7 @@ static unsigned char const RET = 0xC3;         ///< ret
 static unsigned char const BRKPT = 0xCC;       ///< breakpoint
 static unsigned char const INTn = 0xCD;        ///< interrupt
 static unsigned char const JMP = 0xE9;         ///< far jump
+static unsigned char const JNE = 0x75;         ///< short jump not equal
 static unsigned char const FS = 0x64;          ///< fs:
 
 #endif // TRAPNTOPCODES_H_
