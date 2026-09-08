@@ -28,10 +28,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 2716 $
+  $Revision: 3199 $
 */
 
-// $Id: TrapNtOpcodes.h 2716 2025-04-21 22:23:58Z roger $
+// $Id: TrapNtOpcodes.h 3199 2026-09-07 22:24:30Z roger $
 
 // Define the op codes used for NtTrace
 static unsigned char const XOR = 0x33;         ///< xor reg1,reg2

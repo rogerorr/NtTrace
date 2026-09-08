@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: EntryPoint.cpp 3198 2026-09-07 16:10:06Z roger $
+// $Id: EntryPoint.cpp 3200 2026-09-08 20:37:24Z roger $
 
 #include "EntryPoint.h"
 
@@ -108,6 +108,11 @@ RtlNtStatusToDosError(NTSTATUS Status);
 //////////////////////////////////////////////////////////////////////////
 // The various NtDll signatures
 namespace {
+struct Instruction {
+  unsigned char opcode_;
+  unsigned char length_;
+};
+
 #ifdef _M_IX86
 
 // Check for basic NT4/W2K signature...
@@ -116,8 +121,8 @@ namespace {
 //  CD 2E                int         2Eh
 //  C2 20 00             ret         20h      // or just 'ret'
 
-unsigned char const signature1[] = {MOVdwordEax, 5, LEA, 4,
-                                    INTn,        2, 0,   0}; // 11 bytes
+Instruction const signature1[] = {MOVdwordEax, 5, LEA, 4,
+                                  INTn,        2, 0,   0}; // 11 bytes
 
 // Check for basic W2K3 signature...
 //  B8 1E 00 00 00       mov         eax,1Eh
@@ -125,8 +130,8 @@ unsigned char const signature1[] = {MOVdwordEax, 5, LEA, 4,
 //  FF D2                call        edx
 //  C2 0C 00             ret         0Ch
 
-unsigned char const signature2[] = {MOVdwordEax, 5, MOVdwordEdx, 5,
-                                    Call,        2, 0,           0}; // 12 bytes
+Instruction const signature2[] = {MOVdwordEax, 5, MOVdwordEdx, 5,
+                                  Call,        2, 0,           0}; // 12 bytes
 
 // Check for basic W2K8/64 32-bit signature...
 //  B8 1E 00 00 00       mov         eax,1Eh
@@ -135,7 +140,7 @@ unsigned char const signature2[] = {MOVdwordEax, 5, MOVdwordEdx, 5,
 //  64 FF 15 C0 00 00 00 call        fs:[0c0h]
 //  C2 0C 00             ret         0Ch
 
-unsigned char const signature3[] = {
+Instruction const signature3[] = {
     MOVdwordEax, 5, MOVdwordEcx, 5, LEA, 4, FS, 1, Call, 6, 0, 0}; // 21 bytes
 
 // Check for type-2 W2K8/64 32-bit signature...
@@ -145,16 +150,16 @@ unsigned char const signature3[] = {
 //  64 FF 15 C0 00 00 00 call        fs:[0c0h]
 //  C2 0C 00             ret         0Ch
 
-unsigned char const signature4[] = {MOVdwordEax, 5,    XOR, 2, LEA, 4, FS,
-                                    1,           Call, 6,   0, 0}; // 18 bytes
+Instruction const signature4[] = {MOVdwordEax, 5, XOR,  2, LEA, 4,
+                                  FS,          1, Call, 6, 0,   0}; // 18 bytes
 
 // Check for Windows 8.1 32bit signature
 // b8 0e 00 03 00        mov     eax,0x3000e
 // 64 ff 15 c0 00 00 00  call    dword ptr fs:[000000c0]
 // c2 04 00              ret     0x4
 
-unsigned char const signature5[] = {MOVdwordEax, 5, FS, 1,
-                                    Call,        6, 0,  0}; // 12 bytes
+Instruction const signature5[] = {MOVdwordEax, 5, FS, 1,
+                                  Call,        6, 0,  0}; // 12 bytes
 
 // Check for Windows 10 NtQueryInformationProcess (and trap the
 // Wow64SystemServiceCall) ntdll!NtQueryInformationProcess:
@@ -170,7 +175,7 @@ unsigned char const signature5[] = {MOVdwordEax, 5, FS, 1,
 // ff d2                 call    edx c2
 // 14 00                 ret     14h
 
-unsigned char const signature6[] = {
+Instruction const signature6[] = {
     MOVdwordEax, 5, 0xe8, 5 + 4, 0x5a, 1, 0x80, 4, 0x75, 2, FS, 1,
     Call,        6, 0xc2, 3,     0xba, 5, Call, 2, 0,    0}; // 38 bytes
 
@@ -188,11 +193,11 @@ unsigned char const signature6[] = {
 // ff d2                 call    edx
 // c2 14 00              ret     14h
 
-unsigned char const signature6b[] = {
+Instruction const signature6b[] = {
     MOVdwordEax, 5, 0xe8, 5,     0x5a, 1, 0x80, 4, 0x75, 2, FS, 1,
     Call,        6, 0xc2, 3 + 4, 0xba, 5, Call, 2, 0,    0}; // 38 bytes
 
-unsigned char const *const signatures[] = {
+Instruction const *const signatures[] = {
     signature1, signature2, signature3,  signature4,
     signature5, signature6, signature6b,
 };
@@ -202,15 +207,15 @@ unsigned char const *const signatures[] = {
 // c2 08 00             ret     0x8
 // cc                   int     3
 
-unsigned char const dead_export1[] = {0xe8, 5, 0xc2, 3, 0xcc, 1, 0, 0};
+Instruction const dead_export1[] = {0xe8, 5, 0xc2, 3, 0xcc, 1, 0, 0};
 
 // Dead Export from Win32u.dll for example for NtUserYieldTask
 // e9 a1 ff ff ff       jmp     DeadExport
 // cc                   int     3
 
-unsigned char const dead_export2[] = {0xe9, 5, 0xcc, 1, 0, 0};
+Instruction const dead_export2[] = {0xe9, 5, 0xcc, 1, 0, 0};
 
-unsigned char const *const dead_exports[] = {
+Instruction const *const dead_exports[] = {
     dead_export1,
     dead_export2,
 };
@@ -225,8 +230,8 @@ unsigned int const MAX_PREAMBLE(38);
 //  0f 05                syscall
 //  C3                   ret
 
-unsigned char const signature1[] = {0x4c, 3, MOVdwordEax, 5,
-                                    0x0f, 2, 0,           0}; // 10 bytes
+Instruction const signature1[] = {0x4c, 3, MOVdwordEax, 5,
+                                  0x0f, 2, 0,           0}; // 10 bytes
 
 // Check for W10 update 1 64-bit signature...
 // Note: we don't currently trap on the older 'int' case.
@@ -239,15 +244,14 @@ unsigned char const signature1[] = {0x4c, 3, MOVdwordEax, 5,
 // cd 2e                   int     2Eh
 // c3                      ret
 
-unsigned char const signature2[] = {0x4c, 3,    MOVdwordEax, 5, 0xf6, 8, JNE,
-                                    2,    0x0f, 2,           0, 0}; // 21 bytes
+Instruction const signature2[] = {0x4c, 3, MOVdwordEax, 5, 0xf6, 8,
+                                  JNE,  2, 0x0f,        2, 0,    0}; // 21 bytes
 
 // signature2 patched by "jump" and breakpoints by instrumentation software
-unsigned char const signature3[] = {JMP,   5, BRKPT, 1, BRKPT, 1,
-                                    BRKPT, 1, 0xf6,  8, JNE,   2,
-                                    0x0f,  2, 0,     0}; // 21 bytes
+Instruction const signature3[] = {JMP, 5, BRKPT, 1, BRKPT, 1, BRKPT, 1, 0xf6, 8,
+                                  JNE, 2, 0x0f,  2, 0,     0}; // 21 bytes
 
-unsigned char const *const signatures[] = {
+Instruction const *const signatures[] = {
     signature1,
     signature2,
     signature3,
@@ -262,10 +266,10 @@ unsigned int const MAX_PREAMBLE(21);
 // 33 c9                 xor     ecx,ecx
 // 48 ff 15 2e c1 00 00  call    qword ptr [win32u!_imp_RaiseFailFastException]
 
-unsigned char const dead_export1[] = {0x48, 4,    0x45, 3,    0x33, 2, 0x33,
-                                      2,    0x48, 1,    0xff, 7,    0, 0};
+Instruction const dead_export1[] = {0x48, 4,    0x45, 3,    0x33, 2, 0x33,
+                                    2,    0x48, 1,    0xff, 7,    0, 0};
 
-unsigned char const *const dead_exports[] = {
+Instruction const *const dead_exports[] = {
     dead_export1,
 };
 
@@ -663,13 +667,13 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
     unsigned int offset = 0;
     pre_target = nullptr;
     pre_type = preNone;
-    for (; *pCheck != 0; pCheck += 2) {
+    for (; pCheck->opcode_ != 0; ++pCheck) {
       if (pre_type == preNone && instruction[offset] == BRKPT) {
         // already pre-trace trapping!
         preamble = offset;
         break;
       }
-      if (instruction[offset] != pCheck[0])
+      if (instruction[offset] != pCheck->opcode_)
         break;
       if (instruction[offset] == MOVdwordEax) {
         pre_type = preMov;
@@ -678,9 +682,9 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
         pre_type = preJne;
         pre_target = address + offset;
       }
-      offset += pCheck[1];
+      offset += pCheck->length_;
     }
-    if (pCheck[0] == 0) {
+    if (pCheck->opcode_ == 0) {
       // Check for possible esp adjustment
       if (instruction[offset] == AddEsp) {
         offset += 3;
@@ -1167,14 +1171,14 @@ ArgType getArgType(const std::string &typeName,
 bool deadExport(unsigned char instruction[], size_t length) {
   for (auto *pCheck : dead_exports) {
     unsigned int offset = 0;
-    for (; *pCheck != 0; pCheck += 2) {
+    for (; pCheck->opcode_ != 0; ++pCheck) {
       if (offset >= length)
         break;
-      if (instruction[offset] != pCheck[0])
+      if (instruction[offset] != pCheck->opcode_)
         break;
-      offset += pCheck[1];
+      offset += pCheck->length_;
     }
-    if (pCheck[0] == 0) {
+    if (pCheck->opcode_ == 0) {
       return true;
     }
   }

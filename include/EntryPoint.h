@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3198 $
+  $Revision: 3199 $
 */
 
-// $Id: EntryPoint.h 3198 2026-09-07 16:10:06Z roger $
+// $Id: EntryPoint.h 3199 2026-09-07 22:24:30Z roger $
 
 #include <windows.h>
 
