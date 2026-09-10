@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: EntryPoint.cpp 3201 2026-09-09 18:07:17Z roger $
+// $Id: EntryPoint.cpp 3202 2026-09-10 08:53:28Z roger $
 
 #include "EntryPoint.h"
 
@@ -108,9 +108,16 @@ RtlNtStatusToDosError(NTSTATUS Status);
 //////////////////////////////////////////////////////////////////////////
 // The various NtDll signatures
 namespace {
+enum InstructionCategory { Regular = 0, PreSave };
+
 struct Instruction {
-  unsigned char opcode_;
-  unsigned char length_;
+  Instruction(unsigned char opcode, unsigned char length,
+              InstructionCategory category = {})
+      : opcode_(opcode), length_(length), category_(category) {}
+
+  unsigned char opcode_{};
+  unsigned char length_{};
+  InstructionCategory category_{};
 };
 
 struct Signature {
@@ -129,7 +136,7 @@ struct Signature {
 //  C2 20 00             ret         20h      // or just 'ret'
 
 Instruction const x86_signature1[] = {
-    {MOVdwordEax, 5},
+    {MOVdwordEax, 5, PreSave},
     {LEA, 4},
     {INTn, 2},
     {0, 0}
@@ -142,7 +149,7 @@ Instruction const x86_signature1[] = {
 //  C2 0C 00             ret         0Ch
 
 Instruction const x86_signature2[] = {
-    {MOVdwordEax, 5},
+    {MOVdwordEax, 5, PreSave},
     {MOVdwordEdx, 5},
     {Call, 2},
     {0, 0}
@@ -156,7 +163,7 @@ Instruction const x86_signature2[] = {
 //  C2 0C 00             ret         0Ch
 
 Instruction const x86_signature3[] = {
-    {MOVdwordEax, 5},
+    {MOVdwordEax, 5, PreSave},
     {MOVdwordEcx, 5},
     {LEA, 4},
     {FS, 1},
@@ -172,7 +179,7 @@ Instruction const x86_signature3[] = {
 //  C2 0C 00             ret         0Ch
 
 Instruction const x86_signature4[] = {
-    {MOVdwordEax, 5},
+    {MOVdwordEax, 5, PreSave},
     {XOR, 2},
     {LEA, 4},
     {FS, 1},
@@ -186,7 +193,7 @@ Instruction const x86_signature4[] = {
 // c2 04 00              ret     0x4
 
 Instruction const x86_signature5[] = {
-    {MOVdwordEax, 5},
+    {MOVdwordEax, 5, PreSave},
     {FS, 1},
     {Call, 6},
     {0,  0}
@@ -207,7 +214,7 @@ Instruction const x86_signature5[] = {
 // 14 00                 ret     14h
 
 Instruction const x86_signature6[] = {
-    {MOVdwordEax, 5},
+    {MOVdwordEax, 5, PreSave},
     {0xe8, 5 + 4},
     {0x5a, 1},
     {0x80, 4},
@@ -235,7 +242,7 @@ Instruction const x86_signature6[] = {
 // c2 14 00              ret     14h
 
 Instruction const x86_signature7[] = {
-    {MOVdwordEax, 5},
+    {MOVdwordEax, 5, PreSave},
     {0xe8, 5},
     {0x5a, 1},
     {0x80, 4},
@@ -262,17 +269,18 @@ Signature const signatures[] = {
 // c2 08 00             ret     0x8
 // cc                   int     3
 
-Instruction const dead_export1[] = {0xe8, 5, 0xc2, 3, 0xcc, 1, 0, 0};
+Instruction const x86_dead_export1[] = {
+    {0xe8, 5}, {0xc2, 3}, {0xcc, 1}, {0, 0}};
 
 // Dead Export from Win32u.dll for example for NtUserYieldTask
 // e9 a1 ff ff ff       jmp     DeadExport
 // cc                   int     3
 
-Instruction const dead_export2[] = {0xe9, 5, 0xcc, 1, 0, 0};
+Instruction const x86_dead_export2[] = {{0xe9, 5}, {0xcc, 1}, {0, 0}};
 
 Instruction const *const dead_exports[] = {
-    dead_export1,
-    dead_export2,
+    x86_dead_export1,
+    x86_dead_export2,
 };
 
 unsigned int const MAX_PREAMBLE(38);
@@ -289,7 +297,7 @@ unsigned int const MAX_PREAMBLE(38);
 
 Instruction const x64_signature1[] = {
     {0x4c, 3},
-    {MOVdwordEax, 5},
+    {MOVdwordEax, 5, PreSave},
     {0x0f, 2},
     {0, 0}
 }; // 10 bytes
@@ -309,7 +317,7 @@ Instruction const x64_signature2[] = {
     {0x4c, 3},
     {MOVdwordEax, 5},
     {0xf6, 8},
-    {JNE, 2},
+    {JNE, 2, PreSave},
     {0x0f, 2},
     {0, 0}
 }; // 21 bytes
@@ -321,7 +329,7 @@ Instruction const x64_signature3[] = {
     {BRKPT, 1},
     {BRKPT, 1},
     {0xf6, 8},
-    {JNE, 2},
+    {JNE, 2, PreSave},
     {0x0f,  2},
     {0, 0},
 }; // 21 bytes
@@ -343,11 +351,11 @@ unsigned int const MAX_PREAMBLE(21);
 // 33 c9                 xor     ecx,ecx
 // 48 ff 15 2e c1 00 00  call    qword ptr [win32u!_imp_RaiseFailFastException]
 
-Instruction const dead_export1[] = {0x48, 4,    0x45, 3,    0x33, 2, 0x33,
-                                    2,    0x48, 1,    0xff, 7,    0, 0};
+Instruction const x64_dead_export1[] = {
+    {0x48, 4}, {0x45, 3}, {0x33, 2}, {0x33, 2}, {0x48, 1}, {0xff, 7}, {0, 0}};
 
 Instruction const *const dead_exports[] = {
-    dead_export1,
+    x64_dead_export1,
 };
 
 #endif // _M_IX86
@@ -754,9 +762,7 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
       }
       if (opcode != pCheck->opcode_)
         break;
-      if (pre_type == preMov && opcode == MOVdwordEax) {
-        pre_target = address + offset;
-      } else if (pre_type == preJne && opcode == JNE) {
+      if (pCheck->category_ == PreSave) {
         pre_target = address + offset;
       }
       offset += pCheck->length_;
