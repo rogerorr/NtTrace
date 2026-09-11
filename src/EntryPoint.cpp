@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: EntryPoint.cpp 3206 2026-09-11 21:57:04Z roger $
+// $Id: EntryPoint.cpp 3210 2026-09-11 22:27:27Z roger $
 
 #include "EntryPoint.h"
 
@@ -657,8 +657,8 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *target,
     instruction[0] = BRKPT;
     if (!WriteProcessMemory(hProcess, pre_target, instruction, 1 + extra_length,
                             nullptr)) {
-      std::cerr << "Cannot write trap for " << name_ << ": " << displayError()
-                << std::endl;
+      std::cerr << "Cannot write pre-save trap for " << name_ << ": "
+                << displayError() << std::endl;
       return {};
     }
     break;
@@ -797,26 +797,26 @@ NtCall EntryPoint::setNtTrap(HANDLE hProcess, HMODULE hTargetDll,
 // Attempt to set a trap for the entry point in the target DLL.
 bool NtCall::clearNtTrap(HANDLE hProcess) const {
   if (preSave_) {
-    unsigned char instruction[1 + 4];
+    int len{0};
+    unsigned char instruction[1 + sizeof(ssn_)];
     switch (preType_) {
     case preMov:
       instruction[0] = MOVdwordEax;
       memcpy(instruction + 1, &ssn_, sizeof(ssn_));
-      if (!WriteProcessMemory(hProcess, preSave_, instruction, 5, nullptr)) {
-        std::cerr << "Cannot clear trap for " << entryPoint_->getName() << ": "
-                  << displayError() << std::endl;
-        return false;
-      }
+      len = 1 + sizeof(ssn_);
       break;
 
     case preJne:
       instruction[0] = JNE;
-      if (!WriteProcessMemory(hProcess, preSave_, instruction, 1, nullptr)) {
-        std::cerr << "Cannot clear trap for " << entryPoint_->getName() << ": "
-                  << displayError() << std::endl;
+      len = 1;
+      break;
+    }
+    if (len) {
+      if (!WriteProcessMemory(hProcess, preSave_, instruction, len, nullptr)) {
+        std::cerr << "Cannot clear pre-save trap for " << entryPoint_->getName()
+                  << ": " << displayError() << std::endl;
         return false;
       }
-      break;
     }
   }
 
