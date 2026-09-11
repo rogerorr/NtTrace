@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: EntryPoint.cpp 3203 2026-09-11 19:44:31Z roger $
+// $Id: EntryPoint.cpp 3206 2026-09-11 21:57:04Z roger $
 
 #include "EntryPoint.h"
 
@@ -651,16 +651,17 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *target,
     extra_length = 4;
     memset(instruction + 1, NOP, extra_length);
     nt.ssn_ = pre_arg;
+    // [[fallthrough]]
+  case preJne:
+    // Write the breakpoint, and possibly more
+    instruction[0] = BRKPT;
+    if (!WriteProcessMemory(hProcess, pre_target, instruction, 1 + extra_length,
+                            nullptr)) {
+      std::cerr << "Cannot write trap for " << name_ << ": " << displayError()
+                << std::endl;
+      return {};
+    }
     break;
-  }
-
-  // Write the breakpoint, and possibly more
-  instruction[0] = BRKPT;
-  if (!WriteProcessMemory(hProcess, target, instruction, 1 + extra_length,
-                          nullptr)) {
-    std::cerr << "Cannot write trap for " << name_ << ": " << displayError()
-              << std::endl;
-    return {};
   }
 
   nt.entryPoint_ = this;
