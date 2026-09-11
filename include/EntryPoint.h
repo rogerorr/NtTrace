@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3199 $
+  $Revision: 3203 $
 */
 
-// $Id: EntryPoint.h 3199 2026-09-07 22:24:30Z roger $
+// $Id: EntryPoint.h 3203 2026-09-11 19:44:31Z roger $
 
 #include <windows.h>
 
@@ -208,8 +208,7 @@ private:
   std::string retTypeName_;         // full name of return type
   size_t total_{};                  // total call count
 
-  NtCall insertBrkpt(HANDLE hProcess, unsigned char *address,
-                     unsigned int offset, PreType pre_type,
+  NtCall insertBrkpt(HANDLE hProcess, unsigned char *target, PreType pre_type,
                      unsigned char *pre_address, INT32 pre_arg);
 
   void setActive() { inactive_ = false; }
@@ -222,11 +221,10 @@ using EntryPointSet = std::set<EntryPoint>;
 struct NtCall {
   EntryPoint *entryPoint_{}; // Pointer into EntryPointMap
 
-  size_t nArgs_{}; // Number of arguments
-
   unsigned char *targetAddress_{};
   enum TrapType { trapContinue, trapReturn, trapReturn0, trapJump };
   TrapType trapType_{};
+  size_t nArgs_{};     // used for trapContinue/trapReturn
   INT32 jumpTarget_{}; // used for trapJump
 
   unsigned char *preSave_{}; // address of pre-save (for X64 fast-call)
