@@ -31,7 +31,7 @@ COPYRIGHT
   IN THE SOFTWARE."
 */
 
-// $Id: EntryPoint.cpp 3210 2026-09-11 22:27:27Z roger $
+// $Id: EntryPoint.cpp 3216 2026-09-12 19:51:16Z roger $
 
 #include "EntryPoint.h"
 
@@ -320,7 +320,7 @@ Instruction const x64_signature2[] = {
     {JNE, 2, PreSave},
     {0x0f, 2},
     {0, 0}
-}; // 21 bytes
+}; // 20 bytes
 
 // signature2 patched by "jump" and breakpoints by instrumentation software
 Instruction const x64_signature3[] = {
@@ -332,7 +332,7 @@ Instruction const x64_signature3[] = {
     {JNE, 2, PreSave},
     {0x0f,  2},
     {0, 0},
-}; // 21 bytes
+}; // 20 bytes
 
 // clang-format on
 
@@ -624,23 +624,23 @@ NtCall EntryPoint::insertBrkpt(HANDLE hProcess, unsigned char *target,
   // Entry point is available
   setActive();
 
-  // Now we know the actual argument count...
-  size_t const nKnown(getArgumentCount());
-  if (nt.nArgs_ > nKnown) {
-    setArgumentCount(nt.nArgs_);
-    if (nKnown) {
-      size_t const nExtra = nt.nArgs_ - nKnown;
-      std::cerr << "Warning: " << nExtra << " additional argument"
-                << (nExtra == 1 ? "" : "s") << " for " << name_ << std::endl;
-    }
-  } else if (nt.nArgs_ < nKnown) {
-    if (nt.nArgs_ > 0) {
+  if (nt.nArgs_ > 0) {
+    // Now we know the actual argument count...
+    size_t const nKnown(getArgumentCount());
+    if (nt.nArgs_ > nKnown) {
+      setArgumentCount(nt.nArgs_);
+      if (nKnown) {
+        size_t const nExtra = nt.nArgs_ - nKnown;
+        std::cerr << "Warning: " << nExtra << " additional argument"
+                  << (nExtra == 1 ? "" : "s") << " for " << name_ << std::endl;
+      }
+    } else if (nt.nArgs_ < nKnown) {
       size_t const nExtra = nKnown - nt.nArgs_;
       std::cerr << "Warning: " << nExtra << " spurious argument"
                 << (nExtra == 1 ? "" : "s") << " for " << name_ << std::endl;
     }
   }
-  nt.setAddress(target);
+  nt.setTarget(target);
 
   nt.preType_ = pre_type;
   nt.setPreSave(pre_target);

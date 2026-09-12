@@ -1,8 +1,8 @@
 // Resource file for NtTrace
 //
-// $Id: NtTrace.rc 3191 2026-09-05 22:01:58Z roger $
+// $Id: NtTrace.rc 3216 2026-09-12 19:51:16Z roger $
 
-#define MINOR_VERSION 3190
+#define MINOR_VERSION 3216
 #define DESCRIPTION "Trace Native API calls made by a process"
 #define APPLICATION
 

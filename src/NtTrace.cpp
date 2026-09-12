@@ -37,14 +37,14 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 3190 2026-09-05 19:49:04Z roger $";
+    "$Id: NtTrace.cpp 3216 2026-09-12 19:51:16Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
 #define WIN32_NO_STATUS
 #endif
 
-#include <ctime>
+#include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -52,7 +52,6 @@ static char const szRCSID[] =
 #include <map>
 #include <set>
 #include <string>
-#include <sys/timeb.h>
 #include <vector>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -253,50 +252,50 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////
 // Return string for 'now' - substring of asctime + milliseconds
 std::string now() {
-  struct _timeb timeNow;
-  (void)_ftime_s(&timeNow);
+  using namespace std::chrono;
 
-  static _timeb lasttime;
+  const auto now = system_clock::now();
+  const time_t time = system_clock::to_time_t(now);
+  static time_t lasttime;
   static char seconds[] = "HH:MM:SS";
-  if (lasttime.time != timeNow.time) {
+  if (lasttime != time) {
     struct tm tm_buf;
-    (void)localtime_s(&tm_buf, &timeNow.time);
+    (void)localtime_s(&tm_buf, &time);
     strftime(seconds, sizeof(seconds), "%H:%M:%S", &tm_buf);
-    lasttime.time = timeNow.time;
+    lasttime = time;
   }
-  char result[8 + 1 + 3 + 1];
-  snprintf(result, sizeof(result), "%s.%03i", seconds,
-           static_cast<int>(timeNow.millitm));
+  auto micros =
+      duration_cast<microseconds>(now.time_since_epoch()).count() % 1'000'000;
+  char result[8 + 1 + 6 + 1];
+  snprintf(result, sizeof(result), "%s.%06llu", seconds,
+           static_cast<unsigned long long>(micros));
   return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // Return string for 'delta time' - seconds + milliseconds (+[ss]s.mmm)
 std::string delta() {
-  struct _timeb timeNow;
-  (void)_ftime_s(&timeNow);
+  using namespace std::chrono;
 
-  static _timeb lastTime;
+  const nanoseconds timeNow(system_clock::now().time_since_epoch());
+  static nanoseconds lastTime;
 
-  char result[4 + 1 + 3 + 1];
+  char result[4 + 1 + 9 + 1];
   result[0] = '\0';
 
-  if (lastTime.time != 0) {
-    struct _timeb diff = timeNow;
-    if (diff.millitm < lastTime.millitm) {
-      diff.millitm += 1000;
-      diff.time -= 1;
-    }
-    diff.time -= lastTime.time;
-    diff.millitm -= lastTime.millitm;
-
-    if (diff.time < 0) {
+  if (lastTime.count() != 0) {
+    if (timeNow < lastTime) {
       (void)strcpy_s(result, sizeof(result), "<0");
-    } else if (diff.time > 999) {
-      (void)strcpy_s(result, sizeof(result), ">999s");
     } else {
-      snprintf(result, sizeof(result), "+%i.%03i", static_cast<int>(diff.time),
-               static_cast<int>(diff.millitm));
+      const auto diff = (timeNow - lastTime);
+      const auto secs = duration_cast<seconds>(diff);
+      const auto nanos = diff - secs;
+      if (secs.count() > 999) {
+        (void)strcpy_s(result, sizeof(result), ">999s");
+      } else {
+        snprintf(result, sizeof(result), "+%lli.%09lli", secs.count(),
+                 nanos.count());
+      }
     }
   }
   lastTime = timeNow;
@@ -874,8 +873,8 @@ void TrapNtDebugger::SetDllBreakpoints(ProcessData &process_data) {
       NtCall const nt =
           ep.setNtTrap(process_data.hProcess_, TargetDll_, bPreTrace,
                        offsets_[ep.getName()], bVerbose);
-      if (nt.getAddress() != nullptr) {
-        auto &item = process_data.NtCalls_[nt.getAddress()] = nt;
+      if (nt.getTarget() != nullptr) {
+        auto &item = process_data.NtCalls_[nt.getTarget()] = nt;
         if (nt.getPreSave()) {
           process_data.NtPreSave_[nt.getPreSave()] = &item;
         }

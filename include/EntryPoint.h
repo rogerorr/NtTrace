@@ -29,10 +29,10 @@
   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE."
 
-  $Revision: 3203 $
+  $Revision: 3216 $
 */
 
-// $Id: EntryPoint.h 3203 2026-09-11 19:44:31Z roger $
+// $Id: EntryPoint.h 3216 2026-09-12 19:51:16Z roger $
 
 #include <windows.h>
 
@@ -232,11 +232,9 @@ struct NtCall {
   INT32 ssn_{}; // System Service Number for preMov
                 // Used to set Eax/Rax to pre-call breakpoint
 
-  void setAddress(unsigned char *brkptAddress) {
-    targetAddress_ = brkptAddress;
-  }
+  void setTarget(unsigned char *brkptAddress) { targetAddress_ = brkptAddress; }
 
-  unsigned char *getAddress() const { return targetAddress_; }
+  unsigned char *getTarget() const { return targetAddress_; }
 
   /** Clear the trap for this entry in the target process */
   bool clearNtTrap(HANDLE hProcess) const;
