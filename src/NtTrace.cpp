@@ -37,7 +37,7 @@ EXAMPLE
 */
 
 static char const szRCSID[] =
-    "$Id: NtTrace.cpp 3216 2026-09-12 19:51:16Z roger $";
+    "$Id: NtTrace.cpp 3218 2026-09-13 20:34:36Z roger $";
 
 #ifdef _M_X64
 #include <ntstatus.h>
@@ -255,20 +255,21 @@ std::string now() {
   using namespace std::chrono;
 
   const auto now = system_clock::now();
-  const time_t time = system_clock::to_time_t(now);
-  static time_t lasttime;
-  static char seconds[] = "HH:MM:SS";
-  if (lasttime != time) {
+  const auto now_secs = time_point_cast<seconds>(now);
+  static time_point<system_clock, seconds> lasttime;
+  static char seconds[] = "HH:MM:SS.";
+  if (lasttime != now_secs) {
     struct tm tm_buf;
+    const time_t time = system_clock::to_time_t(now_secs);
     (void)localtime_s(&tm_buf, &time);
-    strftime(seconds, sizeof(seconds), "%H:%M:%S", &tm_buf);
-    lasttime = time;
+    strftime(seconds, sizeof(seconds), "%H:%M:%S.", &tm_buf);
+    lasttime = now_secs;
   }
   auto micros =
-      duration_cast<microseconds>(now.time_since_epoch()).count() % 1'000'000;
+      duration_cast<microseconds>(now - now_secs);
   char result[8 + 1 + 6 + 1];
-  snprintf(result, sizeof(result), "%s.%06llu", seconds,
-           static_cast<unsigned long long>(micros));
+  snprintf(result, sizeof(result), "%s%06llu", seconds,
+           static_cast<unsigned long long>(micros.count()));
   return result;
 }
 
